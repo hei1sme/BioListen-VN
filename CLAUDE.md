@@ -51,6 +51,7 @@ Agent cần biết ban giám khảo chấm điểm thế nào để ưu tiên đ
 - Mọi endpoint phải trả về `confidence` score (liên quan đến AI Safety 10đ)
 - Mọi UI component phải có loading state (liên quan đến Demo 20đ)
 - Comments trong code nên giải thích business value, không chỉ technical (Business 20đ)
+- **BẮT BUỘC:** Sau mỗi lần chỉnh sửa tính năng, Agent phải hướng dẫn/nhắc nhở người dùng cập nhật nhật ký vào [docs/ai_collab_log.md](./docs/ai_collab_log.md) theo format quy chuẩn để làm bằng chứng nộp bài cho BTC.
 
 ---
 
