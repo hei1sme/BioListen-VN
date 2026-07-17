@@ -19,7 +19,7 @@
 ### Phần 2: Demo thực tế trạm Edge & Chỉ số Shannon H' (1:15 - 2:30)
 *   **On-Screen Action:**
     *   Chuyển sang trình duyệt chạy trang web online: `https://biolistenvn.vercel.app`.
-    *   Click nút `[BÌNH MINH YÊN BÌNH]`.
+    *   Click nút `[BÌNH MINH YÊN BÌNH]` HOẶC bấm nút ghi âm trực tiếp bằng Micro trên giao diện và phát tiếng chim hót từ điện thoại sát laptop.
     *   Màn hình load spectrogram. Dưới bảng kết quả hiển thị phát hiện Chim và Khỉ (Macaque).
     *   Chỉ vào biểu đồ Shannon-Wiener Index đang tăng lên mức [Index].
 *   **Voiceover:**
@@ -28,7 +28,7 @@
 
 ### Phần 3: Cảnh báo Lâm tặc & AI Agent Action (2:30 - 3:45)
 *   **On-Screen Action:**
-    *   Click nút `[CƯA XÍCH XÂM NHẬP]`.
+    *   Click nút `[CƯA XÍCH XÂM NHẬP]` HOẶC bật micro trên web và phát âm thanh tiếng cưa xích thật.
     *   Hệ thống chuyển trạng thái Báo động Đỏ 🚨. Bản đồ Cúc Phương nhấp nháy đỏ tại vị trí Trạm A.
     *   Zoom vào khung Báo cáo AI Agent (Groq Llama 3.1 70B) đang tự động sinh báo cáo hành động tiếng Việt cho kiểm lâm.
 *   **Voiceover:**
