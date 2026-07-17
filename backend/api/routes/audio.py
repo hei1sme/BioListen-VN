@@ -4,15 +4,21 @@ import wave
 import uuid
 import tempfile
 import random
+from pathlib import Path
 from typing import List, Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel
-from services.ai_services import get_llm
-from services.supabase_client import (
+from backend.services.ai_services import get_llm
+from backend.services.supabase_client import (
     is_supabase_configured,
     insert_detection_record,
     fetch_detection_history,
     fetch_health_trend,
+    get_storage_bucket,
+    upload_storage_file,
+    list_storage_files,
+    get_storage_public_url,
 )
 
 router = APIRouter(prefix="/api/audio", tags=["Audio Monitoring"])
@@ -68,6 +74,21 @@ class HealthTrendPointSchema(BaseModel):
     timestamp: str
     shannon_index: float
     species_richness: int
+
+class StorageFileSchema(BaseModel):
+    path: str
+    name: str
+    public_url: str
+    size: Optional[int] = None
+    updated_at: Optional[str] = None
+
+class StorageUploadResponseSchema(BaseModel):
+    bucket_id: str
+    path: str
+    public_url: str
+    key: Optional[str] = None
+
+LOCAL_STORAGE_ROOT = Path(__file__).resolve().parent.parent.parent / "local_storage"
 
 # In-Memory Cache for Hackathon Demo persistence
 DETECTION_HISTORY: List[HistoricalRecordSchema] = []
@@ -334,3 +355,168 @@ async def get_health_trend(days: int = 7):
         points[-1].shannon_index = 0.54
         points[-1].species_richness = 1
     return points
+
+
+def _sanitize_bucket_id(bucket_id: str) -> str:
+    bucket_id = bucket_id.strip()
+    if not bucket_id or any(sep in bucket_id for sep in ("/", "\\")):
+        raise HTTPException(400, "Invalid bucket_id.")
+    return bucket_id
+
+
+def _sanitize_storage_path(storage_path: str) -> str:
+    if not storage_path or storage_path.strip() == "":
+        raise HTTPException(400, "Storage path is required.")
+
+    normalized = Path(storage_path.replace("\\", "/"))
+    if normalized.is_absolute() or any(part == ".." for part in normalized.parts):
+        raise HTTPException(400, "Invalid storage path.")
+
+    return "/".join(normalized.parts)
+
+
+def _ensure_local_storage_dir(bucket_id: str, storage_path: str) -> Path:
+    bucket_id = _sanitize_bucket_id(bucket_id)
+    storage_path = _sanitize_storage_path(storage_path)
+    path = LOCAL_STORAGE_ROOT / bucket_id / os.path.dirname(storage_path)
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def _save_local_storage_file(bucket_id: str, storage_path: str, content: bytes) -> str:
+    bucket_id = _sanitize_bucket_id(bucket_id)
+    storage_path = _sanitize_storage_path(storage_path)
+    directory = _ensure_local_storage_dir(bucket_id, storage_path)
+    full_path = directory / os.path.basename(storage_path)
+    full_path.write_bytes(content)
+    return f"/local_storage/{bucket_id}/{storage_path}"
+
+
+def _list_local_storage_files(bucket_id: str, path: Optional[str] = None) -> List[dict]:
+    bucket_id = _sanitize_bucket_id(bucket_id)
+    path = _sanitize_storage_path(path) if path else ""
+    root = LOCAL_STORAGE_ROOT / bucket_id
+    results: List[dict] = []
+    if not root.exists():
+        return results
+    search_root = root / path
+    if not search_root.exists():
+        return results
+    for file_path in search_root.rglob("*"):
+        if file_path.is_file():
+            rel = file_path.relative_to(root)
+            results.append(
+                {
+                    "name": str(rel).replace("\\", "/"),
+                    "id": str(rel).replace("\\", "/"),
+                    "size": file_path.stat().st_size,
+                    "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(file_path.stat().st_mtime)),
+                    "public_url": f"/local_storage/{bucket_id}/{str(rel).replace('\\', '/')}"
+                }
+            )
+    return results
+
+
+@router.post("/storage/upload", response_model=StorageUploadResponseSchema)
+async def upload_audio_asset(
+    file: UploadFile = File(...),
+    bucket_id: str = "demo-assets",
+):
+    filename = os.path.basename(file.filename)
+    if filename == "":
+        raise HTTPException(400, "File must include a filename.")
+
+    storage_path = f"samples/{filename}"
+    file_content = await file.read()
+    if len(file_content) == 0:
+        raise HTTPException(400, "Uploaded file is empty.")
+
+    if is_supabase_configured():
+        try:
+            get_storage_bucket(bucket_id)
+            result = upload_storage_file(
+                bucket_id,
+                storage_path,
+                file_content,
+                {
+                    "content-type": file.content_type or "application/octet-stream",
+                    "upsert": True,
+                },
+            )
+            public_url = get_storage_public_url(bucket_id, storage_path)
+            key = result.get("Key") if isinstance(result, dict) else None
+        except Exception as exc:
+            print(f"[Storage] Supabase upload failed, falling back to local storage: {exc}")
+            public_url = _save_local_storage_file(bucket_id, storage_path, file_content)
+            key = None
+    else:
+        public_url = _save_local_storage_file(bucket_id, storage_path, file_content)
+        key = None
+
+    return StorageUploadResponseSchema(
+        bucket_id=bucket_id,
+        path=storage_path,
+        public_url=public_url,
+        key=key,
+    )
+
+
+@router.get("/storage/list", response_model=List[StorageFileSchema])
+async def get_audio_storage_files(bucket_id: str = "demo-assets", path: Optional[str] = None):
+    if is_supabase_configured():
+        try:
+            get_storage_bucket(bucket_id)
+            raw_items = list_storage_files(bucket_id, path)
+            items: List[StorageFileSchema] = []
+            for item in raw_items:
+                file_path = item.get("name") or item.get("id") or ""
+                if not file_path:
+                    continue
+                items.append(
+                    StorageFileSchema(
+                        path=file_path,
+                        name=os.path.basename(file_path),
+                        public_url=get_storage_public_url(bucket_id, file_path),
+                        size=item.get("size"),
+                        updated_at=item.get("updated_at") or item.get("last_modified"),
+                    )
+                )
+            return items
+        except Exception as exc:
+            print(f"[Storage] Supabase listing failed, falling back to local storage: {exc}")
+            raw_items = _list_local_storage_files(bucket_id, path)
+    else:
+        raw_items = _list_local_storage_files(bucket_id, path)
+
+    return [
+        StorageFileSchema(
+            path=item["id"],
+            name=os.path.basename(item["id"]),
+            public_url=item["public_url"],
+            size=item.get("size"),
+            updated_at=item.get("updated_at"),
+        )
+        for item in raw_items
+    ]
+
+
+@router.get("/storage/download")
+async def download_audio_asset(bucket_id: str = "demo-assets", path: Optional[str] = None):
+    bucket_id = _sanitize_bucket_id(bucket_id)
+    if not path:
+        raise HTTPException(400, "Storage path is required.")
+    storage_path = _sanitize_storage_path(path)
+    local_path = LOCAL_STORAGE_ROOT / bucket_id / storage_path
+
+    if local_path.exists() and local_path.is_file():
+        return FileResponse(local_path, filename=os.path.basename(local_path))
+
+    if is_supabase_configured():
+        try:
+            get_storage_bucket(bucket_id)
+            public_url = get_storage_public_url(bucket_id, storage_path)
+            return RedirectResponse(public_url)
+        except Exception as exc:
+            raise HTTPException(404, f"Asset not found locally, and Supabase storage access failed: {exc}")
+
+    raise HTTPException(404, "Storage asset not found.")

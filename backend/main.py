@@ -2,8 +2,10 @@
 VAIC 2026 — FastAPI Backend Boilerplate
 Track-agnostic: thêm routes vào sau khi biết đề bài
 """
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 
 try:
@@ -43,6 +45,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount local storage fallback directory so demo assets are accessible without Supabase.
+local_storage_dir = Path(__file__).resolve().parent / "local_storage"
+local_storage_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/local_storage", StaticFiles(directory=str(local_storage_dir)), name="local_storage")
+
 # ─── Routes ───────────────────────────────────────────────────────────────────
 @app.get("/")
 async def root():
@@ -59,9 +66,9 @@ async def health():
     return {"status": "healthy"}
 
 # ─── Registered Routers ───────────────────────────────────────────────────────
-from api.routes.audio import router as audio_router
+from backend.api.routes.audio import router as audio_router
 app.include_router(audio_router)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)

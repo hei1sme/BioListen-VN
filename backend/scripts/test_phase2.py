@@ -47,6 +47,16 @@ def get_json(path: str) -> str:
         return resp.read().decode("utf-8")
 
 
+def upload_storage_asset(file_path: str, bucket_id: str = "demo-assets") -> str:
+    boundary, body = build_multipart(file_path)
+    url = f"{BASE_URL}/api/audio/storage/upload?bucket_id={bucket_id}"
+    req = urllib.request.Request(url, data=body, method="POST")
+    req.add_header("Content-Type", f"multipart/form-data; boundary={boundary}")
+    req.add_header("Content-Length", str(len(body)))
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        return resp.read().decode("utf-8")
+
+
 if __name__ == "__main__":
     sample_file = os.path.join(os.path.dirname(__file__), "..", "cua_xich.wav")
     sample_file = os.path.abspath(sample_file)
@@ -67,3 +77,8 @@ if __name__ == "__main__":
 
     print("\n5) Health trend endpoint:")
     print(get_json("/api/audio/health-trend?days=7"))
+    print("\n6) Storage upload test:")
+    print(upload_storage_asset(sample_file))
+
+    print("\n7) Storage list test:")
+    print(get_json("/api/audio/storage/list?bucket_id=demo-assets"))
