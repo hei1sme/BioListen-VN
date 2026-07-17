@@ -32,7 +32,7 @@ import {
   CartesianGrid, 
   Tooltip 
 } from "recharts";
-import api, { AudioPredictionResponse, HistoricalRecord, SpeciesDetection, ThreatDetection } from "@/lib/api";
+import api, { AudioPredictionResponse, HistoricalRecord } from "@/lib/api";
 
 // ── Mock Initial Data ────────────────────────────────────────────────────────
 const MOCK_HISTORY: HistoricalRecord[] = [
@@ -168,8 +168,11 @@ export default function Home() {
   const sirenIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
     return () => {
+      clearTimeout(timer);
       stopSiren();
       stopRecordingResources();
     };
@@ -324,12 +327,12 @@ export default function Home() {
     sirenIntervalRef.current = setInterval(playSirenBeep, 500);
   };
 
-  const stopSiren = () => {
+  function stopSiren() {
     if (sirenIntervalRef.current) {
       clearInterval(sirenIntervalRef.current);
       sirenIntervalRef.current = null;
     }
-  };
+  }
 
   // Effect to handle siren whenever alarm condition changes
   useEffect(() => {
@@ -588,7 +591,7 @@ export default function Home() {
     stopRecordingResources();
   };
 
-  const stopRecordingResources = () => {
+  function stopRecordingResources() {
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
@@ -607,7 +610,7 @@ export default function Home() {
       }
       audioContextRef.current = null;
     }
-  };
+  }
 
   const drawCanvasWave = () => {
     if (!canvasRef.current || !analyserRef.current) return;
@@ -1550,31 +1553,31 @@ export default function Home() {
 
                 <div className="flex flex-col gap-4 text-xs">
                   <div className="p-3 border border-[#1b261d] bg-[#050805]">
-                    <div className="text-zinc-500 text-[10px] mb-1">CÔNG THỨC SHANNON-WIENER (H')</div>
-                    <code className="text-[#39FF14] text-xs font-bold font-mono">H' = - ∑ (p_i * ln(p_i))</code>
+                    <div className="text-zinc-500 text-[10px] mb-1">CÔNG THỨC SHANNON-WIENER (H&apos;)</div>
+                    <code className="text-[#39FF14] text-xs font-bold font-mono">H&apos; = - ∑ (p_i * ln(p_i))</code>
                     <div className="text-zinc-400 text-[10px] mt-2 leading-relaxed">
                       p_i là xác suất xuất hiện của loài thứ i được dự đoán bởi đầu phân loại loài.
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <div className="text-zinc-500 text-[10px] uppercase">Thang đo chỉ số H':</div>
+                    <div className="text-zinc-500 text-[10px] uppercase">Thang đo chỉ số H&apos;:</div>
                     <div className="flex justify-between border-b border-[#1b261d]/50 pb-1 text-zinc-400">
-                      <span>H' &gt; 2.0</span> <span className="text-[#39FF14] font-bold">Rất cao</span>
+                      <span>H&apos; &gt; 2.0</span> <span className="text-[#39FF14] font-bold">Rất cao</span>
                     </div>
                     <div className="flex justify-between border-b border-[#1b261d]/50 pb-1 text-zinc-400">
-                      <span>1.5 ≤ H' ≤ 2.0</span> <span className="text-emerald-400">Cao</span>
+                      <span>1.5 ≤ H&apos; ≤ 2.0</span> <span className="text-emerald-400">Cao</span>
                     </div>
                     <div className="flex justify-between border-b border-[#1b261d]/50 pb-1 text-zinc-400">
-                      <span>1.0 ≤ H' &lt; 1.5</span> <span className="text-zinc-300">Trung bình</span>
+                      <span>1.0 ≤ H&apos; &lt; 1.5</span> <span className="text-zinc-300">Trung bình</span>
                     </div>
                     <div className="flex justify-between border-b border-[#1b261d]/50 pb-1 text-zinc-400">
-                      <span>H' &lt; 1.0</span> <span className="text-red-400 font-bold">Báo động suy giảm</span>
+                      <span>H&apos; &lt; 1.0</span> <span className="text-red-400 font-bold">Báo động suy giảm</span>
                     </div>
                   </div>
 
                   <div className="border border-[#1b261d] bg-[#050805] p-3 text-zinc-400 text-[11px] leading-relaxed">
-                    <span className="text-red-400 font-bold">Lưu ý:</span> Khi phát hiện tiếng cưa xích hoặc tiếng súng, chỉ số H' sẽ tự động bị đè (suppressed) xuống mức tối thiểu do tiếng ồn xáo trộn sinh cảnh cao, nhằm phản ánh đúng rủi ro suy giảm hệ sinh vật tức thì.
+                    <span className="text-red-400 font-bold">Lưu ý:</span> Khi phát hiện tiếng cưa xích hoặc tiếng súng, chỉ số H&apos; sẽ tự động bị đè (suppressed) xuống mức tối thiểu do tiếng ồn xáo trộn sinh cảnh cao, nhằm phản ánh đúng rủi ro suy giảm hệ sinh vật tức thì.
                   </div>
                 </div>
               </div>
