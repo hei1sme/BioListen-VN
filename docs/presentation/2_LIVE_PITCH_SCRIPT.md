@@ -17,7 +17,7 @@ Tuy nhiên, với 22.000 ha rừng nguyên sinh, việc tuần tra thủ công h
 
 ### [Slide 3: Giải pháp BioListen VN]
 **Speaker:**
-"Để giải quyết triệt để, BioListen VN xây dựng kiến trúc **Simulated Edge-to-Cloud**. Các trạm cảm biến tự cấp nguồn bằng năng lượng mặt trời sẽ thu âm 24/7. AI tại trạm sẽ lọc nhiễu, phân tích âm thanh và chỉ truyền tải các gói dữ liệu cảnh báo siêu nhẹ thông qua sóng truyền tin tầm xa LoRaWAN về trung tâm kiểm lâm. Dữ liệu sau đó được hiển thị trực quan dạng HUD Dashboard trên Cloud."
+"Để giải quyết triệt để, BioListen VN xây dựng kiến trúc **Simulated Edge-to-Cloud**. Các trạm cảm biến tự cấp nguồn bằng năng lượng mặt trời sẽ không thu âm liên tục để tiết kiệm năng lượng, mà hoạt động theo chu kỳ (duty-cycling) ghi âm từng phân đoạn ngắn 10 giây. AI tại trạm lọc nhiễu, phân tích và chỉ truyền tải gói tin JSON cảnh báo siêu nhẹ (< [Z] Bytes) qua sóng LoRaWAN về trung tâm. Giao diện HUD Dashboard trên Cloud sẽ hiển thị trực quan thông tin này."
 
 ### [Slide 4: Kiến trúc mô hình AI]
 **Speaker:**
@@ -56,4 +56,9 @@ Với BioListen VN, chúng tôi tối ưu mô hình PyTorch, xuất ra chuẩn *
 ### [Slide 10: Đội ngũ & Lời cảm ơn]
 **Speaker:**
 "BioListen VN được phát triển bởi đội ngũ NeuraX.ai với các vai trò chuyên biệt từ AI, Phần cứng cho đến UI/UX. Chúng tôi sẵn sàng mang công nghệ này bảo vệ các cánh rừng di sản của Việt Nam. 
-Kính mời Ban giám khảo quét mã QR trên slide để trải nghiệm trực tiếp mã nguồn PyTorch và Dashboard online. Chúng tôi đã sẵn sàng cho phần câu hỏi Q&A. Xin cảm ơn!"
+Kính mời Ban giám khảo quét mã QR trên slide để trải nghiệm trực tiếp mã nguồn PyTorch và Dashboard online. 
+
+`[Hành động Demo Live tại chỗ]`
+`[Pause]`. Bây giờ, để chứng minh hệ thống đang chạy realtime hoàn chỉnh, tôi xin phép phát một tệp âm thanh tiếng cưa xích từ điện thoại của mình trước micro của máy tính đang chạy Dashboard... `[Bấm nút ghi âm Mic trên web ➔ Phát tiếng cưa xích trên đt ➔ Dừng ghi âm]`. 
+Như quý vị có thể thấy, còi báo động đỏ lập tức hú vang trên màn hình và tọa độ trạm A nhấp nháy đỏ trên bản đồ! 
+Chúng tôi đã sẵn sàng cho phần câu hỏi Q&A. Xin cảm ơn!"

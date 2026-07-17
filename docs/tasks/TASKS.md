@@ -15,9 +15,9 @@
 - [ ] Chạy huấn luyện (training) trên **Google Colab** (do máy cá nhân không đủ dung lượng lưu trữ data), sau đó tải file model `models/biolisten_v1.pt` về máy.
 
 ### Hưng (AI All-round) — `feature/ui`
-- [ ] Thiết lập khung Dashboard Next.js: layout chính, sidebar (Monitor / History / Analytics / Catalog)
-- [ ] Tạo UI hiển thị Mel-spectrogram động và khung hiển thị thông tin trích xuất
-- [ ] Viết system prompt cho Groq (Llama 3.1 70B) để chuyển đổi dữ liệu thô (ví dụ: `[chainsaw: 0.9]`) thành bản tin khuyến cáo tiếng Việt cụ thể cho kiểm lâm
+- [x] Thiết lập khung Dashboard Next.js: layout chính, sidebar (Monitor / History / Analytics / Catalog)
+- [x] Tạo UI hiển thị Mel-spectrogram động và khung hiển thị thông tin trích xuất
+- [x] Viết system prompt cho Groq (Llama 3.1 70B) để chuyển đổi dữ liệu thô (ví dụ: `[chainsaw: 0.9]`) thành bản tin khuyến cáo tiếng Việt cụ thể cho kiểm lâm
 
 ### Hiếu (SE) — `feature/api`
 - [ ] Tạo router `backend/api/routes/audio.py` với các models Pydantic (`POST /predict`, `GET /history`)
@@ -38,10 +38,10 @@
 - [ ] Tích hợp tính toán Chỉ số sức khỏe hệ sinh thái (Shannon Diversity Index) dựa trên tổng số lần đếm phát hiện loài theo giờ (tránh dùng softmax tức thời để đảm bảo độ chuẩn xác toán học)
 
 ### Hưng (AI All-round) — `feature/ui`
-- [ ] Kết nối Next.js với API `/predict` thực tế, cập nhật spectrogram thực từ backend lên giao diện
-- [ ] Tạo biểu đồ Shannon Index theo thời gian thực (dùng Recharts)
-- [ ] Xây dựng **Alert Panel** báo còi hú và màn hình nhấp nháy đỏ khi phát hiện tiếng cưa xích / súng săn từ API
-- [ ] Xây dựng panel `ForestSimulator` cho phép giám khảo chọn chạy thử 5 kịch bản âm thanh mẫu (Yên bình, Bão, Cưa gỗ, Súng săn, v.v.)
+- [x] Kết nối Next.js với API `/predict` thực tế, cập nhật spectrogram thực từ backend lên giao diện
+- [x] Tạo biểu đồ Shannon Index theo thời gian thực (dùng Recharts)
+- [x] Xây dựng **Alert Panel** báo còi hú và màn hình nhấp nháy đỏ khi phát hiện tiếng cưa xích / súng săn từ API
+- [x] Xây dựng panel `ForestSimulator` cho phép giám khảo chọn chạy thử 5 kịch bản âm thanh mẫu (Yên bình, Bão, Cưa gỗ, Súng săn, v.v.)
 
 ### Hiếu (SE) — `feature/api`
 - [ ] Bật tính năng tự động lưu lịch sử phân tích vào database Supabase mỗi khi gọi `/predict`
@@ -60,9 +60,9 @@
 - [ ] Đánh giá hiệu suất: đo thời gian xử lý của model ONNX trên CPU (target < 50ms) để đưa chỉ số vào slide
 
 ### Hưng (AI All-round) — `feature/ui`
-- [ ] Render ảnh heatmap Grad-CAM đè lên biểu đồ phổ âm thanh trên giao diện
-- [ ] Hiển thị nhãn cảnh báo độ tin cậy: Xanh (Chắc chắn) / Vàng (Chưa chắc chắn - Low confidence) dựa trên độ bất định từ API gửi về
-- [ ] Tối ưu hóa UI: bổ sung hiệu ứng chuyển động, loading states khi đang gửi file audio
+- [x] Render ảnh heatmap Grad-CAM đè lên biểu đồ phổ âm thanh trên giao diện
+- [x] Hiển thị nhãn cảnh báo độ tin cậy: Xanh (Chắc chắn) / Vàng (Chưa chắc chắn - Low confidence) dựa trên độ bất định từ API gửi về
+- [x] Tối ưu hóa UI: bổ sung hiệu ứng chuyển động, loading states khi đang gửi file audio
 
 ### Hiếu (SE) — `feature/api`
 - [ ] Tải 5 file âm thanh demo lên Supabase Storage làm tài nguyên cố định cho nút Simulator
