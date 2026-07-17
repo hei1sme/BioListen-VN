@@ -15,7 +15,7 @@
 
 **Track:** Nông nghiệp — BioListen VN (Biodiversity monitoring through Ecological acoustics)
 **Deep Analysis & Technical Plan:** [docs/BIOLISTEN_PLAN.md](file:///c:/Users/Le%20Nguyen%20Gia%20Hung/everything/Code/Organization/NeuraX.ai/vaic-2026/docs/BIOLISTEN_PLAN.md)
-**Active Task Board:** [docs/TASKS.md](file:///c:/Users/Le%20Nguyen%20Gia%20Hung/everything/Code/Organization/NeuraX.ai/vaic-2026/docs/TASKS.md)
+**Active Task Board:** [docs/tasks/TASKS.md](file:///c:/Users/Le%20Nguyen%20Gia%20Hung/everything/Code/Organization/NeuraX.ai/vaic-2026/docs/tasks/TASKS.md)
 
 ---
 

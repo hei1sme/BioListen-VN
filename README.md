@@ -17,9 +17,10 @@
 
 ---
 
-## Track
-
-> _Công bố lúc 11:00 ngày 17/07 — chốt trong vòng 30 phút_
+## Project: BioListen VN
+- **Track:** Nông nghiệp (Biodiversity monitoring through Ecological acoustics)
+- **Technical Plan:** [docs/BIOLISTEN_PLAN.md](./docs/BIOLISTEN_PLAN.md)
+- **Active Task Board:** [docs/tasks/TASKS.md](./docs/tasks/TASKS.md)
 
 ---
 
