@@ -1,3 +1,9 @@
+# For local development and simulation mode on Windows (avoiding C-compiling errors on Python 3.13):
+# Run: pip install -r requirements-light.txt
+#
+# For production deployment (Docker/Railway/Colab):
+# Run: pip install -r requirements.txt
+
 setuptools<82
 fastapi==0.115.0
 uvicorn[standard]==0.30.6

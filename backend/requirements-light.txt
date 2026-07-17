@@ -1,0 +1,16 @@
+# Lightweight requirements for local development & simulation mode.
+# Install this to avoid C-compilation errors on Windows (Python 3.13+)
+# Usage: pip install -r requirements-light.txt
+
+setuptools<82
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+httpx==0.27.2
+pydantic==2.8.2
+pydantic-settings==2.5.2
+supabase==2.7.4
+python-dotenv==1.0.1
+requests==2.32.3
+aiofiles==24.1.0
+groq==0.11.0
