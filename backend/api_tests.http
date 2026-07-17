@@ -1,0 +1,36 @@
+### VAIC 2026 — API Testing File
+# Sử dụng với VS Code extension: "REST Client"
+# Giúp test nhanh API backend mà không cần Postman.
+
+@baseUrl = http://localhost:8000
+# Sau khi deploy thật, uncomment dòng dưới và thay URL vào để test production
+# @baseUrl = https://your-railway-app.railway.app
+
+### 1. Kiểm tra Health Check
+GET {{baseUrl}}/health
+Accept: application/json
+
+### 2. Kiểm tra Root Endpoint (Xem PyTorch & CUDA status)
+GET {{baseUrl}}/
+Accept: application/json
+
+### 3. Phân tích văn bản bằng LLM (Groq)
+POST {{baseUrl}}/api/ai/analyze
+Content-Type: application/json
+
+{
+    "text": "Xin chào, đây là tín hiệu kiểm tra hệ thống AI của team NeuraX.ai tại VAIC 2026.",
+    "language": "vi"
+}
+
+### 4. Gửi file âm thanh thử nghiệm Whisper (Yêu cầu có file audio.wav ở thư mục local)
+# Uncomment đoạn dưới nếu bạn muốn test upload file âm thanh
+# POST {{baseUrl}}/api/ai/transcribe
+# Content-Type: multipart/form-data; boundary=boundary
+
+# --boundary
+# Content-Disposition: form-data; name="file"; filename="test_voice.wav"
+# Content-Type: audio/wav
+
+# < ./test_voice.wav
+# --boundary--

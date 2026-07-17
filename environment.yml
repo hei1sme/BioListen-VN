@@ -1,0 +1,70 @@
+name: vaic2026
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  # Python
+  - python=3.11
+
+  # PyTorch — core cho PyTorch Award (CPU build, đổi thành pytorch-cuda nếu có GPU)
+  - pytorch
+  - torchvision
+  - torchaudio
+  - cpuonly  # Xóa dòng này nếu máy có NVIDIA GPU
+
+  # API & Web
+  - pip
+
+  - pip:
+    # FastAPI backend
+    - fastapi==0.115.0
+    - uvicorn[standard]==0.30.6
+    - python-multipart==0.0.9
+    - httpx==0.27.2
+    - pydantic==2.8.2
+    - pydantic-settings==2.5.2
+
+    # HuggingFace — load PyTorch models dễ dàng
+    - transformers==4.44.2
+    - datasets==3.0.1
+    - accelerate==0.34.2
+    - sentencepiece==0.2.0
+    - tokenizers==0.19.1
+
+    # Build tools (phải install trước whisper)
+    - setuptools>=68.0
+    - wheel
+
+    # Whisper — speech-to-text bằng PyTorch (dùng được mọi track)
+    - openai-whisper
+
+    # AI / LLM clients
+    - openai==1.50.2
+    - anthropic==0.34.2
+    - google-generativeai==0.8.1
+
+    # Computer Vision (cho track y te, nong nghiep)
+    - Pillow==10.4.0
+    - opencv-python-headless==4.10.0.84
+    - ultralytics==8.3.0
+
+    # Data & Processing
+    - numpy==1.26.4
+    - pandas==2.2.2
+    - scipy==1.14.1
+    - scikit-learn==1.5.2
+
+    # Database & Storage
+    - supabase==2.7.4
+
+    # Utilities
+    - python-dotenv==1.0.1
+    - requests==2.32.3
+    - aiofiles==24.1.0
+    - python-jose[cryptography]==3.3.0
+    - passlib[bcrypt]==1.7.4
+    - langchain==0.3.1
+    - langchain-community==0.3.1
+    - langchain-groq==0.2.0
+    - groq==0.11.0
