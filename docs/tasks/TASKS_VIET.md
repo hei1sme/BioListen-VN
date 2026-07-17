@@ -11,7 +11,7 @@
 ### Phase 1: Foundation (Giờ H0–H6 | Thứ Sáu 12:00 – 18:00)
 - [ ] **1. Tải và chuẩn bị Dataset (Target: 13:00):**
   - Tải tập dữ liệu **ESC-50** (`git clone https://github.com/karolpiczak/ESC-50.git`).
-  - Viết script Python sử dụng thư viện `requests` cào dữ liệu âm thanh từ **Xeno-canto API** cho 5 loài chim phổ biến Việt Nam: Chào mào (*Pycnonotus jocosus*), Sáo đá (*Acridotheres tristis*), Chích chòe (*Copsychus saularis*), Bói cá (*Halcyon smyrnensis*), Ếch nhái (*Microhyla fissipes*).
+  - Viết script Python sử dụng thư viện `requests` cào dữ liệu âm thanh từ **Xeno-canto API** cho 5 loài mục tiêu bám sát Track: Chào mào (*Pycnonotus jocosus*), Sáo đá (*Acridotheres tristis*), Ếch nhái (*Microhyla fissipes*), Khỉ đuôi lợn (*Macaca leonina*), Ve sầu (*Cicadidae*).
 - [ ] **2. Xây dựng Preprocessing Pipeline (Target: 14:30):**
   - Viết class `AudioDataset` trong file `backend/services/audio_dataset.py`.
   - Quy chuẩn hóa âm thanh đầu vào: Tần số lấy mẫu (sample_rate) `22050Hz`, thời gian `5s` cố định (110,250 samples).
@@ -21,8 +21,10 @@
   - Code class `BioListenModel` trong `backend/services/biolisten_model.py`.
   - Sử dụng chung backbone `features` của EfficientNet-V2-S có sẵn trong repo.
   - Thiết kế 2 heads riêng biệt: `species_head` (Phân loại 5 loài) và `threat_head` (Phân loại cưa xích/súng/không có mối đe dọa).
-- [ ] **4. Huấn luyện Model (Target: 18:00):**
-  - Viết file `scripts/train.py` chạy huấn luyện model (chạy 20 epochs). Lưu checkpoint tốt nhất tại `models/biolisten_v1.pt`.
+- [ ] **3. Tiến hành Training (Target: 16:00):**
+  - Viết file `scripts/train.py` hoặc Jupyter Notebook để train trên **Google Colab**. 
+  - Khởi chạy training loop đầu tiên (~20 epochs).
+  - Tải file model weights `models/biolisten_v1.pt` từ Colab về máy tính cá nhân để chuẩn bị export.
 
 ### Phase 2: Integration (Giờ H6–H24 | Thứ Sáu 18:00 – Thứ Bảy 12:00)
 - [ ] **1. Tối ưu hóa Model (Target: 20:00):**
@@ -32,7 +34,7 @@
 - [ ] **3. Đấu nối API:**
   - Hỗ trợ Hiếu đưa file `ONNXAudioService` thay thế cho mock data trong API `/predict` của FastAPI.
 - [ ] **4. Chỉ số sức khỏe hệ sinh thái:**
-  - Viết hàm tính toán Chỉ số đa dạng sinh học Shannon-Wiener dựa trên phân phối xác suất các loài chim phát hiện được để trả về cho API.
+  - Viết hàm tính toán Chỉ số đa dạng sinh học Shannon-Wiener dựa trên tổng số lượt đếm (counts) các loài được phát hiện theo giờ, đảm bảo tính toán học chuẩn xác thay vì dùng Softmax tức thời.
 
 ### Phase 3: Polish & AI Safety (Giờ H24–H36 | Thứ Bảy 12:00 – 23:00)
 - [ ] **1. Bayesian Uncertainty (MC-Dropout):**

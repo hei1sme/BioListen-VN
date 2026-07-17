@@ -14,7 +14,7 @@
   - Định nghĩa các schema Pydantic: `PredictRequest` (file upload), `PredictResponse` (chứa species, threats, health_index, spectrogram_base64, gradcam_base64, llm_report).
 - [x] **2. Tích hợp Router vào App (Target: 15:30):**
   - Import và khai báo `audio.py` vào file `backend/main.py`.
-  - Cập nhật file `backend/requirements.txt` thêm `torchaudio`, `librosa`, và `onnxruntime`.
+  - Cập nhật file `backend/requirements.txt` thêm `torch`, `torchvision`, `torchaudio`, `librosa`, `onnx`, và `onnxruntime`.
 - [x] **3. Triển khai Mock Endpoint (Target: 14:00):**
   - Viết code mock dữ liệu dự đoán trả về ngẫu nhiên các loại chim và threat (chainsaw/gunshot) để Hưng đấu nối frontend.
 - [ ] **4. Thiết lập Supabase Database (Target: 17:00):**
@@ -112,4 +112,5 @@ Khi Hiếu dùng AI Agent hỗ trợ code hệ thống, hãy bảo Agent của m
     "llm_report": "string"
   }
   ```
+- **Lưu ý Payload IoT:** Đối với Demo, API trả về Base64 của Spectrogram. Tuy nhiên, khi trình bày với giám khảo, Hiếu phải nhấn mạnh rằng: ở môi trường thực tế, Edge Node chỉ gửi JSON `species`, `threats` (dưới 100 bytes) qua LoRa để tiết kiệm pin/băng thông. Ảnh Grad-CAM chỉ được tạo trên Cloud.
 - **Lưu ý Fallback:** Nếu tối Thứ Sáu team quyết định pivot sang Điện Biên Agriculture, Hiếu sẽ điều chỉnh router sang nhận file ảnh thay vì file audio. Mọi logic deploy và database giữ nguyên 90%.

@@ -39,14 +39,14 @@ To build a functional prototype within 36 hours without data-gathering overhead:
 
 | # | Scientific Name | Vietnamese Name | Xeno-canto Query | Est. Recordings |
 |---|----------------|-----------------|-------------------|-----------------|
-| 1 | *Pycnonotus jocosus* | Chào mào (Red-whiskered Bulbul) | `pycnonotus+jocosus` | 200+ |
-| 2 | *Acridotheres tristis* | Sáo đá (Common Myna) | `acridotheres+tristis` | 300+ |
-| 3 | *Copsychus saularis* | Chích chòe (Oriental Magpie-Robin) | `copsychus+saularis` | 250+ |
-| 4 | *Halcyon smyrnensis* | Bói cá (White-throated Kingfisher) | `halcyon+smyrnensis` | 150+ |
-| 5 | *Microhyla fissipes* | Ếch nhái (Ornate Narrow-mouthed Frog) | Search manually on xeno-canto | 50+ |
+| 1 | *Pycnonotus jocosus* | Chào mào (Red-whiskered Bulbul - Bird) | `pycnonotus+jocosus` | 200+ |
+| 2 | *Acridotheres tristis* | Sáo đá (Common Myna - Bird) | `acridotheres+tristis` | 300+ |
+| 3 | *Microhyla fissipes* | Ếch nhái (Ornate Narrow-mouthed Frog - Amphibian) | Search manually on xeno-canto | 50+ |
+| 4 | *Macaca leonina* | Khỉ đuôi lợn (Northern pig-tailed macaque - Primate) | `macaca+leonina` | 100+ |
+| 5 | *Cicadidae* | Ve sầu (Cicada - Insect) | `cicadidae` | 150+ |
 
 **Total target classes for demo: 10**
-- 5 species (birds + 1 amphibian)
+- 5 species (2 birds, 1 amphibian, 1 primate, 1 insect - 100% Track Compliance)
 - 2 threats (chainsaw, gunshot)
 - 3 backgrounds (rain, crickets, silence/wind)
 
@@ -293,6 +293,8 @@ file: <audio_file.wav>  (max 10MB, 5-60 seconds)
 
   "llm_report": "Phát hiện tiếng Chào mào (94% tin cậy) tại phân khu 3. Cảnh báo: phát hiện tiếng cưa xích cách trạm ~200m. Đề xuất thông báo kiểm lâm."
 }
+
+*(Note for Judges: In the actual production Edge node, `spectrogram_base64` and `gradcam_base64` are NOT transmitted to save IoT bandwidth. They are generated on the cloud dashboard only when a ranger requests the raw 5-second audio snippet).*
 ```
 
 ### 3.2 Frontend API Client Extensions
@@ -396,10 +398,10 @@ INSERT INTO sensors VALUES
 ### Phase 1: Foundation (H0–H6 | Fri 12:00 – 18:00)
 
 #### Việt (AI Lead) — Branch: `feature/ai`
-- **12:00–13:00:** Download ESC-50 (`git clone`) + write Xeno-canto scraper for 5 VN bird species. Output: `data/esc50/`, `data/birds/`, `scripts/download_data.py`.
-- **13:00–14:30:** Build `AudioDataset` class: load wav → resample 22050Hz → pad/clip 5s → MelSpectrogram → normalize → resize 224×224 → repeat to 3ch. Output: `backend/services/audio_dataset.py`.
-- **14:30–16:00:** Implement `BioListenModel(nn.Module)` with dual heads on EfficientNet-V2-S backbone. Output: `backend/services/biolisten_model.py`.
-- **16:00–18:00:** Write training script. Start first training run (aim: 20 epochs, ~2h on GPU). Output: `scripts/train.py`, first checkpoint at `models/biolisten_v1.pt`.
+- **12:00–13:00:** Execute on **Google Colab**: Download ESC-50 + write Xeno-canto scraper for 5 VN target species. Output: Dataset loaded into Colab session.
+- **13:00–14:30:** Build `AudioDataset` class: load wav → resample 22050Hz → pad/clip 5s → MelSpectrogram → normalize → resize 224×224 → repeat to 3ch. Output: Colab Notebook cell.
+- **14:30–16:00:** Implement `BioListenModel(nn.Module)` with dual heads on EfficientNet-V2-S backbone. Output: Colab Notebook cell.
+- **16:00–18:00:** Write training script on Colab. Start first training run (aim: 20 epochs, ~2h on T4 GPU). Download the trained `biolisten_v1.pt` checkpoint to local machine.
 
 #### Hưng (AI All-round) — Branch: `feature/ui`
 - **12:00–13:30:** Design main dashboard layout: sidebar (Monitor / History / Analytics / Catalog) + header. Output: `frontend/src/app/page.tsx`, `frontend/src/components/layout/`.
@@ -424,7 +426,7 @@ INSERT INTO sensors VALUES
 - **22:00–01:00:** **Replace mock** with real model inference in `/predict` endpoint. End-to-end test: upload wav → get real species predictions. Output: Real predictions flowing through API.
 - **01:00–04:00:** 💤 **Sleep 3h** (Việt needs to be sharp for Phase 3 AI Safety work).
 - **04:00–08:00:** Improve model: add more augmentation, try unfreezing more backbone layers, retrain. Output: `models/biolisten_v2.pt`.
-- **08:00–12:00:** Implement Shannon-Wiener Ecosystem Health Index calculator. Integrate into `/predict` response. Output: Ecosystem health scores in API response.
+- **08:00–12:00:** Implement Shannon-Wiener Ecosystem Health Index calculator. Calculate based on hourly aggregated species detection counts (not instantaneous softmax). Integrate into `/predict` response. Output: Mathematically accurate Ecosystem health scores.
 
 #### Hưng (AI All-round)
 - **18:00–20:00:** Connect all components to live API (replace mock data). Handle loading/error states. Output: Working frontend with real API calls.
@@ -447,7 +449,7 @@ INSERT INTO sensors VALUES
 
 #### Việt (AI Lead)
 - **12:00–15:00:** Implement MC-Dropout uncertainty quantification. Add `uncertainty` and `is_confident` fields to API response.
-- **15:00–18:00:** Implement Grad-CAM spectrogram overlay. Return `gradcam_base64` in API response.
+- **15:00–18:00:** Implement Grad-CAM spectrogram overlay. Ensure `.backward()` is only run on the cloud dashboard or on-demand, avoiding battery drain on the Edge CPU.
 - **18:00–21:00:** ONNX edge benchmark: measure inference time on CPU, model file size. Prepare stats for slides.
 - **21:00–00:00:** Final model review. Ensure every response has confidence + uncertainty. Review code for PyTorch Award submission.
 

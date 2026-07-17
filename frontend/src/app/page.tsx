@@ -16,7 +16,6 @@ import {
   FileText, 
   Play, 
   Pause, 
-  Wifi, 
   CheckCircle,
   Database,
   ArrowRight,
@@ -167,6 +166,67 @@ export default function Home() {
   // Synthesizer Siren node state
   const sirenIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // ── Helper functions defined before useEffect to avoid declaration errors ──
+  const stopSiren = () => {
+    if (sirenIntervalRef.current) {
+      clearInterval(sirenIntervalRef.current);
+      sirenIntervalRef.current = null;
+    }
+  };
+
+  const startSiren = () => {
+    stopSiren();
+    if (isMuted) return;
+    
+    // Play dual oscillator siren beeps
+    const playSirenBeep = () => {
+      try {
+        const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+        const osc1 = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(880, ctx.currentTime);
+        osc1.frequency.linearRampToValueAtTime(440, ctx.currentTime + 0.25);
+        
+        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.24);
+        
+        osc1.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        osc1.start();
+        osc1.stop(ctx.currentTime + 0.25);
+      } catch (e) {
+        console.error("Alarm beep synth failed", e);
+      }
+    };
+    
+    playSirenBeep();
+    sirenIntervalRef.current = setInterval(playSirenBeep, 500);
+  };
+
+  const stopRecordingResources = () => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (audioContextRef.current) {
+      if (audioContextRef.current.state !== "closed") {
+        audioContextRef.current.close();
+      }
+      audioContextRef.current = null;
+    }
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setMounted(true);
@@ -294,46 +354,6 @@ export default function Home() {
     }
   };
 
-  // ── Alarm Siren loop ──────────────────────────────────────────────────────────
-  const startSiren = () => {
-    stopSiren();
-    if (isMuted) return;
-    
-    // Play dual oscillator siren beeps
-    const playSirenBeep = () => {
-      try {
-        const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-        const osc1 = ctx.createOscillator();
-        const gainNode = ctx.createGain();
-        
-        osc1.type = "sine";
-        osc1.frequency.setValueAtTime(880, ctx.currentTime);
-        osc1.frequency.linearRampToValueAtTime(440, ctx.currentTime + 0.25);
-        
-        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.24);
-        
-        osc1.connect(gainNode);
-        gainNode.connect(ctx.destination);
-        
-        osc1.start();
-        osc1.stop(ctx.currentTime + 0.25);
-      } catch (e) {
-        console.error("Alarm beep synth failed", e);
-      }
-    };
-    
-    playSirenBeep();
-    sirenIntervalRef.current = setInterval(playSirenBeep, 500);
-  };
-
-  function stopSiren() {
-    if (sirenIntervalRef.current) {
-      clearInterval(sirenIntervalRef.current);
-      sirenIntervalRef.current = null;
-    }
-  }
-
   // Effect to handle siren whenever alarm condition changes
   useEffect(() => {
     const hasAlert = prediction?.threat_detections?.some(t => t.is_alert);
@@ -343,6 +363,7 @@ export default function Home() {
       stopSiren();
     }
     return () => stopSiren();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prediction, isMuted]);
 
   // ── Simulator Presets Selection ─────────────────────────────────────────────
@@ -406,7 +427,7 @@ export default function Home() {
           };
           setActiveSensor("demo-sensor-3");
           break;
-
+          
         case 2: // Gunshot Alert
           playSynthSound("gunshot");
           res = {
@@ -591,27 +612,6 @@ export default function Home() {
     stopRecordingResources();
   };
 
-  function stopRecordingResources() {
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-      timerIntervalRef.current = null;
-    }
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    if (audioContextRef.current) {
-      if (audioContextRef.current.state !== "closed") {
-        audioContextRef.current.close();
-      }
-      audioContextRef.current = null;
-    }
-  }
-
   const drawCanvasWave = () => {
     if (!canvasRef.current || !analyserRef.current) return;
     const canvas = canvasRef.current;
@@ -628,11 +628,11 @@ export default function Home() {
       
       analyser.getByteFrequencyData(dataArray);
 
-      ctx.fillStyle = "#070c08";
+      ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw HUD vertical tech grid lines
-      ctx.strokeStyle = "rgba(16, 185, 129, 0.1)";
+      // Draw vertical tech grid lines
+      ctx.strokeStyle = "rgba(5, 150, 105, 0.06)";
       ctx.lineWidth = 1;
       for (let i = 0; i < canvas.width; i += 30) {
         ctx.beginPath();
@@ -641,7 +641,7 @@ export default function Home() {
         ctx.stroke();
       }
 
-      // Draw soundwave columns in Acid Green
+      // Draw soundwave columns in Emerald Green
       const barWidth = (canvas.width / bufferLength) * 1.5;
       let barHeight;
       let x = 0;
@@ -650,9 +650,9 @@ export default function Home() {
         barHeight = (dataArray[i] / 255) * canvas.height;
 
         const greenGrad = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
-        greenGrad.addColorStop(0, "rgba(16, 185, 129, 0.1)");
-        greenGrad.addColorStop(0.5, "rgba(52, 211, 153, 0.7)");
-        greenGrad.addColorStop(1, "#39FF14");
+        greenGrad.addColorStop(0, "rgba(5, 150, 105, 0.1)");
+        greenGrad.addColorStop(0.5, "rgba(5, 150, 105, 0.6)");
+        greenGrad.addColorStop(1, "#059669");
 
         ctx.fillStyle = greenGrad;
         ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
@@ -708,11 +708,11 @@ export default function Home() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    ctx.fillStyle = "#060606";
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw background grid lines (Technical HUD)
-    ctx.strokeStyle = "rgba(16, 185, 129, 0.05)";
+    // Draw background grid lines
+    ctx.strokeStyle = "rgba(5, 150, 105, 0.05)";
     ctx.lineWidth = 1;
     for (let x = 0; x < canvas.width; x += 40) {
       ctx.beginPath();
@@ -734,8 +734,8 @@ export default function Home() {
       // Spec 1
       const grad1 = ctx.createLinearGradient(0, 0, canvas.width, 0);
       grad1.addColorStop(0, "transparent");
-      grad1.addColorStop(0.2, heat ? "#ef4444" : "#10b981");
-      grad1.addColorStop(0.3, heat ? "#fbbf24" : "#6ee7b7");
+      grad1.addColorStop(0.2, heat ? "#dc2626" : "#059669");
+      grad1.addColorStop(0.3, heat ? "#d97706" : "#34d399");
       grad1.addColorStop(0.4, "transparent");
       ctx.strokeStyle = grad1;
       ctx.beginPath();
@@ -749,8 +749,8 @@ export default function Home() {
       // Spec 2
       const grad2 = ctx.createLinearGradient(0, 0, canvas.width, 0);
       grad2.addColorStop(0.4, "transparent");
-      grad2.addColorStop(0.6, heat ? "#ef4444" : "#10b981");
-      grad2.addColorStop(0.7, heat ? "#f59e0b" : "#34d399");
+      grad2.addColorStop(0.6, heat ? "#dc2626" : "#059669");
+      grad2.addColorStop(0.7, heat ? "#d97706" : "#34d399");
       grad2.addColorStop(0.8, "transparent");
       ctx.strokeStyle = grad2;
       ctx.beginPath();
@@ -764,7 +764,7 @@ export default function Home() {
     } else if (type === "procedural_chainsaw") {
       // Dense low frequency block and horizontal teeth
       ctx.lineWidth = 1;
-      ctx.strokeStyle = heat ? "rgba(239, 68, 68, 0.4)" : "rgba(16, 185, 129, 0.3)";
+      ctx.strokeStyle = heat ? "rgba(220, 38, 38, 0.4)" : "rgba(5, 150, 105, 0.3)";
       
       // Bottom rumble block
       for (let y = canvas.height - 40; y < canvas.height - 10; y += 4) {
@@ -776,7 +776,7 @@ export default function Home() {
       
       // Mid teeth (chainsaw buzz)
       ctx.lineWidth = 2;
-      ctx.strokeStyle = heat ? "#ef4444" : "#10b981";
+      ctx.strokeStyle = heat ? "#dc2626" : "#059669";
       ctx.beginPath();
       for (let x = 20; x < canvas.width - 20; x += 6) {
         const y = 140 + (x % 12 === 0 ? 15 : -15) + Math.random() * 5;
@@ -787,9 +787,9 @@ export default function Home() {
       
       // Highlight heatmap if Gradcam active
       if (heat) {
-        ctx.fillStyle = "rgba(239, 68, 68, 0.25)";
+        ctx.fillStyle = "rgba(220, 38, 38, 0.15)";
         ctx.fillRect(80, 110, 240, 60);
-        ctx.strokeStyle = "#fbbf24";
+        ctx.strokeStyle = "#d97706";
         ctx.strokeRect(80, 110, 240, 60);
       }
 
@@ -797,15 +797,15 @@ export default function Home() {
       // Sudden vertical blast line (broadband explosion)
       const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
       grad.addColorStop(0, "transparent");
-      grad.addColorStop(0.3, heat ? "#ef4444" : "#10b981");
-      grad.addColorStop(0.5, heat ? "#fbbf24" : "#6ee7b7");
-      grad.addColorStop(0.9, heat ? "rgba(239, 68, 68, 0.1)" : "rgba(16, 185, 129, 0.1)");
+      grad.addColorStop(0.3, heat ? "#dc2626" : "#059669");
+      grad.addColorStop(0.5, heat ? "#d97706" : "#34d399");
+      grad.addColorStop(0.9, heat ? "rgba(220, 38, 38, 0.1)" : "rgba(5, 150, 105, 0.1)");
       
       ctx.fillStyle = grad;
       ctx.fillRect(150, 20, 25, canvas.height - 30);
 
       if (heat) {
-        ctx.strokeStyle = "#ef4444";
+        ctx.strokeStyle = "#dc2626";
         ctx.lineWidth = 2;
         ctx.strokeRect(145, 15, 35, canvas.height - 25);
       }
@@ -813,8 +813,8 @@ export default function Home() {
     } else if (type === "procedural_storm") {
       // Large low-frequency blur clouds
       const grad = ctx.createRadialGradient(200, 160, 10, 200, 160, 90);
-      grad.addColorStop(0, heat ? "rgba(251, 191, 36, 0.6)" : "rgba(16, 185, 129, 0.4)");
-      grad.addColorStop(0.8, heat ? "rgba(239, 68, 68, 0.1)" : "rgba(6, 95, 70, 0.1)");
+      grad.addColorStop(0, heat ? "rgba(217, 119, 6, 0.6)" : "rgba(5, 150, 105, 0.4)");
+      grad.addColorStop(0.8, heat ? "rgba(220, 38, 38, 0.1)" : "rgba(4, 120, 87, 0.1)");
       grad.addColorStop(1, "transparent");
       ctx.fillStyle = grad;
       ctx.beginPath();
@@ -823,7 +823,7 @@ export default function Home() {
 
     } else {
       // Quiet scan line
-      ctx.strokeStyle = "rgba(16, 185, 129, 0.2)";
+      ctx.strokeStyle = "rgba(5, 150, 105, 0.2)";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(0, canvas.height - 30);
@@ -848,43 +848,43 @@ export default function Home() {
   }, [prediction, showGradcam, activeTab]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#050505] text-[#ededed] font-sans antialiased overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-[#f4f6f5] text-[#0f172a] font-sans antialiased overflow-x-hidden">
       
       {/* ── Flashing Danger Background Alert ───────────────────────────────────── */}
       {prediction?.threat_detections?.some(t => t.is_alert) && (
-        <div className="pointer-events-none fixed inset-0 z-50 border-[6px] border-red-600/70 animate-pulse" />
+        <div className="pointer-events-none fixed inset-0 z-50 border-[6px] border-red-600/50 animate-pulse" />
       )}
 
       {/* ── Top Technical Status Bar ───────────────────────────────────────────── */}
-      <header className="border-b border-[#1b261d] bg-[#070c08]/90 px-6 py-3 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md">
+      <header className="border-b border-zinc-200 bg-white/95 px-6 py-3.5 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Activity className="h-6 w-6 text-[#39FF14] animate-pulse" />
-            <div className="absolute inset-0 bg-[#39FF14]/20 blur-sm rounded-full animate-ping" />
+            <Activity className="h-5 w-5 text-emerald-600 animate-pulse" />
+            <div className="absolute inset-0 bg-emerald-500/10 blur-sm rounded-full animate-ping" />
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-wider font-mono text-[#ededed] flex items-center gap-2">
-              BIOLISTEN VN <span className="text-[10px] bg-[#162a1a] text-[#39FF14] px-1.5 py-0.5 border border-[#39FF14]/30">V1.0.0</span>
+            <h1 className="text-xs font-bold tracking-widest font-sans text-zinc-900 flex items-center gap-2">
+              BIOLISTEN VN <span className="text-[9px] bg-emerald-50 text-emerald-700 px-2 py-0.5 border border-emerald-200 rounded-sm font-semibold">FOREST OPERATIONS</span>
             </h1>
-            <p className="text-[10px] text-zinc-500 font-mono">CÚC PHƯƠNG NATIONAL PARK MONITORING CONSOLE</p>
+            <p className="text-[9px] text-emerald-700/80 font-mono tracking-wider font-semibold">CÚC PHƯƠNG NATIONAL PARK • COMMAND CENTER</p>
           </div>
         </div>
 
         {/* Live Metrics strip */}
-        <div className="hidden lg:flex items-center gap-6 font-mono text-[11px] border-l border-[#1b261d] pl-6">
+        <div className="hidden lg:flex items-center gap-6 font-sans text-[10px] border-l border-zinc-200 pl-6 text-zinc-500">
           <div>
-            <span className="text-zinc-500">STATIONS ACTIVE:</span>{" "}
-            <span className="text-[#39FF14] font-bold">3/3</span>
+            <span>STATIONS ONLINE:</span>{" "}
+            <span className="text-emerald-600 font-bold">3 / 3</span>
           </div>
           <div>
-            <span className="text-zinc-500">HEALTH INDEX (SHANNON):</span>{" "}
-            <span className="text-[#39FF14] font-bold">
+            <span>ECOSYSTEM HEALTH (SHANNON):</span>{" "}
+            <span className="text-emerald-600 font-bold">
               {prediction ? prediction.ecosystem_health.shannon_index.toFixed(2) : "1.42"}
             </span>
           </div>
           <div>
-            <span className="text-zinc-500">LATENCY:</span>{" "}
-            <span className="text-zinc-400">
+            <span>STREAM LATENCY:</span>{" "}
+            <span className="text-zinc-700">
               {prediction ? `${prediction.processing_time_ms}ms` : "124ms"}
             </span>
           </div>
@@ -895,10 +895,10 @@ export default function Home() {
           {prediction?.threat_detections?.some(t => t.is_alert) && (
             <button 
               onClick={() => setIsMuted(!isMuted)}
-              className={`flex items-center gap-1.5 px-3 py-1 text-[11px] font-mono border transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-sans border rounded-sm font-bold tracking-wider transition-all duration-200 cursor-pointer ${
                 isMuted 
-                ? "bg-zinc-800 border-zinc-700 text-zinc-400" 
-                : "bg-red-950/80 border-red-600 text-red-400 animate-bounce"
+                ? "bg-zinc-100 border-zinc-300 text-zinc-600 hover:bg-zinc-200" 
+                : "bg-red-50 border-red-500 text-red-600 hover:bg-red-100 animate-bounce"
               }`}
             >
               {isMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5 animate-pulse" />}
@@ -906,9 +906,9 @@ export default function Home() {
             </button>
           )}
           
-          <div className="flex items-center gap-1 bg-[#0f1d14] px-2.5 py-1 border border-[#1b261d] text-[10px] font-mono text-[#39FF14]">
-            <Wifi className="h-3 w-3 animate-pulse" />
-            LIVE EDGE LINK
+          <div className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 border border-emerald-200 text-[9px] font-sans text-emerald-700 rounded-sm font-semibold">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
+            LIVE TELEMETRY
           </div>
         </div>
       </header>
@@ -917,64 +917,64 @@ export default function Home() {
       <div className="flex flex-1 flex-col md:flex-row">
         
         {/* Sidebar Nav & Station Status Logs */}
-        <aside className="w-full md:w-60 border-r border-[#1b261d] bg-[#070c08]/50 flex flex-col font-mono shrink-0">
-          <div className="p-4 border-b border-[#1b261d]">
-            <div className="text-[10px] text-zinc-500 mb-2">QUẢN LÝ THIẾT BỊ</div>
+        <aside className="w-full md:w-64 border-r border-zinc-200 bg-zinc-50 flex flex-col font-sans shrink-0">
+          <div className="p-4 border-b border-zinc-200">
+            <div className="text-[9px] text-zinc-400 font-bold mb-3 tracking-wider uppercase">Hệ thống giám sát</div>
             <nav className="flex flex-col gap-1">
               <button 
                 onClick={() => setActiveTab("monitor")}
-                className={`w-full flex items-center justify-between px-3 py-2 text-xs border transition-all ${
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-xs rounded-sm transition-all duration-200 cursor-pointer ${
                   activeTab === "monitor" 
-                  ? "bg-[#112215]/80 border-[#39FF14]/30 text-[#39FF14]" 
-                  : "border-transparent text-zinc-400 hover:text-[#ededed] hover:bg-[#112215]/20"
+                  ? "bg-emerald-50 text-emerald-700 border-l-4 border-emerald-600 font-bold" 
+                  : "border-l-4 border-transparent text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <Activity className="h-3.5 w-3.5" /> GIÁM SÁT REAL-TIME
+                  <Activity className="h-3.5 w-3.5 text-emerald-600" /> TRUNG TÂM CHỈ HUY
                 </span>
-                <span className="text-[9px] bg-[#162a1a] px-1 text-[#39FF14]">01</span>
+                <span className="text-[8px] bg-emerald-100 px-1.5 py-0.5 rounded-sm border border-emerald-200 text-emerald-700 font-bold">01</span>
               </button>
               
               <button 
                 onClick={() => setActiveTab("history")}
-                className={`w-full flex items-center justify-between px-3 py-2 text-xs border transition-all ${
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-xs rounded-sm transition-all duration-200 cursor-pointer ${
                   activeTab === "history" 
-                  ? "bg-[#112215]/80 border-[#39FF14]/30 text-[#39FF14]" 
-                  : "border-transparent text-zinc-400 hover:text-[#ededed] hover:bg-[#112215]/20"
+                  ? "bg-emerald-50 text-emerald-700 border-l-4 border-emerald-600 font-bold" 
+                  : "border-l-4 border-transparent text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <History className="h-3.5 w-3.5" /> NHẬT KÝ LỊCH SỬ
+                  <History className="h-3.5 w-3.5 text-emerald-600" /> NHẬT KÝ LỊCH SỬ
                 </span>
-                <span className="text-[9px] bg-zinc-800 px-1 text-zinc-400">{history.length}</span>
+                <span className="text-[8px] bg-zinc-200 px-1.5 py-0.5 rounded-sm text-zinc-600 font-bold">{history.length}</span>
               </button>
 
               <button 
                 onClick={() => setActiveTab("analytics")}
-                className={`w-full flex items-center justify-between px-3 py-2 text-xs border transition-all ${
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-xs rounded-sm transition-all duration-200 cursor-pointer ${
                   activeTab === "analytics" 
-                  ? "bg-[#112215]/80 border-[#39FF14]/30 text-[#39FF14]" 
-                  : "border-transparent text-zinc-400 hover:text-[#ededed] hover:bg-[#112215]/20"
+                  ? "bg-emerald-50 text-emerald-700 border-l-4 border-emerald-600 font-bold" 
+                  : "border-l-4 border-transparent text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <BarChart3 className="h-3.5 w-3.5" /> PHÂN TÍCH ĐA DẠNG
+                  <BarChart3 className="h-3.5 w-3.5 text-emerald-600" /> XU HƯỚNG ĐA DẠNG
                 </span>
-                <span className="text-[9px] bg-zinc-800 px-1 text-zinc-400">GRAPH</span>
+                <span className="text-[8px] bg-zinc-200 px-1.5 py-0.5 rounded-sm text-zinc-600 font-bold">ANL</span>
               </button>
 
               <button 
                 onClick={() => setActiveTab("catalog")}
-                className={`w-full flex items-center justify-between px-3 py-2 text-xs border transition-all ${
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-xs rounded-sm transition-all duration-200 cursor-pointer ${
                   activeTab === "catalog" 
-                  ? "bg-[#112215]/80 border-[#39FF14]/30 text-[#39FF14]" 
-                  : "border-transparent text-zinc-400 hover:text-[#ededed] hover:bg-[#112215]/20"
+                  ? "bg-emerald-50 text-emerald-700 border-l-4 border-emerald-600 font-bold" 
+                  : "border-l-4 border-transparent text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <Compass className="h-3.5 w-3.5" /> THƯ VIỆN LOÀI
+                  <Compass className="h-3.5 w-3.5 text-emerald-600" /> THƯ VIỆN LOÀI RỪNG
                 </span>
-                <span className="text-[9px] bg-zinc-800 px-1 text-zinc-400">{SPECIES_CATALOG.length}</span>
+                <span className="text-[8px] bg-zinc-200 px-1.5 py-0.5 rounded-sm text-zinc-400 font-bold">{SPECIES_CATALOG.length}</span>
               </button>
             </nav>
           </div>
@@ -982,112 +982,127 @@ export default function Home() {
           {/* Simulated Stations coordinates log */}
           <div className="p-4 flex-1 flex flex-col justify-between">
             <div>
-              <div className="text-[10px] text-zinc-500 mb-3 uppercase">ĐIỂM TRẠM CẢM BIẾN</div>
-              <div className="flex flex-col gap-2">
-                {SENSORS.map((s) => (
-                  <button 
-                    key={s.id} 
-                    onClick={() => setActiveSensor(s.id)}
-                    className={`p-2.5 text-[11px] text-left border flex flex-col gap-1 transition-all ${
-                      activeSensor === s.id 
-                      ? "bg-[#112215]/60 border-[#39FF14]/40" 
-                      : "bg-[#0b120c]/30 border-[#1b261d] hover:border-zinc-700"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between font-bold">
-                      <span className="text-[#ededed] flex items-center gap-1.5">
-                        <MapPin className="h-3 w-3 text-[#39FF14]" />
-                        {s.name}
-                      </span>
-                      <span>
-                        {s.id === "demo-sensor-3" && prediction?.threat_detections?.some(t => t.is_alert) ? "🚨 ALARM" : s.status.toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="text-[10px] text-zinc-500 font-mono">Lat: {s.lat}</div>
-                    <div className="text-[10px] text-zinc-500 font-mono">Lng: {s.lng}</div>
-                  </button>
-                ))}
+              <div className="text-[9px] text-zinc-400 font-bold mb-3 tracking-wider uppercase">Trạm cảm biến biên</div>
+              <div className="flex flex-col gap-2.5">
+                {SENSORS.map((s) => {
+                  const isSensorAlert = s.id === "demo-sensor-3" && prediction?.threat_detections?.some(t => t.is_alert);
+                  return (
+                    <button 
+                      key={s.id} 
+                      onClick={() => setActiveSensor(s.id)}
+                      className={`p-3 text-[10px] text-left border rounded-sm flex flex-col gap-1.5 transition-all duration-200 cursor-pointer ${
+                        activeSensor === s.id 
+                        ? "bg-emerald-50/50 border-emerald-300 shadow-sm" 
+                        : "bg-white border-zinc-200 hover:border-zinc-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between font-bold">
+                        <span className="text-zinc-800 flex items-center gap-1.5">
+                          <MapPin className="h-3.5 w-3.5 text-emerald-600" />
+                          {s.name}
+                        </span>
+                        <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-sm border ${
+                          isSensorAlert 
+                          ? "bg-red-50 border-red-200 text-red-600 animate-pulse" 
+                          : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                        }`}>
+                          {isSensorAlert ? "🚨 ALARM" : "ACTIVE"}
+                        </span>
+                      </div>
+                      <div className="text-[9px] text-zinc-400 flex flex-col gap-0.5 font-mono">
+                        <div>Lat: {s.lat}</div>
+                        <div>Lng: {s.lng}</div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Hardware spec info strip */}
-            <div className="pt-4 border-t border-[#1b261d] text-[10px] text-zinc-600 flex flex-col gap-1">
-              <div className="flex items-center gap-1">
-                <Database className="h-3 w-3" /> PyTorch ONNX Runtime (CPU)
+            <div className="pt-4 border-t border-zinc-200 text-[9px] text-zinc-500 flex flex-col gap-2 font-sans">
+              <div className="flex items-center gap-1.5 text-zinc-600">
+                <Database className="h-3.5 w-3.5 text-emerald-600" /> PyTorch ONNX Runtime (CPU)
               </div>
-              <div>⚡ Latency Target: &lt;150ms</div>
-              <div>🔋 Battery: 84% (Solar Linked)</div>
+              <div className="flex justify-between">
+                <span>Đo trễ xử lý biên:</span>
+                <span className="text-zinc-800 font-bold">&lt;150ms</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Nguồn năng lượng:</span>
+                <span className="text-emerald-600 font-bold">84% (Mặt Trời)</span>
+              </div>
             </div>
           </div>
         </aside>
 
         {/* ── Content Viewports ──────────────────────────────────────────────── */}
-        <main className="flex-1 bg-[#090e0a]/20 p-6 overflow-y-auto">
+        <main className="flex-1 bg-[#f4f6f5] p-6 overflow-y-auto">
           
           {/* TAB 1: Real-time Audio Monitoring dashboard */}
           {activeTab === "monitor" && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               
-              {/* Left Column: Audio Uploader, Spectrogram Visualizer */}
+              {/* Left Column: Audio Ingestion & Spectrogram Visualizer */}
               <div className="lg:col-span-8 flex flex-col gap-6">
                 
                 {/* Panel 1: Live Audio Ingestion */}
-                <div className="border border-[#1b261d] bg-[#070c08]/80 p-5 rounded-none relative">
-                  <div className="absolute top-0 right-0 px-2 py-0.5 bg-[#1b261d] text-[9px] font-mono text-zinc-500">INGESTION MODULE</div>
-                  <h2 className="text-sm font-bold font-mono tracking-wider text-[#39FF14] mb-4 flex items-center gap-2">
-                    <Activity className="h-4 w-4" /> KÊNH THU PHÁT VÀ PHÂN TÍCH ÂM THANH
+                <div className="border border-zinc-200/80 bg-white p-5 rounded-sm relative shadow-sm">
+                  <div className="absolute top-0 right-0 px-2.5 py-0.5 bg-zinc-50 text-[8px] font-mono text-zinc-400 border-l border-b border-zinc-200/80 rounded-bl-sm">INGESTION MODULE</div>
+                  <h2 className="text-xs font-bold font-sans tracking-widest text-zinc-800 mb-4 flex items-center gap-2 uppercase">
+                    <Activity className="h-4 w-4 text-emerald-600" /> Kênh thu phát và phân tích âm thanh
                   </h2>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Live Mic Recorder */}
-                    <div className="border border-[#1b261d] bg-[#090e0a] p-4 flex flex-col justify-between items-center text-center relative rounded-none">
-                      <div className="absolute top-2 left-2 flex items-center gap-1 text-[9px] font-mono text-zinc-500">
-                        <span className={`inline-block h-2 w-2 rounded-full ${isRecording ? "bg-red-500 animate-ping" : "bg-zinc-600"}`} />
-                        MICROPHONE
+                    <div className="border border-zinc-200/80 bg-zinc-50/50 p-4 flex flex-col justify-between items-center text-center relative rounded-sm">
+                      <div className="absolute top-2 left-2 flex items-center gap-1.5 text-[8px] font-mono text-zinc-400 uppercase">
+                        <span className={`inline-block h-2 w-2 rounded-full ${isRecording ? "bg-red-500 animate-ping" : "bg-zinc-300"}`} />
+                        Ghi âm từ trạm
                       </div>
                       
-                      <div className="my-3 flex flex-col items-center gap-2">
+                      <div className="my-4 flex flex-col items-center gap-2">
                         {isRecording ? (
                           <button 
                             onClick={stopRecording}
-                            className="h-16 w-16 bg-red-950 border border-red-500 text-red-500 flex items-center justify-center rounded-none shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:bg-red-900 transition-all cursor-pointer animate-pulse animate-duration-1000"
+                            className="h-14 w-14 bg-red-600 border border-red-500 text-white flex items-center justify-center rounded-full shadow-[0_2px_10px_rgba(220,38,38,0.25)] hover:bg-red-700 transition-all cursor-pointer animate-pulse"
                           >
-                            <Pause className="h-8 w-8" />
+                            <Pause className="h-5 w-5" />
                           </button>
                         ) : (
                           <button 
                             onClick={startRecording}
                             disabled={isProcessing}
-                            className="h-16 w-16 bg-[#112215] border border-[#39FF14] text-[#39FF14] flex items-center justify-center rounded-none shadow-[0_0_15px_rgba(57,255,20,0.2)] hover:bg-[#1a3320] disabled:opacity-50 transition-all cursor-pointer"
+                            className="h-14 w-14 bg-emerald-50 border border-emerald-500 text-emerald-600 flex items-center justify-center rounded-full shadow-[0_2px_8px_rgba(5,150,105,0.1)] hover:bg-emerald-100 disabled:opacity-50 transition-all cursor-pointer"
                           >
-                            <Mic className="h-8 w-8" />
+                            <Mic className="h-5 w-5 animate-pulse" />
                           </button>
                         )}
-                        <span className="text-xs font-mono text-zinc-400 mt-2">
-                          {isRecording ? `Đang ghi âm: ${recordingDuration}s / 10s` : "Nhấp để thu âm trực tiếp (Tối đa 10s)"}
+                        <span className="text-[10px] font-sans text-zinc-500 mt-2">
+                          {isRecording ? `Đang thu âm: ${recordingDuration}s / 10s` : "Ghi trực tiếp từ micro trạm"}
                         </span>
                       </div>
 
                       {/* Microphone visualizer canvas */}
                       <canvas 
                         ref={canvasRef} 
-                        className="w-full h-16 bg-[#070c08] border border-[#1b261d] rounded-none"
+                        className="w-full h-14 bg-white border border-zinc-200 rounded-sm"
                         width={300}
-                        height={64}
+                        height={56}
                       />
                     </div>
 
                     {/* Drag and Drop Wav Upload */}
-                    <div className="border border-[#1b261d] bg-[#090e0a] p-4 flex flex-col justify-between items-center text-center relative rounded-none">
-                      <div className="absolute top-2 left-2 flex items-center gap-1 text-[9px] font-mono text-zinc-500">
-                        <UploadCloud className="h-3 w-3" /> TẬP TIN ÂM THANH
+                    <div className="border border-zinc-200/80 bg-zinc-50/50 p-4 flex flex-col justify-between items-center text-center relative rounded-sm">
+                      <div className="absolute top-2 left-2 flex items-center gap-1 text-[8px] font-mono text-zinc-400 uppercase">
+                        <UploadCloud className="h-3.5 w-3.5 text-zinc-400" /> Tải lên tệp âm thanh
                       </div>
 
-                      <div className="my-auto flex flex-col items-center p-3">
-                        <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-[#1b261d] hover:border-[#39FF14]/50 cursor-pointer bg-[#070c08]/50 hover:bg-[#070c08] transition-all p-4">
-                          <UploadCloud className="h-8 w-8 text-[#39FF14] mb-2" />
-                          <span className="text-xs text-zinc-400 font-mono">Tải lên file .wav (5s - 60s)</span>
-                          <span className="text-[10px] text-zinc-600 mt-1">Kéo thả hoặc click chọn file</span>
+                      <div className="my-auto flex flex-col items-center p-3 w-full">
+                        <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-emerald-200 hover:border-emerald-500 rounded-sm cursor-pointer bg-white hover:bg-emerald-50/10 transition-all p-4">
+                          <UploadCloud className="h-7 w-7 text-emerald-600 mb-1" />
+                          <span className="text-[10px] text-zinc-600 font-sans font-medium">Tải tệp tin .wav (5s - 60s)</span>
+                          <span className="text-[9px] text-zinc-400 mt-0.5">Click để chọn hoặc kéo thả</span>
                           <input 
                             type="file" 
                             accept="audio/wav" 
@@ -1099,7 +1114,7 @@ export default function Home() {
                       </div>
 
                       {errorMessage && (
-                        <div className="mt-2 text-[10px] font-mono text-red-500 flex items-center gap-1">
+                        <div className="mt-2 text-[9px] font-sans text-red-600 flex items-center gap-1.5">
                           <AlertTriangle className="h-3 w-3" />
                           {errorMessage}
                         </div>
@@ -1109,87 +1124,87 @@ export default function Home() {
 
                   {/* Processing / Classification Loading overlay */}
                   {isProcessing && (
-                    <div className="absolute inset-0 bg-[#050505]/95 z-10 flex flex-col items-center justify-center text-center p-6">
-                      <div className="relative w-16 h-16 mb-4">
-                        <div className="absolute inset-0 border-4 border-dashed border-[#39FF14] rounded-none animate-spin animate-duration-3000" />
-                        <Activity className="absolute inset-0 m-auto h-6 w-6 text-[#39FF14] animate-pulse animate-duration-1000" />
+                    <div className="absolute inset-0 bg-white/95 z-10 flex flex-col items-center justify-center text-center p-6 rounded-sm">
+                      <div className="relative w-12 h-12 mb-3">
+                        <div className="absolute inset-0 border-3 border-dashed border-emerald-500 rounded-full animate-spin" />
+                        <Activity className="absolute inset-0 m-auto h-5 w-5 text-emerald-600 animate-pulse" />
                       </div>
-                      <div className="text-xs font-mono text-[#39FF14] animate-pulse tracking-widest uppercase animate-duration-1000">
-                        ĐANG TRÍCH XUẤT SPECTROGRAM & CHẠY NHẬN DIỆN PYTORCH...
+                      <div className="text-[10px] font-sans text-emerald-700 animate-pulse tracking-wide font-bold">
+                        Đang phân tích phổ tần & chạy nhận dạng PyTorch...
                       </div>
-                      <div className="text-[10px] text-zinc-500 font-mono mt-1">ONNX Runtime Engine executing inference pipelines</div>
+                      <div className="text-[9px] text-zinc-400 font-mono mt-0.5">Executing inference heads on CPU edge node</div>
                     </div>
                   )}
                 </div>
 
                 {/* Panel 2: Spectrogram & Heatmap Viewer */}
-                <div className="border border-[#1b261d] bg-[#070c08]/80 p-5 rounded-none relative">
-                  <div className="absolute top-0 right-0 px-2 py-0.5 bg-[#1b261d] text-[9px] font-mono text-zinc-500">ACCORDIAN MODULE</div>
+                <div className="border border-zinc-200/80 bg-white p-5 rounded-sm relative shadow-sm">
+                  <div className="absolute top-0 right-0 px-2.5 py-0.5 bg-zinc-50 text-[8px] font-mono text-zinc-400 border-l border-b border-zinc-200/80 rounded-bl-sm">SPECTRAL ANALYSIS</div>
                   
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-bold font-mono tracking-wider text-[#39FF14] flex items-center gap-2">
-                      <Activity className="h-4 w-4" /> PHỔ ÂM TẦN (MEL-SPECTROGRAM) & HEATMAP
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <h2 className="text-xs font-bold font-sans tracking-widest text-zinc-800 flex items-center gap-2 uppercase">
+                      <Activity className="h-4 w-4 text-emerald-600" /> Biểu đồ phổ âm (Spectrogram) & Bản đồ nhiệt AI
                     </h2>
                     
                     {/* Grad-CAM toggle switch */}
                     <button 
                       onClick={() => setShowGradcam(!showGradcam)}
                       disabled={!prediction}
-                      className={`px-3 py-1 text-[11px] font-mono border transition-all ${
+                      className={`px-3 py-1.5 text-[10px] font-sans border rounded-sm font-bold transition-all duration-200 ${
                         !prediction 
-                        ? "opacity-30 cursor-not-allowed border-zinc-800 text-zinc-600"
+                        ? "opacity-30 cursor-not-allowed border-zinc-200 text-zinc-400 bg-transparent"
                         : showGradcam
-                        ? "bg-amber-950/80 border-amber-500 text-[#fbbf24] shadow-[0_0_10px_rgba(251,191,36,0.15)]"
-                        : "bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-[#ededed] cursor-pointer"
+                        ? "bg-amber-50 border-amber-500 text-amber-700 shadow-sm cursor-pointer"
+                        : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 cursor-pointer"
                       }`}
                     >
-                      {showGradcam ? "ẨN GRAD-CAM HEATMAP" : "HIỆN GRAD-CAM (ĐỘ TẬP TRUNG)"}
+                      {showGradcam ? "ẨN ĐỘ TẬP TRUNG GRAD-CAM" : "XEM ĐỘ TẬP TRUNG GRAD-CAM (XAI)"}
                     </button>
                   </div>
 
                   <div className="flex flex-col md:flex-row gap-4 items-stretch">
                     {/* Mel Spectrogram display canvas */}
-                    <div className="flex-1 bg-[#050505] p-3 border border-[#1b261d] flex flex-col justify-center relative min-h-[220px]">
+                    <div className="flex-1 bg-zinc-50 p-3 border border-zinc-200/60 rounded-sm flex flex-col justify-center relative min-h-[210px]">
                       
-                      <div className="absolute top-2 left-2 bg-[#090e0a] border border-[#1b261d] px-2 py-0.5 text-[9px] font-mono text-[#39FF14] z-10 flex items-center gap-1.5">
-                        <span className={`inline-block h-1.5 w-1.5 rounded-full ${showGradcam ? "bg-amber-400 animate-pulse animate-duration-1000" : "bg-[#39FF14]"}`} />
-                        {showGradcam ? "GRAD-CAM WEIGHT OVERLAY" : "MEL-SPECTROGRAM FREQUENCY PLOT"}
+                      <div className="absolute top-2 left-2 bg-white border border-zinc-200 px-2.5 py-0.5 text-[8px] font-sans text-emerald-700 z-10 flex items-center gap-1.5 rounded-sm font-semibold shadow-xs">
+                        <span className={`inline-block h-1.5 w-1.5 rounded-full ${showGradcam ? "bg-amber-500 animate-pulse" : "bg-emerald-500 animate-pulse"}`} />
+                        {showGradcam ? "BẢN ĐỒ NHIỆT GIẢI THÍCH GRAD-CAM XAI" : "PHỔ LOG FREQUENCY SPECTROGRAM (5.0s)"}
                       </div>
 
                       {/* Display Canvas */}
                       <canvas 
                         ref={specCanvasRef} 
-                        className="w-full h-48 bg-[#060606] rounded-none border border-zinc-900/30"
+                        className="w-full h-44 bg-white rounded-sm border border-zinc-200"
                         width={450}
-                        height={192}
+                        height={176}
                       />
 
                       {/* Canvas legend labels */}
-                      <div className="flex justify-between items-center text-[9px] text-zinc-600 font-mono mt-1">
-                        <span>0.0s (BẮT ĐẦU)</span>
-                        <span>WINDOW SIZE: 5.0s</span>
-                        <span>5.0s (KẾT THÚC)</span>
+                      <div className="flex justify-between items-center text-[8px] text-zinc-400 font-mono mt-1 px-1">
+                        <span>0.0 Giây (Khởi đầu)</span>
+                        <span>Độ dài khung cửa sổ: 5.0 Giây</span>
+                        <span>5.0 Giây (Kết thúc)</span>
                       </div>
                     </div>
 
                     {/* Spectrogram Y-Axis legend block */}
-                    <div className="w-full md:w-48 bg-[#090e0a] p-4 border border-[#1b261d] flex flex-col justify-between font-mono text-[10px]">
+                    <div className="w-full md:w-48 bg-zinc-50 p-4 border border-zinc-200 flex flex-col justify-between font-sans text-[9px] rounded-sm">
                       <div>
-                        <div className="text-zinc-500 font-bold mb-2 uppercase border-b border-[#1b261d] pb-1">Trục Tần số (Hz)</div>
-                        <div className="flex flex-col gap-1 text-zinc-400">
-                          <div className="flex justify-between"><span>Max:</span> <span className="text-[#39FF14]">11,025 Hz</span></div>
+                        <div className="text-emerald-700 font-bold mb-2 uppercase border-b border-zinc-200 pb-1 tracking-wider">Trục Tần số (Hz)</div>
+                        <div className="flex flex-col gap-1.5 text-zinc-600 font-mono">
+                          <div className="flex justify-between"><span>Max:</span> <span className="text-emerald-600 font-bold">11,025 Hz</span></div>
                           <div className="flex justify-between"><span>Mid:</span> <span>5,500 Hz</span></div>
                           <div className="flex justify-between"><span>Min:</span> <span>50 Hz</span></div>
                         </div>
                       </div>
-                      <div className="mt-4 pt-2 border-t border-[#1b261d]">
-                        <div className="text-zinc-500 font-bold mb-2 uppercase pb-1">Mã hóa Cường độ</div>
+                      <div className="mt-4 pt-3 border-t border-zinc-200">
+                        <div className="text-emerald-700 font-bold mb-2 uppercase pb-1 tracking-wider">Cường độ âm (dB)</div>
                         <div className="flex items-center gap-2">
-                          <div className="w-4 h-24 bg-gradient-to-t from-black via-emerald-800 to-emerald-400 border border-zinc-800" />
-                          <div className="flex flex-col justify-between h-24 text-[9px] text-zinc-500">
-                            <span>-10 dB (Max)</span>
-                            <span>-50 dB (Mid)</span>
-                            <span>-90 dB (Min)</span>
+                          <div className="w-3 h-20 bg-gradient-to-t from-zinc-200 via-emerald-600 to-emerald-400 border border-zinc-300 rounded-sm" />
+                          <div className="flex flex-col justify-between h-20 text-[8px] text-zinc-400 font-mono">
+                            <span>-10 dB (Lớn)</span>
+                            <span>-50 dB (Trung)</span>
+                            <span>-90 dB (Nhỏ)</span>
                           </div>
                         </div>
                       </div>
@@ -1202,199 +1217,248 @@ export default function Home() {
               {/* Right Column: Active Threat Warnings & LLM Report */}
               <div className="lg:col-span-4 flex flex-col gap-6">
                 
-                {/* Panel 3: Live Beacons & SVG Maps */}
-                <div className="border border-[#1b261d] bg-[#070c08]/80 p-5 rounded-none relative">
-                  <div className="absolute top-0 right-0 px-2 py-0.5 bg-[#1b261d] text-[9px] font-mono text-zinc-500">GEO MAP MODULE</div>
-                  <h2 className="text-sm font-bold font-mono tracking-wider text-[#39FF14] mb-3 flex items-center gap-2">
-                    <Compass className="h-4 w-4" /> BẢN ĐỒ TRẠM CẢM BIẾN QUỐC GIA
+                {/* Panel 3: GIS Map */}
+                <div className="border border-zinc-200/80 bg-white p-5 rounded-sm relative shadow-sm">
+                  <div className="absolute top-0 right-0 px-2.5 py-0.5 bg-zinc-50 text-[8px] font-mono text-zinc-400 border-l border-b border-zinc-200/80 rounded-bl-sm">GEO MAP</div>
+                  <h2 className="text-xs font-bold font-sans tracking-widest text-zinc-800 mb-3 flex items-center gap-2 uppercase">
+                    <Compass className="h-4 w-4 text-emerald-600" /> Bản đồ định vị VQG Cúc Phương
                   </h2>
                   
                   {/* Simulated SVG Map of Park */}
-                  <div className="relative w-full h-48 bg-[#050906] border border-[#1b261d] overflow-hidden flex items-center justify-center">
+                  <div className="relative w-full h-44 bg-emerald-50/5 border border-zinc-200/60 rounded-sm overflow-hidden flex items-center justify-center">
                     
                     {/* SVG Vector Map */}
-                    <svg className="w-full h-full opacity-60" viewBox="0 0 300 180">
+                    <svg className="w-full h-full opacity-80" viewBox="0 0 300 180">
                       {/* Grid background */}
                       <defs>
                         <pattern id="mapGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(16, 185, 129, 0.04)" strokeWidth="1" />
+                          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(5, 150, 105, 0.05)" strokeWidth="0.75" />
                         </pattern>
                       </defs>
                       <rect width="100%" height="100%" fill="url(#mapGrid)" />
                       
                       {/* Cúc Phương border mock shape */}
                       <path 
-                        d="M 20 80 Q 50 20 120 40 T 220 30 T 280 120 T 150 160 T 40 140 Z" 
+                        d="M 25 85 Q 55 25 125 45 T 225 35 T 275 125 T 145 165 T 35 145 Z" 
                         fill="none" 
-                        stroke="rgba(16, 185, 129, 0.15)" 
+                        stroke="rgba(5, 150, 105, 0.2)" 
                         strokeWidth="1.5"
                         strokeDasharray="4 2"
                       />
                       
                       {/* Topographic Lines */}
-                      <path d="M 40 90 Q 80 50 150 80 T 240 70" fill="none" stroke="rgba(16, 185, 129, 0.05)" strokeWidth="1" />
-                      <path d="M 50 110 Q 100 80 170 110 T 260 100" fill="none" stroke="rgba(16, 185, 129, 0.05)" strokeWidth="1" />
+                      <path d="M 45 95 Q 85 55 155 85 T 245 75" fill="none" stroke="rgba(5, 150, 105, 0.08)" strokeWidth="0.75" />
+                      <path d="M 55 115 Q 105 85 175 115 T 265 105" fill="none" stroke="rgba(5, 150, 105, 0.08)" strokeWidth="0.75" />
 
                       {/* Map Labels */}
-                      <text x="25" y="150" fill="rgba(16, 185, 129, 0.3)" fontSize="8" fontFamily="monospace">VQG CÚC PHƯƠNG</text>
-                      <text x="180" y="25" fill="rgba(16, 185, 129, 0.2)" fontSize="7" fontFamily="monospace">NINH BÌNH SECTOR</text>
+                      <text x="35" y="155" fill="rgba(5, 150, 105, 0.4)" fontSize="7" fontFamily="sans-serif" fontWeight="bold">VQG CÚC PHƯƠNG - PHÂN KHU TÂY</text>
+                      <text x="175" y="20" fill="rgba(5, 150, 105, 0.3)" fontSize="6" fontFamily="sans-serif">SECTOR BẢO VỆ I</text>
 
                       {/* Connections between sensors */}
-                      <line x1="80" y1="70" x2="160" y2="40" stroke="rgba(16, 185, 129, 0.1)" strokeWidth="1" strokeDasharray="3 3" />
-                      <line x1="160" y1="40" x2="220" y2="110" stroke="rgba(16, 185, 129, 0.1)" strokeWidth="1" strokeDasharray="3 3" />
-                      <line x1="80" y1="70" x2="220" y2="110" stroke="rgba(16, 185, 129, 0.1)" strokeWidth="1" strokeDasharray="3 3" />
+                      <line x1="80" y1="70" x2="160" y2="40" stroke="rgba(5, 150, 105, 0.15)" strokeWidth="1" strokeDasharray="2 2" />
+                      <line x1="160" y1="40" x2="220" y2="110" stroke="rgba(5, 150, 105, 0.15)" strokeWidth="1" strokeDasharray="2 2" />
+                      <line x1="80" y1="70" x2="220" y2="110" stroke="rgba(5, 150, 105, 0.15)" strokeWidth="1" strokeDasharray="2 2" />
 
                       {/* Station 1 Point - Suối Lớn */}
                       <circle 
                         cx="80" 
                         cy="70" 
-                        r={activeSensor === "demo-sensor-1" ? "5" : "3.5"} 
-                        fill={activeSensor === "demo-sensor-1" ? "#39FF14" : "#10b981"} 
+                        r={activeSensor === "demo-sensor-1" ? "5.5" : "3.5"} 
+                        fill={activeSensor === "demo-sensor-1" ? "#059669" : "#10b981"} 
                         className="cursor-pointer" 
                         onClick={() => setActiveSensor("demo-sensor-1")}
                       />
-                      <circle cx="80" cy="70" r="10" fill="none" stroke="#10b981" strokeWidth="0.5" className="animate-ping animate-duration-1000" />
-                      <text x="60" y="60" fill={activeSensor === "demo-sensor-1" ? "#39FF14" : "rgba(255, 255, 255, 0.5)"} fontSize="7" fontFamily="monospace" fontWeight="bold">TRẠM A (SUỐI LỚN)</text>
+                      <circle cx="80" cy="70" r="10" fill="none" stroke="#059669" strokeWidth="0.5" className="animate-ping" />
+                      <text x="60" y="58" fill={activeSensor === "demo-sensor-1" ? "#059669" : "rgba(15, 23, 42, 0.4)"} fontSize="6" fontFamily="sans-serif" fontWeight="bold">TRẠM A (SUỐI LỚN)</text>
 
                       {/* Station 2 Point - Đỉnh Mây */}
                       <circle 
                         cx="160" 
                         cy="40" 
-                        r={activeSensor === "demo-sensor-2" ? "5" : "3.5"} 
-                        fill={activeSensor === "demo-sensor-2" ? "#39FF14" : "#10b981"}
+                        r={activeSensor === "demo-sensor-2" ? "5.5" : "3.5"} 
+                        fill={activeSensor === "demo-sensor-2" ? "#059669" : "#10b981"}
                         className="cursor-pointer" 
                         onClick={() => setActiveSensor("demo-sensor-2")}
                       />
-                      <text x="140" y="30" fill={activeSensor === "demo-sensor-2" ? "#39FF14" : "rgba(255, 255, 255, 0.5)"} fontSize="7" fontFamily="monospace" fontWeight="bold">TRẠM B (ĐỈNH MÂY)</text>
+                      <text x="140" y="28" fill={activeSensor === "demo-sensor-2" ? "#059669" : "rgba(15, 23, 42, 0.4)"} fontSize="6" fontFamily="sans-serif" fontWeight="bold">TRẠM B (ĐỈNH MÂY)</text>
 
                       {/* Station 3 Point - Rừng Già */}
-                      {/* If alert is active in Rừng Già, show red blinking circle */}
                       {prediction?.threat_detections?.some(t => t.is_alert) && activeSensor === "demo-sensor-3" ? (
                         <>
-                          <circle cx="220" cy="110" r="6" fill="#ef4444" className="cursor-pointer" onClick={() => setActiveSensor("demo-sensor-3")} />
-                          <circle cx="220" cy="110" r="14" fill="none" stroke="#ef4444" strokeWidth="1" className="animate-ping animate-duration-1000" />
+                          <circle cx="220" cy="110" r="6" fill="#dc2626" className="cursor-pointer" onClick={() => setActiveSensor("demo-sensor-3")} />
+                          <circle cx="220" cy="110" r="13" fill="none" stroke="#dc2626" strokeWidth="1.5" className="animate-ping" />
                         </>
                       ) : (
                         <circle 
                           cx="220" 
                           cy="110" 
-                          r={activeSensor === "demo-sensor-3" ? "5" : "3.5"} 
-                          fill={activeSensor === "demo-sensor-3" ? "#39FF14" : "#10b981"} 
+                          r={activeSensor === "demo-sensor-3" ? "5.5" : "3.5"} 
+                          fill={activeSensor === "demo-sensor-3" ? "#059669" : "#10b981"} 
                           className="cursor-pointer" 
                           onClick={() => setActiveSensor("demo-sensor-3")}
                         />
                       )}
-                      <text x="200" y="125" fill={prediction?.threat_detections?.some(t => t.is_alert) && activeSensor === "demo-sensor-3" ? "#ef4444" : activeSensor === "demo-sensor-3" ? "#39FF14" : "rgba(255, 255, 255, 0.5)"} fontSize="7" fontFamily="monospace" fontWeight="bold">TRẠM C (RỪNG GIÀ)</text>
+                      <text x="195" y="125" fill={prediction?.threat_detections?.some(t => t.is_alert) && activeSensor === "demo-sensor-3" ? "#dc2626" : activeSensor === "demo-sensor-3" ? "#059669" : "rgba(15, 23, 42, 0.4)"} fontSize="6" fontFamily="sans-serif" fontWeight="bold">TRẠM C (RỪNG GIÀ)</text>
                     </svg>
 
                     {/* Sensor Overlay coordinate index */}
-                    <div className="absolute bottom-2 left-2 font-mono text-[9px] text-zinc-500 bg-[#050906]/85 border border-[#1b261d] p-1">
-                      ACTIVE TRẠM: <span className="text-[#39FF14]">{SENSORS.find(s => s.id === activeSensor)?.name}</span>
+                    <div className="absolute bottom-2 left-2 font-sans text-[8px] text-zinc-500 bg-white/90 border border-zinc-200 p-1.5 rounded-sm shadow-xs font-semibold">
+                      TRẠM: <span className="text-emerald-700">{SENSORS.find(s => s.id === activeSensor)?.name}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Panel 4: Alert Pane & Groq Report */}
-                <div className={`border p-5 rounded-none relative transition-colors ${
+                {/* Panel 4: Alert Pane & Dispatch Ticket */}
+                <div className={`border rounded-sm p-5 relative shadow-sm transition-colors duration-300 ${
                   prediction?.threat_detections?.some(t => t.is_alert)
-                  ? "border-red-500/50 bg-red-950/20"
-                  : "border-[#1b261d] bg-[#070c08]/80"
+                  ? "border-red-300 bg-red-50/50"
+                  : "border-zinc-200/80 bg-white"
                 }`}>
-                  <div className="absolute top-0 right-0 px-2 py-0.5 bg-[#1b261d] text-[9px] font-mono text-zinc-500">INTELLIGENCE MODULE</div>
+                  <div className="absolute top-0 right-0 px-2.5 py-0.5 bg-zinc-50 text-[8px] font-mono text-zinc-400 border-l border-b border-zinc-200/80 rounded-bl-sm">ALERT CONTROL</div>
 
                   {/* Header alert status */}
                   <div className="flex items-center gap-2 mb-4">
                     {prediction?.threat_detections?.some(t => t.is_alert) ? (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-900/60 border border-red-500 text-red-400 font-mono text-[10px] font-bold tracking-widest animate-pulse animate-duration-1000">
-                        <ShieldAlert className="h-4 w-4" /> MỐI ĐE DỌA XÂM HẠI CAO
+                      <div className="flex items-center gap-1.5 px-3 py-1 bg-red-100 border border-red-400 text-red-700 font-sans text-[9px] font-bold tracking-wide rounded-sm animate-pulse">
+                        <ShieldAlert className="h-4 w-4 text-red-600" /> PHÁT HIỆN MỐI ĐE DỌA XÂM HẠI CAO
                       </div>
                     ) : prediction ? (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#10b981]/15 border border-[#10b981]/30 text-[#39FF14] font-mono text-[10px]">
-                        <CheckCircle className="h-4 w-4" /> HỆ SINH THÁI AN TOÀN
+                      <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-300 text-emerald-700 font-sans text-[9px] font-bold tracking-wide rounded-sm">
+                        <CheckCircle className="h-4 w-4 text-emerald-600" /> HỆ SINH THÁI KHÔNG CÓ BẤT THƯỜNG
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800 border border-zinc-700 text-zinc-400 font-mono text-[10px]">
-                        <Activity className="h-4 w-4" /> CHỜ THU THẬP TÍN HIỆU
+                      <div className="flex items-center gap-1.5 px-3 py-1 bg-zinc-100 border border-zinc-300 text-zinc-500 font-sans text-[9px] tracking-wide rounded-sm">
+                        <Activity className="h-4 w-4 text-zinc-400" /> ĐANG ĐỢI TÍN HIỆU ÂM THANH
                       </div>
                     )}
                   </div>
 
-                  {/* Classification details */}
+                  {/* Display Ticket style when threat detected */}
                   {prediction ? (
                     <div className="flex flex-col gap-4">
                       
-                      {/* Threat Details if exists */}
-                      {prediction.threat_detections.length > 0 && (
-                        <div className="border border-red-500/20 bg-red-950/10 p-3">
-                          <div className="text-[10px] font-mono text-red-400 font-bold mb-2 uppercase">PHÂN LOẠI MỐI ĐE DỌA (THREAT HEAD)</div>
-                          {prediction.threat_detections.map((t, idx) => (
-                            <div key={idx} className="flex justify-between items-center font-mono text-xs text-red-200">
-                              <span>Mối nguy: <span className="font-bold uppercase text-red-400">{t.threat_type}</span></span>
-                              <div className="flex items-center gap-3">
-                                <span>Độ tin cậy: <span className="text-red-400 font-bold">{(t.confidence * 100).toFixed(0)}%</span></span>
-                                <span className="text-[10px] text-zinc-500">Uncert: {(t.uncertainty * 100).toFixed(0)}%</span>
-                              </div>
+                      {/* Emergency Threat Dispatch Ticket */}
+                      {prediction.threat_detections.some(t => t.is_alert) ? (
+                        <div className="border border-dashed border-red-300 bg-white p-4 rounded-sm font-sans text-xs flex flex-col gap-3 relative overflow-hidden shadow-xs">
+                          {/* Decorative ticket notch */}
+                          <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#f4f6f5] border-r border-red-200" />
+                          <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#f4f6f5] border-l border-red-200" />
+                          
+                          <div className="text-center font-bold text-red-600 uppercase tracking-widest border-b border-zinc-100 pb-2">
+                            PHẦN MỀM KIỂM LÂM - PHIẾU PHÁI CỬ TUẦN TRA
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-y-2.5 text-[10px] text-zinc-600 font-sans border-b border-zinc-100 pb-3">
+                            <div className="font-semibold">Mã phiếu:</div>
+                            <div className="text-right font-bold text-red-600">{prediction.request_id.slice(0, 8).toUpperCase()}</div>
+                            
+                            <div className="font-semibold">Trạm kiểm âm gốc:</div>
+                            <div className="text-right font-bold text-zinc-800">{SENSORS.find(s => s.id === activeSensor)?.name}</div>
+
+                            <div className="font-semibold">Vị trí địa lý trạm:</div>
+                            <div className="text-right font-bold text-zinc-800 font-mono">{SENSORS.find(s => s.id === activeSensor)?.lat}</div>
+                            
+                            <div className="font-semibold">Thời điểm kích hoạt:</div>
+                            <div className="text-right text-zinc-700">{new Date().toLocaleTimeString("vi-VN")}</div>
+
+                            <div className="font-semibold">Phân loại tiếng động:</div>
+                            <div className="text-right uppercase text-red-600 font-extrabold flex items-center gap-1 justify-end">
+                              <AlertTriangle className="h-3.5 w-3.5 text-red-600 animate-pulse" />
+                              {prediction.threat_detections.map(td => td.threat_type === "chainsaw" ? "TIẾNG CƯA XÍCH" : "TIẾNG SÚNG").join(", ")}
                             </div>
-                          ))}
+
+                            <div className="font-semibold">Mức tin cậy mô hình:</div>
+                            <div className="text-right text-red-600 font-bold">
+                              {(prediction.threat_detections[0].confidence * 100).toFixed(0)}% (Sai số ±{(prediction.threat_detections[0].uncertainty * 100).toFixed(0)}%)
+                            </div>
+                          </div>
+
+                          <div className="pt-2">
+                            <button 
+                              onClick={() => alert(`[DISPATCH CONTROL] Đã kích hoạt lệnh cử tuần tra cơ động tới ${SENSORS.find(s => s.id === activeSensor)?.name}. Lực lượng biên sẽ di chuyển ngay lập tức.`)}
+                              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-sm tracking-wide uppercase text-[10px] flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-[0_2px_8px_rgba(220,38,38,0.2)]"
+                            >
+                              <ShieldAlert className="h-4 w-4" /> BẮT ĐẦU PHÁI CỬ LỰC LƯỢNG TUẦN TRA
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Species detected details */
+                        <div className="flex flex-col gap-3">
+                          <div className="text-[9px] font-sans text-zinc-400 font-bold uppercase tracking-wider">Danh sách loài chỉ thị nhận dạng (PyTorch Species Head)</div>
+                          {prediction.species_detections.length > 0 ? (
+                            <div className="flex flex-col gap-2">
+                              {prediction.species_detections.map((sp, idx) => (
+                                <div key={idx} className="p-3 border border-zinc-200/80 bg-zinc-50/50 text-xs rounded-sm">
+                                  <div className="flex justify-between font-sans mb-1">
+                                    <span className="text-zinc-800 font-bold">{sp.common_name}</span>
+                                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-sm border ${
+                                      sp.is_confident 
+                                      ? "bg-emerald-50 border-emerald-200 text-emerald-700" 
+                                      : "bg-amber-50 border-amber-200 text-amber-700"
+                                    }`}>
+                                      {sp.is_confident ? "TIN CẬY CAO" : "CẦN XÁC MINH"}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between text-[9px] text-zinc-500 font-sans">
+                                    <span>Độ tin cậy: {(sp.confidence * 100).toFixed(0)}% (Bất định: {(sp.uncertainty * 100).toFixed(0)}%)</span>
+                                    <span className="font-mono">Dải âm: {sp.time_window.start_sec}s - {sp.time_window.end_sec}s</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-zinc-400 bg-zinc-50/50 p-3 border border-zinc-200/80 rounded-sm">
+                              Không phát hiện tín hiệu loài cụ thể trong dải ghi âm.
+                            </div>
+                          )}
                         </div>
                       )}
 
-                      {/* Species detected Details */}
-                      <div>
-                        <div className="text-[10px] font-mono text-zinc-400 font-bold mb-2 uppercase">PHÂN LOẠI KHU HỆ SINH VẬT (SPECIES HEAD)</div>
-                        {prediction.species_detections.length > 0 ? (
-                          <div className="flex flex-col gap-2">
-                            {prediction.species_detections.map((sp, idx) => (
-                              <div key={idx} className="p-2 border border-[#1b261d] bg-[#050805] text-xs">
-                                <div className="flex justify-between font-mono mb-1">
-                                  <span className="text-[#ededed] font-bold">{sp.common_name}</span>
-                                  <span className={sp.is_confident ? "text-[#39FF14]" : "text-amber-500 font-bold"}>
-                                    {sp.is_confident ? "CONFIDENT" : "LOW CONFIDENCE"}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between text-[10px] font-mono text-zinc-500">
-                                  <span>Độ tin cậy: {(sp.confidence * 100).toFixed(0)}%</span>
-                                  <span>Độ bất định: {(sp.uncertainty * 100).toFixed(0)}%</span>
-                                  <span>Cửa sổ: {sp.time_window.start_sec}s - {sp.time_window.end_sec}s</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-xs font-mono text-zinc-600 bg-[#050805] p-2 border border-[#1b261d]">
-                            Không phát hiện tín hiệu loài cụ thể.
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Ecosystem health values */}
-                      <div className="grid grid-cols-2 gap-3 font-mono text-xs p-3 border border-[#1b261d] bg-[#050805]">
+                      {/* Ecosystem health values simplified */}
+                      <div className="grid grid-cols-2 gap-3 font-sans text-xs p-3.5 border border-zinc-200/80 bg-zinc-50/50 rounded-sm">
                         <div>
-                          <div className="text-zinc-500 text-[9px] uppercase">Chỉ số Shannon</div>
-                          <div className="text-lg font-bold text-[#39FF14]">{prediction.ecosystem_health.shannon_index.toFixed(2)}</div>
+                          <div className="text-zinc-400 text-[8px] uppercase tracking-wider mb-1">Chỉ số Shannon (H&apos;)</div>
+                          <div className="text-lg font-bold text-emerald-700">{prediction.ecosystem_health.shannon_index.toFixed(2)}</div>
+                          <div className="text-[8px] text-zinc-500 mt-1 uppercase font-semibold">
+                            {prediction.ecosystem_health.shannon_index >= 1.5 ? (
+                              <span className="text-emerald-600">Đa dạng: Cao (Tốt)</span>
+                            ) : prediction.ecosystem_health.shannon_index >= 1.0 ? (
+                              <span className="text-zinc-500">Đa dạng: Trung bình</span>
+                            ) : (
+                              <span className="text-red-500 font-bold">Đa dạng: Cực thấp</span>
+                            )}
+                          </div>
                         </div>
                         <div>
-                          <div className="text-zinc-500 text-[9px] uppercase">Độ phong phú loài</div>
-                          <div className="text-lg font-bold text-[#39FF14]">{prediction.ecosystem_health.species_richness} loài</div>
+                          <div className="text-zinc-400 text-[8px] uppercase tracking-wider mb-1">Độ trù phú sinh học</div>
+                          <div className="text-lg font-bold text-emerald-700">{prediction.ecosystem_health.species_richness} Loài chim/ếch</div>
+                          <div className="text-[8px] text-zinc-500 mt-1 uppercase font-semibold">
+                            {prediction.threat_detections.some(t => t.is_alert) ? (
+                              <span className="text-red-600 font-bold">Rừng bị đe dọa</span>
+                            ) : (
+                              <span className="text-emerald-600">Hệ sinh cảnh ổn định</span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
                       {/* Groq Llama 3.1 emergency bulletin report */}
-                      <div className="border border-[#1b261d] bg-[#050805] p-3">
-                        <div className="text-[10px] font-mono text-[#39FF14] font-bold mb-2 flex items-center gap-1.5 uppercase">
-                          <FileText className="h-3.5 w-3.5" /> BÁO CÁO HÀNH ĐỘNG KIỂM LÂM (Groq LLM)
+                      <div className="border border-zinc-200/80 bg-zinc-50/50 p-3.5 rounded-sm">
+                        <div className="text-[9px] text-zinc-700 font-bold mb-2 flex items-center gap-1.5 uppercase tracking-wider border-b border-zinc-200/50 pb-1.5">
+                          <FileText className="h-3.5 w-3.5 text-emerald-600" /> BÁO CÁO NGHIỆP VỤ LÂM NGHIỆP
                         </div>
-                        <p className="text-xs text-zinc-300 leading-relaxed text-justify">
+                        <p className="text-[11px] text-zinc-700 leading-relaxed text-justify whitespace-pre-wrap font-sans">
                           {prediction.llm_report}
                         </p>
                       </div>
 
                     </div>
                   ) : (
-                    <div className="text-center py-12 text-zinc-600 font-mono text-xs flex flex-col items-center justify-center gap-2">
-                      <Database className="h-8 w-8 text-zinc-700 animate-pulse animate-duration-1000" />
-                      <span>Sẵn sàng xử lý dữ liệu kiểm âm.</span>
-                      <span>Chọn một preset bên dưới hoặc kích hoạt Microphone để phân tích.</span>
+                    <div className="text-center py-14 text-zinc-400 text-[10px] flex flex-col items-center justify-center gap-3">
+                      <Database className="h-7 w-7 text-zinc-300" />
+                      <div>Sẵn sàng tiếp nhận dữ liệu từ trạm kiểm lâm.</div>
+                      <div className="text-zinc-400">Vui lòng bấm chọn kịch bản giả lập ở chân trang hoặc ghi âm trực tiếp.</div>
                     </div>
                   )}
 
@@ -1407,58 +1471,58 @@ export default function Home() {
 
           {/* TAB 2: Historical log list view */}
           {activeTab === "history" && (
-            <div className="border border-[#1b261d] bg-[#070c08]/80 p-5 rounded-none font-mono">
-              <h2 className="text-sm font-bold tracking-wider text-[#39FF14] mb-4 flex items-center gap-2">
-                <History className="h-4 w-4" /> NHẬT KÝ KIỂM ÂM LỊCH SỬ
+            <div className="border border-zinc-200/80 bg-white p-5 rounded-sm font-sans shadow-sm">
+              <h2 className="text-xs font-bold tracking-widest text-zinc-800 mb-4 flex items-center gap-2 uppercase">
+                <History className="h-4 w-4 text-emerald-600" /> Nhật ký giám sát âm thanh lịch sử
               </h2>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left border-collapse">
+                <table className="w-full text-[10px] text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-[#1b261d] text-zinc-500 uppercase text-[10px]">
-                      <th className="py-2.5 px-3">Thời gian</th>
-                      <th className="py-2.5 px-3">Trạm</th>
-                      <th className="py-2.5 px-3">Mối đe dọa (Head 2)</th>
-                      <th className="py-2.5 px-3">Loài phát hiện (Head 1)</th>
-                      <th className="py-2.5 px-3 text-right">Shannon</th>
-                      <th className="py-2.5 px-3 text-right">Độ trễ</th>
-                      <th className="py-2.5 px-3 text-right">Hành động</th>
+                    <tr className="border-b border-zinc-200 text-zinc-400 uppercase tracking-wider text-[8px] font-bold">
+                      <th className="py-3 px-3">Thời gian ghi nhận</th>
+                      <th className="py-3 px-3">Trạm cảm biến</th>
+                      <th className="py-3 px-3">Kết quả cảnh báo (Head 2)</th>
+                      <th className="py-3 px-3">Khu hệ sinh vật phát hiện (Head 1)</th>
+                      <th className="py-3 px-3 text-right">Chỉ số Shannon H&apos;</th>
+                      <th className="py-3 px-3 text-right">Độ trễ AI</th>
+                      <th className="py-3 px-3 text-right">Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1b261d]/50">
+                  <tbody className="divide-y divide-zinc-100">
                     {history.map((h) => (
-                      <tr key={h.id} className={`hover:bg-[#112215]/20 ${h.is_alert ? "bg-red-950/10 text-red-200" : "text-zinc-300"}`}>
-                        <td className="py-3 px-3 text-[11px] text-zinc-500">
+                      <tr key={h.id} className={`hover:bg-zinc-50/50 transition-colors duration-150 ${h.is_alert ? "bg-red-50/30 text-red-900" : "text-zinc-700"}`}>
+                        <td className="py-3.5 px-3 text-zinc-400 font-mono">
                           {new Date(h.timestamp).toLocaleString("vi-VN")}
                         </td>
-                        <td className="py-3 px-3 font-bold text-zinc-200">
+                        <td className="py-3.5 px-3 font-bold text-zinc-800">
                           {SENSORS.find(s => s.id === h.sensor_id)?.name || h.sensor_id}
                         </td>
-                        <td className="py-3 px-3 font-bold">
+                        <td className="py-3.5 px-3 font-bold">
                           {h.threats.length > 0 ? (
-                            <span className="text-red-500 uppercase bg-red-950/40 px-2 py-0.5 border border-red-500/30">
-                              🚨 {h.threats.map(t => t.threat_type).join(", ")}
+                            <span className="text-red-600 font-extrabold uppercase bg-red-100/50 px-2 py-0.5 border border-red-300 rounded-sm text-[8px]">
+                              🚨 {h.threats.map(t => t.threat_type === "chainsaw" ? "TIẾNG CƯA MÁY" : "TIẾNG SÚNG").join(", ")}
                             </span>
                           ) : (
-                            <span className="text-zinc-500">Không có</span>
+                            <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 border border-emerald-200 rounded-sm text-[8px] font-semibold">An toàn</span>
                           )}
                         </td>
-                        <td className="py-3 px-3">
+                        <td className="py-3.5 px-3">
                           {h.species.length > 0 ? (
                             <div className="flex flex-col gap-0.5">
                               {h.species.map((sp, idx) => (
-                                <span key={idx} className="text-[#39FF14]">
+                                <span key={idx} className="text-emerald-700 font-semibold">
                                   {sp.common_name} ({(sp.confidence * 100).toFixed(0)}%)
                                 </span>
                               ))}
                             </div>
                           ) : (
-                            <span className="text-zinc-600">None</span>
+                            <span className="text-zinc-400">Không có</span>
                           )}
                         </td>
-                        <td className="py-3 px-3 text-right font-bold text-[#39FF14]">{h.shannon_index.toFixed(2)}</td>
-                        <td className="py-3 px-3 text-right text-zinc-500">{h.processing_time_ms}ms</td>
-                        <td className="py-3 px-3 text-right">
+                        <td className="py-3.5 px-3 text-right font-bold text-emerald-700 font-mono">{h.shannon_index.toFixed(2)}</td>
+                        <td className="py-3.5 px-3 text-right text-zinc-400 font-mono">{h.processing_time_ms}ms</td>
+                        <td className="py-3.5 px-3 text-right">
                           <button 
                             onClick={() => {
                               // Reload this record to the active view pane
@@ -1482,7 +1546,7 @@ export default function Home() {
                               setActiveSensor(h.sensor_id);
                               setActiveTab("monitor");
                             }}
-                            className="text-[#39FF14] hover:underline cursor-pointer flex items-center gap-1 justify-end ml-auto"
+                            className="text-emerald-600 hover:text-emerald-700 font-bold hover:underline cursor-pointer flex items-center gap-1 justify-end ml-auto"
                           >
                             XEM CHI TIẾT <ArrowRight className="h-3 w-3" />
                           </button>
@@ -1500,84 +1564,92 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               
               {/* Trend Chart */}
-              <div className="lg:col-span-8 border border-[#1b261d] bg-[#070c08]/80 p-5 rounded-none">
-                <h2 className="text-sm font-bold font-mono tracking-wider text-[#39FF14] mb-6 flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" /> BIỂU ĐỒ CHỈ SỐ SHANNON THEO THỜI GIAN
+              <div className="lg:col-span-8 border border-zinc-200/80 bg-white p-5 rounded-sm shadow-sm">
+                <h2 className="text-xs font-bold font-sans tracking-widest text-zinc-800 mb-6 flex items-center gap-2 uppercase">
+                  <TrendingUp className="h-4 w-4 text-emerald-600" /> Đồ thị xu hướng đa dạng Shannon H&apos; theo thời gian
                 </h2>
                 
                 {/* Recharts Wrapper */}
-                <div className="w-full h-80 font-mono text-[10px]">
+                <div className="w-full h-80 font-sans text-[9px]">
                   {mounted ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={MOCK_TREND} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <AreaChart data={MOCK_TREND} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                         <defs>
                           <linearGradient id="shannonGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#059669" stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor="#059669" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(16, 185, 129, 0.05)" />
-                        <XAxis dataKey="timestamp" stroke="rgba(16, 185, 129, 0.4)" />
-                        <YAxis domain={[0, 2.5]} stroke="rgba(16, 185, 129, 0.4)" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(5, 150, 105, 0.05)" />
+                        <XAxis dataKey="timestamp" stroke="rgba(15, 23, 42, 0.3)" />
+                        <YAxis domain={[0, 2.0]} stroke="rgba(15, 23, 42, 0.3)" />
                         <Tooltip 
-                          contentStyle={{ backgroundColor: "#070c08", borderColor: "#1b261d", color: "#ededed" }}
-                          itemStyle={{ color: "#39FF14" }}
+                          contentStyle={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0", color: "#0f172a" }}
+                          itemStyle={{ color: "#059669" }}
                         />
                         <Area 
                           type="monotone" 
                           dataKey="shannon_index" 
-                          name="Chỉ số Shannon"
-                          stroke="#39FF14" 
-                          strokeWidth={2}
+                          name="Chỉ số Shannon H'"
+                          stroke="#059669" 
+                          strokeWidth={1.5}
                           fillOpacity={1} 
                           fill="url(#shannonGrad)" 
                         />
                       </AreaChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-zinc-600">Đang khởi tạo biểu đồ...</div>
+                    <div className="w-full h-full flex items-center justify-center text-zinc-400">Đang tải biểu đồ đa dạng...</div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 mt-4 p-3 border border-[#1b261d] bg-[#050805] text-xs font-mono text-zinc-400">
-                  <span className="inline-block h-2 w-2 rounded-full bg-[#39FF14]" />
-                  <span>Chỉ số Shannon (Ecosystem Health Index) được tính toán theo thời gian dựa trên phân phối xác suất dự đoán của Head 1 trên 5-second windows.</span>
+                <div className="flex items-center gap-2 mt-4 p-3 border border-zinc-200/80 bg-zinc-50/50 text-[10px] text-zinc-500 rounded-sm">
+                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Chỉ số đa dạng Shannon được cập nhật tự động từ kết quả lượng giá quần thể loài chỉ thị theo thời gian thực.</span>
                 </div>
               </div>
 
               {/* Bio Assessment specs */}
-              <div className="lg:col-span-4 border border-[#1b261d] bg-[#070c08]/80 p-5 rounded-none font-mono">
-                <h2 className="text-sm font-bold tracking-wider text-[#39FF14] mb-4 flex items-center gap-2">
-                  <Award className="h-4 w-4" /> ĐÁNH GIÁ ĐA DẠNG SINH HỌC
+              <div className="lg:col-span-4 border border-zinc-200/80 bg-white p-5 rounded-sm font-sans shadow-sm">
+                <h2 className="text-xs font-bold tracking-widest text-emerald-700 mb-4 flex items-center gap-2 uppercase">
+                  <Award className="h-4 w-4 text-emerald-600" /> Quy chuẩn đánh giá đa dạng
                 </h2>
 
                 <div className="flex flex-col gap-4 text-xs">
-                  <div className="p-3 border border-[#1b261d] bg-[#050805]">
-                    <div className="text-zinc-500 text-[10px] mb-1">CÔNG THỨC SHANNON-WIENER (H&apos;)</div>
-                    <code className="text-[#39FF14] text-xs font-bold font-mono">H&apos; = - ∑ (p_i * ln(p_i))</code>
-                    <div className="text-zinc-400 text-[10px] mt-2 leading-relaxed">
-                      p_i là xác suất xuất hiện của loài thứ i được dự đoán bởi đầu phân loại loài.
+                  <div className="p-3 border border-zinc-200 bg-zinc-50 rounded-sm">
+                    <div className="text-zinc-500 text-[9px] mb-1 uppercase tracking-wider font-semibold">Thuật toán Shannon-Wiener (H&apos;)</div>
+                    <code className="text-emerald-700 text-xs font-bold font-mono">H&apos; = - ∑ (p_i * ln(p_i))</code>
+                    <div className="text-zinc-500 text-[9px] mt-2 leading-relaxed">
+                      Với p_i là mật độ xác suất hiện diện của loài i thu được trên phổ âm kiểm tra.
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2">
-                    <div className="text-zinc-500 text-[10px] uppercase">Thang đo chỉ số H&apos;:</div>
-                    <div className="flex justify-between border-b border-[#1b261d]/50 pb-1 text-zinc-400">
-                      <span>H&apos; &gt; 2.0</span> <span className="text-[#39FF14] font-bold">Rất cao</span>
+                  <div className="flex flex-col gap-2.5">
+                    <div className="text-zinc-600 text-[9px] uppercase tracking-wider font-bold">Thang đo chỉ số H&apos;:</div>
+                    
+                    <div className="flex justify-between border-b border-zinc-100 pb-1.5 text-zinc-600">
+                      <span>H&apos; &gt; 2.0</span> 
+                      <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 rounded-sm border border-emerald-200">Độ đa dạng: Rất cao</span>
                     </div>
-                    <div className="flex justify-between border-b border-[#1b261d]/50 pb-1 text-zinc-400">
-                      <span>1.5 ≤ H&apos; ≤ 2.0</span> <span className="text-emerald-400">Cao</span>
+                    
+                    <div className="flex justify-between border-b border-zinc-100 pb-1.5 text-zinc-600">
+                      <span>1.5 ≤ H&apos; ≤ 2.0</span> 
+                      <span className="text-emerald-600 font-semibold bg-emerald-50/50 px-1.5 rounded-sm border border-emerald-100">Độ đa dạng: Tốt</span>
                     </div>
-                    <div className="flex justify-between border-b border-[#1b261d]/50 pb-1 text-zinc-400">
-                      <span>1.0 ≤ H&apos; &lt; 1.5</span> <span className="text-zinc-300">Trung bình</span>
+                    
+                    <div className="flex justify-between border-b border-zinc-100 pb-1.5 text-zinc-600">
+                      <span>1.0 ≤ H&apos; &lt; 1.5</span> 
+                      <span className="text-zinc-600 bg-zinc-100 px-1.5 rounded-sm border border-zinc-200">Độ đa dạng: Trung bình</span>
                     </div>
-                    <div className="flex justify-between border-b border-[#1b261d]/50 pb-1 text-zinc-400">
-                      <span>H&apos; &lt; 1.0</span> <span className="text-red-400 font-bold">Báo động suy giảm</span>
+                    
+                    <div className="flex justify-between border-b border-zinc-100 pb-1.5 text-zinc-600">
+                      <span>H&apos; &lt; 1.0</span> 
+                      <span className="text-red-600 font-bold bg-red-50 px-1.5 rounded-sm border border-red-200">Báo động: Suy giảm cao</span>
                     </div>
                   </div>
 
-                  <div className="border border-[#1b261d] bg-[#050805] p-3 text-zinc-400 text-[11px] leading-relaxed">
-                    <span className="text-red-400 font-bold">Lưu ý:</span> Khi phát hiện tiếng cưa xích hoặc tiếng súng, chỉ số H&apos; sẽ tự động bị đè (suppressed) xuống mức tối thiểu do tiếng ồn xáo trộn sinh cảnh cao, nhằm phản ánh đúng rủi ro suy giảm hệ sinh vật tức thì.
+                  <div className="border border-zinc-200 bg-zinc-50 p-3 text-zinc-500 text-[10px] leading-relaxed rounded-sm">
+                    <span className="text-red-600 font-bold">Quy chế cảnh báo:</span> Khi phát hiện tiếng động phá hoại rừng (cưa máy/súng), chỉ số H&apos; sẽ bị đè cưỡng bức về mức &lt;0.50 nhằm phát tín hiệu xáo trộn sinh cảnh khẩn cấp.
                   </div>
                 </div>
               </div>
@@ -1587,25 +1659,25 @@ export default function Home() {
 
           {/* TAB 4: Species Catalog details */}
           {activeTab === "catalog" && (
-            <div className="border border-[#1b261d] bg-[#070c08]/80 p-5 rounded-none font-mono">
-              <h2 className="text-sm font-bold tracking-wider text-[#39FF14] mb-4 flex items-center gap-2">
-                <Compass className="h-4 w-4" /> THƯ VIỆN LOÀI CHỈ THỊ (CÚC PHƯƠNG SECTOR)
+            <div className="border border-zinc-200/80 bg-white p-5 rounded-sm font-sans shadow-sm">
+              <h2 className="text-xs font-bold tracking-widest text-zinc-800 mb-4 flex items-center gap-2 uppercase">
+                <Compass className="h-4 w-4 text-emerald-600" /> Thư viện loài chỉ thị rừng đặc dụng
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
                 {SPECIES_CATALOG.map((sp) => (
-                  <div key={sp.id} className="p-4 border border-[#1b261d] bg-[#050805] hover:border-[#39FF14]/40 transition-all flex flex-col gap-2 rounded-none">
+                  <div key={sp.id} className="p-4 border border-zinc-200/80 bg-white hover:border-emerald-500/50 transition-all duration-200 flex flex-col gap-2 rounded-sm shadow-xs">
                     <div className="flex items-center gap-3">
-                      <span className="text-3xl bg-[#112215]/80 p-2 border border-[#1b261d]">{sp.icon}</span>
+                      <span className="text-2xl bg-emerald-50 p-2 border border-emerald-100 rounded-sm">{sp.icon}</span>
                       <div>
-                        <h3 className="text-xs font-bold text-zinc-200">{sp.name}</h3>
-                        <p className="text-[10px] text-zinc-500 italic font-serif">{sp.scientific}</p>
+                        <h3 className="text-xs font-bold text-zinc-800">{sp.name}</h3>
+                        <p className="text-[9px] text-emerald-600 italic font-serif">{sp.scientific}</p>
                       </div>
                     </div>
-                    <div className="text-[10px] text-[#39FF14] font-mono border-y border-[#1b261d] py-1 mt-2">
-                      DẢI TẦN SỐ: {sp.frequencyRange}
+                    <div className="text-[9px] text-emerald-700 font-sans border-y border-zinc-100 py-1.5 mt-2 font-medium">
+                      TẦN SỐ ĐẶC TRƯNG: {sp.frequencyRange}
                     </div>
-                    <p className="text-[11px] text-zinc-400 leading-relaxed text-justify mt-1">
+                    <p className="text-[10px] text-zinc-500 leading-relaxed text-justify mt-1">
                       {sp.description}
                     </p>
                   </div>
@@ -1617,51 +1689,51 @@ export default function Home() {
         </main>
       </div>
 
-      {/* ── Bottom Deck: Forest Audio Simulator Scenarios (Jurors Panel) ───────────── */}
-      <footer className="border-t border-[#1b261d] bg-[#070c08] p-4 flex flex-col md:flex-row items-center justify-between gap-4 font-mono z-30">
-        <div className="flex items-center gap-2 shrink-0">
-          <Play className="h-4 w-4 text-[#39FF14] animate-pulse animate-duration-1000" />
+      {/* ── Bottom Deck: Forest Audio Simulator Scenarios (Active Stream Feeds) ───────────── */}
+      <footer className="border-t border-zinc-200 bg-white p-4 flex flex-col lg:flex-row items-center justify-between gap-4 font-sans z-30 shadow-xs">
+        <div className="flex items-center gap-2.5 shrink-0">
+          <Play className="h-4 w-4 text-emerald-600 animate-pulse" />
           <div>
-            <div className="text-xs font-bold text-zinc-300">BỘ GIẢ LẬP KỊCH BẢN (FOREST SIMULATOR)</div>
-            <div className="text-[9px] text-zinc-500 uppercase">DÀNH CHO BAN GIÁM KHẢO TRẢI NGHIỆM ĐỒNG BỘ</div>
+            <div className="text-xs font-bold text-zinc-800 tracking-wider">BỘ THỬ NGHIỆM GIẢ LẬP KỊCH BẢN (DEMO FEEDS)</div>
+            <div className="text-[8px] text-zinc-400 uppercase font-semibold">Tái dựng 5 kịch bản rừng để đánh giá phản hồi hệ thống</div>
           </div>
         </div>
 
         {/* 5 Scenario Deck */}
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end font-sans">
           <button 
             onClick={() => triggerSimulatorPreset(0)}
-            className="px-3 py-2 text-[10px] border border-emerald-500/20 bg-emerald-950/20 text-[#39FF14] hover:bg-emerald-900/20 transition-all flex items-center gap-1.5 cursor-pointer rounded-none"
+            className="px-3.5 py-2 text-[9px] font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-all duration-150 cursor-pointer rounded-sm"
           >
-            🐦 BÌNH MINH YÊN BÌNH
+            🐦 BÌNH MINH BÌNH YÊN
           </button>
           
           <button 
             onClick={() => triggerSimulatorPreset(1)}
-            className="px-3 py-2 text-[10px] border border-red-500/30 bg-red-950/30 text-red-400 hover:bg-red-900/30 transition-all flex items-center gap-1.5 cursor-pointer rounded-none"
+            className="px-3.5 py-2 text-[9px] font-bold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all duration-150 cursor-pointer rounded-sm"
           >
-            🪓 CƯA XÍCH XÂM NHẬP
+            🪓 PHÁT HIỆN TIẾNG CƯA MÁY
           </button>
 
           <button 
             onClick={() => triggerSimulatorPreset(2)}
-            className="px-3 py-2 text-[10px] border border-red-500/30 bg-red-950/30 text-red-400 hover:bg-red-900/30 transition-all flex items-center gap-1.5 cursor-pointer rounded-none"
+            className="px-3.5 py-2 text-[9px] font-bold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all duration-150 cursor-pointer rounded-sm"
           >
-            💥 NỔ SÚNG SĂN BẮN
+            💥 BÁO ĐỘNG TIẾNG SÚNG SĂN
           </button>
 
           <button 
             onClick={() => triggerSimulatorPreset(3)}
-            className="px-3 py-2 text-[10px] border border-amber-500/30 bg-amber-950/30 text-[#fbbf24] hover:bg-amber-900/30 transition-all flex items-center gap-1.5 cursor-pointer rounded-none"
+            className="px-3.5 py-2 text-[9px] font-bold border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all duration-150 cursor-pointer rounded-sm"
           >
-            ⛈️ MƯA DÔNG (NHEO TÍN HIỆU)
+            ⛈️ NHIỄU GIÓ BÃO (NHEO SÓNG)
           </button>
 
           <button 
             onClick={() => triggerSimulatorPreset(4)}
-            className="px-3 py-2 text-[10px] border border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-all flex items-center gap-1.5 cursor-pointer rounded-none"
+            className="px-3.5 py-2 text-[9px] font-bold border border-zinc-200 bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition-all duration-150 cursor-pointer rounded-sm"
           >
-            🌙 ĐÊM TĨNH LẶNG
+            🌙 KHÔNG GIAN ĐÊM TĨNH
           </button>
         </div>
       </footer>

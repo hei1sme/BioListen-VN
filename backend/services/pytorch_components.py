@@ -250,6 +250,57 @@ class EfficientNetClassifier:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# COMPONENT 4: BioListenModel — Multi-Task Audio Classifier (PyTorch)
+# Track: Biodiversity & Security (Nông nghiệp)
+# ═══════════════════════════════════════════════════════════════════════════════
+class BioListenModel(nn.Module):
+    """
+    Multi-task audio classifier for edge computing.
+    Backbone: EfficientNet-V2-S (pretrained, frozen early layers)
+    Head 1: Species classification (N_SPECIES classes)
+    Head 2: Threat detection (binary: threat / no_threat, with sub-labels)
+    """
+    def __init__(self, n_species=5, n_threats=2):
+        super().__init__()
+        import torchvision.models as models
+        # Load pretrained backbone
+        backbone = models.efficientnet_v2_s(
+            weights=models.EfficientNet_V2_S_Weights.IMAGENET1K_V1
+        )
+        self.features = backbone.features       # Feature extractor
+        self.avgpool = backbone.avgpool         # Global average pooling
+        feature_dim = 1280                      # EfficientNet-V2-S output dim
+
+        # Freeze early layers (transfer learning — only train last 30 blocks + heads)
+        for param in list(self.features.parameters())[:-30]:
+            param.requires_grad = False
+
+        # Head 1: Species classification (Birds, Amphibians, Primates, Insects)
+        self.species_head = nn.Sequential(
+            nn.Dropout(p=0.3),   # Reused for MC-Dropout Bayesian Uncertainty
+            nn.Linear(feature_dim, 256),
+            nn.ReLU(),
+            nn.Dropout(p=0.3),
+            nn.Linear(256, n_species),
+        )
+
+        # Head 2: Threat detection (chainsaw, gunshot, or none)
+        self.threat_head = nn.Sequential(
+            nn.Dropout(p=0.3),
+            nn.Linear(feature_dim, 128),
+            nn.ReLU(),
+            nn.Linear(128, n_threats + 1),  # +1 for "no_threat" class
+        )
+
+    def forward(self, x):
+        features = self.features(x)
+        features = self.avgpool(features).flatten(1)  # [B, 1280]
+        species_logits = self.species_head(features)  # [B, n_species]
+        threat_logits = self.threat_head(features)    # [B, n_threats+1]
+        return species_logits, threat_logits
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # SINGLETON REGISTRY — lazy load, không load tất cả lúc startup
 # ═══════════════════════════════════════════════════════════════════════════════
 _registry: dict = {}

@@ -33,6 +33,7 @@
 | [11:00 17/07] | - | Nhận đề bài, brainstorm | - | Chọn track: BioListen VN ( Ecological Acoustics ) |
 | [14:28 17/07] | Antigravity | Triển khai Phase 1: Mở rộng ApiClient và dựng giao diện Next.js Technical HUD | ✅ | Chấp thuận kế hoạch và mã nguồn giao diện tích hợp Web Audio & Recharts. |
 | [15:10 17/07] | Antigravity | Triển khai audio router backend, sửa lỗi build setuptools trên Docker/pip | ✅ | Lưu trữ mã nguồn router, Dockerfile và requirements.txt phục vụ tích hợp. |
+| [19:00 17/07] | Antigravity | Thiết kế lại UI/UX toàn diện sang Light Theme hiện đại (Emerald Green) và sửa các lỗi linter hoisting | ✅ | Phê duyệt thiết kế Light Mode dã chiến/chuyên dụng thân thiện với kiểm lâm thay vì cyberpunk hacker. |
 
 ---
 
@@ -59,3 +60,4 @@
 |------|----------|--------|
 | [14:30 17/07] | Sử dụng Web Audio API để giả lập tiếng còi báo động và kịch bản | Đảm bảo tính hoạt động 100% của demo trong điều kiện mất internet/không tải được asset bên ngoài. |
 | [14:32 17/07] | Dùng SVG cho Bản đồ cảm biến thay vì Leaflet | Tránh tải chậm tệp CSS lớn ngoài và loại bỏ rủi ro về CORS / API keys của bản đồ nền. |
+| [19:00 17/07] | Chuyển đổi giao diện từ Dark Mode Cyberpunk sang Light Mode chuyên dụng | Tránh chói/mỏi mắt cho kiểm lâm khi nhìn màn hình liên tục trong phòng trực ca đêm, tăng độ tin cậy thực tế. |

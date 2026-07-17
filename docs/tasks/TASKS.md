@@ -9,10 +9,10 @@
 > *Mục tiêu: Xây dựng pipeline xử lý dữ liệu âm thanh và các endpoints API mô phỏng.*
 
 ### Việt (AI Lead) — `feature/ai`
-- [ ] Tải dữ liệu mẫu: ESC-50 (`git clone`) + viết script cào Xeno-canto cho 5 loài chim Việt Nam
+- [ ] Tải dữ liệu mẫu: ESC-50 (`git clone`) + viết script cào Xeno-canto cho 5 loài chuẩn Track (2 chim, 1 ếch, 1 khỉ, 1 ve sầu)
 - [ ] Xây dựng class `AudioDataset` trong PyTorch: load wav ➔ resample 22050Hz ➔ crop/pad 5s ➔ chuyển sang Mel-spectrogram ➔ resize 224x224 ➔ lặp thành 3 channels
 - [ ] Định nghĩa model `BioListenModel` với backbone `EfficientNet-V2-S` dùng chung feature extractor, đầu ra chia làm 2 nhánh: Phân loại loài (5 lớp) và Phát hiện cưa xích/súng (3 lớp)
-- [ ] Chạy lượt huấn luyện (training) đầu tiên trên máy tính của Việt
+- [ ] Chạy huấn luyện (training) trên **Google Colab** (do máy cá nhân không đủ dung lượng lưu trữ data), sau đó tải file model `models/biolisten_v1.pt` về máy.
 
 ### Hưng (AI All-round) — `feature/ui`
 - [ ] Thiết lập khung Dashboard Next.js: layout chính, sidebar (Monitor / History / Analytics / Catalog)
@@ -35,7 +35,7 @@
 - [ ] Export model PyTorch thành công sang định dạng **`.onnx`**
 - [ ] Viết lớp `ONNXAudioService` chạy suy luận (inference) model ONNX trên CPU để giả lập xử lý biên (Edge computing)
 - [ ] Thay thế mock dữ liệu của Hiếu bằng suy luận thực tế từ model ONNX
-- [ ] Tích hợp tính năng tính toán Chỉ số sức khỏe hệ sinh thái (Shannon Diversity Index) dựa trên kết quả phát hiện loài
+- [ ] Tích hợp tính toán Chỉ số sức khỏe hệ sinh thái (Shannon Diversity Index) dựa trên tổng số lần đếm phát hiện loài theo giờ (tránh dùng softmax tức thời để đảm bảo độ chuẩn xác toán học)
 
 ### Hưng (AI All-round) — `feature/ui`
 - [ ] Kết nối Next.js với API `/predict` thực tế, cập nhật spectrogram thực từ backend lên giao diện
@@ -56,7 +56,7 @@
 
 ### Việt (AI Lead) — `feature/ai`
 - [ ] Tích hợp giải thuật MC-Dropout để đo lường độ bất định (uncertainty) của model PyTorch
-- [ ] Tạo ảnh Grad-CAM làm nổi bật vùng phổ âm thanh (Mel-spectrogram) quyết định việc phân loại
+- [ ] Tạo ảnh Grad-CAM làm nổi bật vùng phổ âm. Lưu ý: Grad-CAM (`.backward()`) chỉ tính toán trên Cloud/Dashboard để tiết kiệm pin cho Edge Device
 - [ ] Đánh giá hiệu suất: đo thời gian xử lý của model ONNX trên CPU (target < 50ms) để đưa chỉ số vào slide
 
 ### Hưng (AI All-round) — `feature/ui`

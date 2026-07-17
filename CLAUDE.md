@@ -365,3 +365,18 @@ graph TD
 | WiFi venue chậm | Mobile hotspot |
 | Cần GPU | Google Colab free tier |
 | Model accuracy thấp | Zero-shot với PhoBERT + LLM explanation |
+
+---
+
+## 13. Ready-to-use AI Prompts (Copy & Paste)
+
+Khi giao việc cho AI Agent (Claude/Cursor/Windsurf), copy nguyên văn các prompt mẫu dưới đây để có kết quả chính xác 100%.
+
+### Cho Việt (AI Lead - Google Colab)
+> **Prompt:** "Agent, read `backend/services/pytorch_components.py` and `docs/tasks/TASKS_VIET.md`. I need you to build the `AudioDataset` class and the data preprocessing pipeline. Note that I am running this on **Google Colab** due to storage limits, so generate the Jupyter Notebook cell code (`!pip install...`, `import...`) that downloads the ESC-50 data directly to Colab and processes the Mel-spectrograms according to `AUDIO_CONFIG`."
+
+### Cho Hiếu (Backend/SE)
+> **Prompt:** "Agent, read `backend/api/routes/audio.py` and `docs/tasks/TASKS_HIEU.md`. I need to setup the Supabase database. Please provide the Python code using `supabase-py` to connect and insert a mock detection record into the `detections` table based on the schema in my task board."
+
+### Cho Hưng (Frontend/UI)
+> **Prompt:** "Agent, read `frontend/src/lib/api.ts` and `docs/tasks/TASKS_HUNG.md`. I need you to create the `SpectrogramViewer.tsx` component. Use Tailwind v4 glassmorphic styles. It should take a base64 image string as a prop and display it. Include a loading skeleton state."
