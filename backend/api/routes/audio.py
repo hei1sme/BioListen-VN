@@ -8,6 +8,12 @@ from typing import List, Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from services.ai_services import get_llm
+from services.supabase_client import (
+    is_supabase_configured,
+    insert_detection_record,
+    fetch_detection_history,
+    fetch_health_trend,
+)
 
 router = APIRouter(prefix="/api/audio", tags=["Audio Monitoring"])
 
@@ -65,6 +71,21 @@ class HealthTrendPointSchema(BaseModel):
 
 # In-Memory Cache for Hackathon Demo persistence
 DETECTION_HISTORY: List[HistoricalRecordSchema] = []
+
+
+def build_detection_record(response: AudioPredictionResponse, sensor_id: str) -> dict:
+    return {
+        "id": response.request_id,
+        "sensor_id": sensor_id,
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "species": [item.dict() for item in response.species_detections],
+        "threats": [item.dict() for item in response.threat_detections],
+        "shannon_index": response.ecosystem_health.shannon_index,
+        "is_alert": len(response.threat_detections) > 0,
+        "llm_report": response.llm_report,
+        "processing_time_ms": response.processing_time_ms,
+    }
+
 
 # ─── Helper: Get Audio Duration via wave ──────────────────────────────────────
 def get_wav_duration(file_path: str) -> float:
@@ -259,30 +280,43 @@ async def predict_audio(file: UploadFile = File(...)):
     )
 
     # Save to history log
-    historical_record = HistoricalRecordSchema(
-        id=response.request_id,
-        sensor_id=random.choice(["demo-sensor-1", "demo-sensor-2", "demo-sensor-3"]),
-        timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        species=response.species_detections,
-        threats=response.threat_detections,
-        shannon_index=response.ecosystem_health.shannon_index,
-        is_alert=len(response.threat_detections) > 0,
-        llm_report=response.llm_report,
-        processing_time_ms=response.processing_time_ms
-    )
-    DETECTION_HISTORY.insert(0, historical_record)
+    sensor_id = random.choice(["demo-sensor-1", "demo-sensor-2", "demo-sensor-3"])
+    record = build_detection_record(response, sensor_id)
+
+    if is_supabase_configured():
+        try:
+            insert_detection_record(record)
+        except Exception as exc:
+            # Log Supabase error but preserve demo behavior
+            print(f"[Supabase] insert failed: {exc}")
+            DETECTION_HISTORY.insert(0, HistoricalRecordSchema(**record))
+    else:
+        DETECTION_HISTORY.insert(0, HistoricalRecordSchema(**record))
 
     return response
 
 @router.get("/history", response_model=List[HistoricalRecordSchema])
 async def get_history(sensor_id: Optional[str] = None, limit: int = 50):
-    # If Supabase is hooked up, replace this list read with supabase query
+    if is_supabase_configured():
+        try:
+            rows = fetch_detection_history(limit=limit, sensor_id=sensor_id)
+            return [HistoricalRecordSchema(**row) for row in rows]
+        except Exception as exc:
+            print(f"[Supabase] history fetch failed: {exc}")
+
     if sensor_id:
         return [h for h in DETECTION_HISTORY if h.sensor_id == sensor_id][:limit]
     return DETECTION_HISTORY[:limit]
 
 @router.get("/health-trend", response_model=List[HealthTrendPointSchema])
 async def get_health_trend(days: int = 7):
+    if is_supabase_configured():
+        try:
+            rows = fetch_health_trend(days=days)
+            return [HealthTrendPointSchema(**row) for row in rows]
+        except Exception as exc:
+            print(f"[Supabase] health trend fetch failed: {exc}")
+
     # Returns 7 mock data points for Recharts area rendering
     points = []
     current_time = time.time()

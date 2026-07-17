@@ -18,6 +18,8 @@ uvicorn main:app --reload        # http://localhost:8000
 | `SUPABASE_URL` | Optional | https://supabase.com |
 | `SUPABASE_KEY` | Optional | Supabase project settings |
 
+> Nếu sử dụng Supabase cho Phase 1, chạy SQL schema trong `docs/supabase_schema.sql` để tạo bảng `sensors` và `detections`.
+
 ## Structure
 
 ```
