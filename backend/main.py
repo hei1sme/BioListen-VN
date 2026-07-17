@@ -51,11 +51,9 @@ async def root():
 async def health():
     return {"status": "healthy"}
 
-# ─── TODO: Import your feature routers here after picking track ───────────────
-# from api.routes.ai import router as ai_router
-# from api.routes.auth import router as auth_router
-# app.include_router(ai_router, prefix="/api/ai")
-# app.include_router(auth_router, prefix="/api/auth")
+# ─── Registered Routers ───────────────────────────────────────────────────────
+from api.routes.audio import router as audio_router
+app.include_router(audio_router)
 
 if __name__ == "__main__":
     import uvicorn

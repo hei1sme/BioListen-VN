@@ -32,6 +32,7 @@
 |-----------|------|---------------|-------|----------------|
 | [11:00 17/07] | - | Nhận đề bài, brainstorm | - | Chọn track: BioListen VN ( Ecological Acoustics ) |
 | [14:28 17/07] | Antigravity | Triển khai Phase 1: Mở rộng ApiClient và dựng giao diện Next.js Technical HUD | ✅ | Chấp thuận kế hoạch và mã nguồn giao diện tích hợp Web Audio & Recharts. |
+| [15:10 17/07] | Antigravity | Triển khai audio router backend, sửa lỗi build setuptools trên Docker/pip | ✅ | Lưu trữ mã nguồn router, Dockerfile và requirements.txt phục vụ tích hợp. |
 
 ---
 
