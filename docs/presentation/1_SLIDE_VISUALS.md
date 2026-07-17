@@ -24,7 +24,7 @@
 ### Slide 3: Giải pháp BioListen VN (Simulated Edge-to-Cloud)
 *   **Visual chính:** Sơ đồ luồng hoạt động 3 bước tinh gọn:
     1.  `[Trạm Edge AI tự cấp nguồn]` (ESP32-S3 + Solar) thu âm.
-    2.  `[Sóng truyền tin LoRaWAN]` chuyển dữ liệu siêu nhẹ (<100 Bytes JSON).
+    2.  `[Sóng truyền tin LoRaWAN]` chuyển dữ liệu siêu nhẹ (< [Z] Bytes JSON).
     3.  `[Cloud HUD Dashboard]` vẽ phổ tần và Grad-CAM cảnh báo tức thì cho kiểm lâm.
 *   **Chữ trên slide:** "Edge AI lọc nhiễu" | "Truyền sóng LoRaWAN cực đại" | "Cảnh báo khẩn cấp tức thời"
 
@@ -55,27 +55,27 @@
     *Dưới công thức là biểu đồ đường Recharts mô phỏng biến động H' tăng/giảm theo từng giờ dựa trên số lượng đếm loài chim của AI.*
 *   **Chữ trên slide:** "Shannon-Wiener H' thời gian thực" | "Số hóa mật độ loài" | "Đo lường sức khỏe sinh cảnh tự động"
 
-### Slide 7: Kết quả kiểm chứng thực nghiệm
-*   **Visual chính:** Bảng so sánh các thông số đo lường hiệu năng:
-    | Chỉ số | Kết quả thực tế | Ý nghĩa |
+### Slide 7: Kết quả thử nghiệm (Metrics)
+*   **Visual chính:** Bảng so sánh các thông số đo lường hiệu năng (Placeholder):
+    | Chỉ số | Kết quả thực nghiệm | Ý nghĩa |
     | :--- | :--- | :--- |
-    | **Accuracy** | **> 92%** | Đạt chuẩn nhận diện tiếng cưa/súng & 5 loài động vật mục tiêu |
-    | **Inference Latency** | **< 150ms** | Tối ưu hóa cực hạn để chạy trên CPU Edge |
-    | **Uncertainty Rate** | **< 5%** | Giảm thiểu tối đa sai sót nhờ MC-Dropout |
+    | **Accuracy** | **[X]%** | Đạt chuẩn nhận diện tiếng cưa/súng & 5 loài động vật mục tiêu |
+    | **Inference Latency** | **< [Y] ms** | Tối ưu hóa cực hạn để chạy trên CPU Edge |
+    | **Uncertainty Rate** | **< [U]%** | Giảm thiểu tối đa sai sót nhờ MC-Dropout |
 *   **Chữ trên slide:** "Chính xác cao - Phản hồi thời gian thực"
 
-### Slide 8: Bài toán kinh tế & simulated Edge (Thuyết phục Senior Judge)
+### Slide 8: Thương mại hóa & Simulated Edge (Dành cho Senior Judge)
 *   **Visual chính:** Biểu đồ cột so sánh chi phí thiết bị:
-    *   `Thiết bị sinh học tiêu chuẩn (AudioMoth): >$100` (Không có Edge AI xử lý tại chỗ).
-    *   `Trạm BioListen VN: <$15` (Mạch ESP32-S3 + Mic I2S chạy ONNX).
-*   **Sơ đồ minh họa:** `Audio gốc nặng -> Xử lý Edge -> Chỉ gửi JSON payload <100 Bytes qua LoRa`.
-*   **Chữ trên slide:** "Inference ONNX Runtime trên CPU giá rẻ" | "Tiết kiệm 85% chi phí phần cứng"
+    *   `Thiết bị sinh học tiêu chuẩn (AudioMoth): > $100` (Không có Edge AI xử lý tại chỗ).
+    *   `Trạm BioListen VN: < $[Cost]` (Mạch ESP32-S3 + Mic I2S chạy ONNX).
+*   **Sơ đồ minh họa:** `Audio gốc nặng -> Xử lý Edge -> Chỉ gửi JSON payload < [Z] Bytes qua LoRa`.
+*   **Chữ trên slide:** "Inference ONNX Runtime trên CPU giá rẻ" | "Tiết kiệm [W]% chi phí phần cứng"
 
 ### Slide 9: Lộ trình phát triển thực tế (Agile Roadmap)
 *   **Visual chính:** Trục thời gian 3 mốc rõ ràng, hướng đến thương mại hóa:
     *   **Tháng 1:** Hoàn thiện thiết kế PCB & vỏ hộp chống nước tiêu chuẩn IP67.
     *   **Tháng 3:** Triển khai thử nghiệm trạm POC đầu tiên tại Phân khu Rừng Già Cúc Phương để thu thập tập dữ liệu thực địa.
-    *   **Tháng 6:** Gọi vốn Seed vòng 1 để sản xuất và phủ sóng 50 trạm toàn phân khu.
+    *   **Tháng 6:** Gọi vốn Seed vòng 1 để sản xuất và phủ sóng [N] trạm toàn phân khu.
 *   **Chữ trên slide:** "Mạch PCB IP67" -> "Pilot Cúc Phương" -> "Thương mại hóa diện rộng"
 
 ### Slide 10: Đội ngũ & Q&A

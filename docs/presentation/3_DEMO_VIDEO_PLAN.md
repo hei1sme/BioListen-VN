@@ -21,9 +21,9 @@
     *   Chuyển sang trình duyệt chạy trang web online: `https://biolistenvn.vercel.app`.
     *   Click nút `[BÌNH MINH YÊN BÌNH]`.
     *   Màn hình load spectrogram. Dưới bảng kết quả hiển thị phát hiện Chim và Khỉ (Macaque).
-    *   Chỉ vào biểu đồ Shannon-Wiener Index đang tăng lên mức 1.62.
+    *   Chỉ vào biểu đồ Shannon-Wiener Index đang tăng lên mức [Index].
 *   **Voiceover:**
-    > "Đây là giao diện giám sát Cyberpunk HUD của chúng tôi. Khi chạy kịch bản rừng yên bình, micro thu tiếng động vật, mô hình thực hiện inference dưới 150ms để nhận diện các loài chim thú mục tiêu. 
+    > "Đây là giao diện giám sát Cyberpunk HUD của chúng tôi. Khi chạy kịch bản rừng yên bình, micro thu tiếng động vật, mô hình thực hiện inference dưới [Y] ms để nhận diện các loài chim thú mục tiêu. 
     > Đồng thời, hệ thống tự động tính toán chỉ số đa dạng sinh học Shannon-Wiener theo thời gian thực và vẽ biểu đồ xu hướng sức khỏe sinh thái trực quan."
 
 ### Phần 3: Cảnh báo Lâm tặc & AI Agent Action (2:30 - 3:45)
@@ -43,7 +43,7 @@
 
 ### Phần 5: Simulated Edge & Khả năng Thương mại (4:30 - 5:00)
 *   **On-Screen Action:**
-    *   Show file model `.onnx` siêu nhẹ và cấu trúc bản tin JSON gửi qua mạng LoRaWAN (<100 Bytes).
-    *   Hiện Slide lộ trình Agile (PCB -> Pilot -> Scale 34 Vườn Quốc Gia).
+    *   Show file model `.onnx` siêu nhẹ và cấu trúc bản tin JSON gửi qua mạng LoRaWAN (< [Z] Bytes).
+    *   Hiện Slide lộ trình Agile (PCB -> Pilot -> Scale [N] trạm).
 *   **Voiceover:**
-    > "Bằng cách tối ưu xuất mô hình sang chuẩn ONNX Runtime, BioListen VN chạy mượt mà trên chip ESP32-S3 với tổng giá thành phần cứng dưới 15 đô la, chỉ gửi dữ liệu JSON siêu nhẹ qua LoRa. Đây là giải pháp thực tế, chi phí thấp, sẵn sàng triển khai diện rộng trên toàn bộ 34 Vườn Quốc Gia của Việt Nam. Cảm ơn Ban giám khảo."
+    > "Bằng cách tối ưu xuất mô hình sang chuẩn ONNX Runtime, BioListen VN chạy mượt mà trên chip ESP32-S3 với tổng giá thành phần cứng dưới [Cost] đô la, chỉ gửi dữ liệu JSON siêu nhẹ qua LoRa. Đây là giải pháp thực tế, chi phí thấp, sẵn sàng triển khai diện rộng trên toàn bộ 34 Vườn Quốc Gia của Việt Nam. Cảm ơn Ban giám khảo."
