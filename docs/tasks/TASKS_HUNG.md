@@ -40,6 +40,19 @@
 - [x] **3. UX Polish:**
   - Thêm hiệu ứng loading skeletons, xử lý giao diện hiển thị lỗi khi API mất kết nối.
 
+### Phase 4: Deployment & Final Delivery (Giờ H36–H48 | Chủ Nhật)
+- [x] **1. Triển khai Backend API lên Railway:**
+  - Viết Dockerfile tối ưu hóa cài đặt Python + setuptools + openai-whisper + PyTorch.
+  - Cấu hình CORS wildcard và biến môi trường.
+  - Deploy thành công lên Railway (`https://vaic-2026.up.railway.app`).
+- [x] **2. Triển khai Frontend lên Vercel:**
+  - Cấu hình monorepo Next.js trỏ Root Directory về thư mục `frontend`.
+  - Cấu hình biến môi trường `NEXT_PUBLIC_API_URL` trỏ về API Railway.
+  - Giải quyết lỗi định tuyến Edge CDN (404) bằng cách di chuyển rewrite từ `vercel.json` sang `next.config.ts`.
+  - Deploy chạy thành công giao diện online tại `https://biolistenvn.vercel.app`.
+- [x] **3. Sửa lỗi & Chuẩn hóa mã nguồn:**
+  - Sửa triệt để 11 lỗi linter nghiêm trọng liên quan đến JavaScript Hoisting, synchronous React state và JSX single quotes.
+
 ---
 
 ## 🛠️ Hướng dẫn nhanh cho Agent của Hưng
