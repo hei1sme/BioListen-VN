@@ -14,11 +14,39 @@
   - Định nghĩa các schema Pydantic: `PredictRequest` (file upload), `PredictResponse` (chứa species, threats, health_index, spectrogram_base64, gradcam_base64, llm_report).
 - [ ] **2. Tích hợp Router vào App (Target: 15:30):**
   - Import và khai báo `audio.py` vào file `backend/main.py`.
-  - Cập nhật file `backend/requirements.txt` thêm `torchaudio` và `librosa`.
+  - Cập nhật file `backend/requirements.txt` thêm `torchaudio`, `librosa`, và `onnxruntime`.
 - [ ] **3. Triển khai Mock Endpoint (Target: 14:00):**
   - Viết code mock dữ liệu dự đoán trả về ngẫu nhiên các loại chim và threat (chainsaw/gunshot) để Hưng đấu nối frontend.
 - [ ] **4. Thiết lập Supabase Database (Target: 17:00):**
-  - Đăng ký project Supabase. Tạo bảng `detections` (lưu vết phân tích) và `sensors` (dữ liệu vị trí địa lý trạm) bằng script SQL được chuẩn bị sẵn trong `BIOLISTEN_PLAN.md`.
+  - Đăng ký project Supabase. Tạo bảng `detections` (lưu vết phân tích) và `sensors` (dữ liệu vị trí địa lý trạm) bằng cách chạy script SQL dưới đây trong SQL Editor của Supabase:
+    ```sql
+    CREATE TABLE detections (
+      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+      sensor_id TEXT NOT NULL DEFAULT 'demo-sensor-1',
+      timestamp TIMESTAMPTZ DEFAULT now(),
+      audio_url TEXT,
+      species JSONB NOT NULL DEFAULT '[]',
+      threats JSONB NOT NULL DEFAULT '[]',
+      shannon_index FLOAT,
+      is_alert BOOLEAN DEFAULT false,
+      llm_report TEXT,
+      processing_time_ms INT
+    );
+
+    CREATE TABLE sensors (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      lat FLOAT NOT NULL,
+      lng FLOAT NOT NULL,
+      park_name TEXT,
+      status TEXT DEFAULT 'active'
+    );
+
+    INSERT INTO sensors VALUES
+      ('demo-sensor-1', 'Trạm A - Suối Lớn', 20.2373, 105.6157, 'Cúc Phương', 'active'),
+      ('demo-sensor-2', 'Trạm B - Đỉnh Mây', 20.2410, 105.6200, 'Cúc Phương', 'active'),
+      ('demo-sensor-3', 'Trạm C - Rừng Già', 20.2350, 105.6100, 'Cúc Phương', 'active');
+    ```
 - [ ] **5. Deploy thử nghiệm (Target: 18:00):**
   - Triển khai backend FastAPI trống lên Railway để xác nhận live API url hoạt động bình thường, không lỗi CORS.
 
@@ -49,4 +77,39 @@
 Khi Hiếu dùng AI Agent hỗ trợ code hệ thống, hãy bảo Agent của mình:
 - **Đọc kỹ file:** `backend/main.py` và `backend/config.py` để lấy đúng cấu hình biến môi trường của Groq và Supabase.
 - **REST Client Testing:** Viết thêm các test request vào file `backend/api_tests.http` để kiểm tra nhanh các API endpoint mới viết mà không cần mở Postman.
+- **API Contract mẫu cho `/predict`:**
+  ```json
+  {
+    "request_id": "string",
+    "duration_sec": 5.0,
+    "processing_time_ms": 120,
+    "species_detections": [
+      {
+        "species_id": "string",
+        "common_name": "string",
+        "confidence": 0.95,
+        "uncertainty": 0.02,
+        "time_window": { "start_sec": 1.0, "end_sec": 4.0 },
+        "is_confident": true
+      }
+    ],
+    "threat_detections": [
+      {
+        "threat_type": "chainsaw",
+        "confidence": 0.91,
+        "uncertainty": 0.04,
+        "is_alert": true
+      }
+    ],
+    "ecosystem_health": {
+      "shannon_index": 1.5,
+      "species_richness": 3,
+      "trend": "stable",
+      "assessment": "string"
+    },
+    "spectrogram_base64": "string_base64_image",
+    "gradcam_base64": "string_base64_image",
+    "llm_report": "string"
+  }
+  ```
 - **Lưu ý Fallback:** Nếu tối Thứ Sáu team quyết định pivot sang Điện Biên Agriculture, Hiếu sẽ điều chỉnh router sang nhận file ảnh thay vì file audio. Mọi logic deploy và database giữ nguyên 90%.
