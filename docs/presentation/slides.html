@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioListen VN — Pitch Deck Slideshow</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #050814;
+            color: #E2E8F0;
+            overflow: hidden;
+        }
+        .font-header {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        /* Cyberpunk HUD Glassmorphism */
+        .glass-card {
+            background: rgba(10, 15, 30, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(57, 255, 20, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5),
+                        inset 0 0 32px 0 rgba(57, 255, 20, 0.02);
+        }
+        .neon-glow {
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.6), 0 0 20px rgba(57, 255, 20, 0.3);
+        }
+        .neon-border {
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+        }
+        .slide {
+            display: none;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .slide.active {
+            display: flex;
+            opacity: 1;
+        }
+        /* Custom scrollbar for mock code */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 15, 30, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(57, 255, 20, 0.3);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between p-6 select-none relative">
+
+    <!-- Background decorative grids & lights -->
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#0c1328_1px,transparent_1px),linear-gradient(to_bottom,#0c1328_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-40 z-0"></div>
+    <div class="absolute top-10 left-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    <div class="absolute bottom-10 right-10 w-96 h-96 bg-lime-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+    <!-- Header / Brand Bar -->
+    <header class="flex justify-between items-center z-10 w-full px-6">
+        <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-[#39FF14] animate-pulse"></div>
+            <span class="font-header font-bold tracking-wider text-sm text-[#39FF14] neon-glow">BIOLISTEN VN</span>
+        </div>
+        <div class="flex items-center gap-6 text-xs text-slate-400">
+            <span>TRACK NÔNG NGHIỆP | ĐH DUY TÂN</span>
+            <div class="h-4 w-[1px] bg-slate-800"></div>
+            <span>TEAM NEURAX.AI</span>
+        </div>
+    </header>
+
+    <!-- Slide Container -->
+    <main class="flex-1 w-full flex items-center justify-center p-6 z-10 relative overflow-hidden">
+        
+        <!-- Slide 1: Bìa -->
+        <div class="slide active flex-col items-center justify-center text-center max-w-4xl w-full h-full justify-center">
+            <div class="glass-card p-12 rounded-3xl neon-border max-w-2xl w-full flex flex-col items-center gap-8 relative overflow-hidden">
+                <!-- Decorative HUD lines -->
+                <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[#39FF14]"></div>
+                <div class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-[#39FF14]"></div>
+                <div class="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#39FF14]"></div>
+                <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[#39FF14]"></div>
+                
+                <div class="w-20 h-20 rounded-full bg-emerald-950/50 border border-[#39FF14]/30 flex items-center justify-center relative">
+                    <div class="absolute inset-2 rounded-full border border-dashed border-[#39FF14]/40 animate-[spin_20s_linear_infinite]"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#39FF14" class="w-10 h-10">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
+                    </svg>
+                </div>
+                
+                <div>
+                    <h1 class="font-header font-extrabold text-5xl tracking-tight text-white mb-2">BIOLISTEN <span class="text-[#39FF14] neon-glow">VN</span></h1>
+                    <p class="text-slate-400 text-sm italic font-light">"Lắng nghe hơi thở của rừng sâu bằng Trí tuệ Nhân tạo"</p>
+                </div>
+
+                <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-[#39FF14]/30 to-transparent"></div>
+
+                <div class="flex flex-col gap-2 text-center text-xs tracking-wide">
+                    <span class="text-[#39FF14] font-semibold">TRACK NÔNG NGHIỆP | ĐỀ BÀI: ĐẠI HỌC DUY TÂN</span>
+                    <span class="text-slate-500">ĐỘI THI: NEURAX.AI (HACKATHON VAIC 2026)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Đặt vấn đề -->
+        <div class="slide flex-col items-center justify-center w-full max-w-5xl h-full">
+            <h2 class="font-header text-3xl font-bold text-white mb-10 text-center">Rừng đầu nguồn là <span class="text-[#39FF14]">gốc rễ</span> của Nông nghiệp bền vững</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+                <!-- Card 1 -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col items-center text-center gap-6 border-red-500/20">
+                    <div class="w-16 h-16 rounded-2xl bg-red-950/30 flex items-center justify-center border border-red-500/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ef4444" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-red-400 mb-2">22.000 ha Diện tích</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">Rừng Cúc Phương quá rộng lớn. Tuần tra đi bộ kiểu truyền thống bỏ sót 90% nguy cơ phá hoại.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col items-center text-center gap-6 border-red-500/20">
+                    <div class="w-16 h-16 rounded-2xl bg-red-950/30 flex items-center justify-center border border-red-500/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ef4444" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-red-400 mb-2">Phát hiện quá muộn</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">Khi nghe tiếng súng/cưa bằng tai thường, cây cổ thụ đã đổ xuống, lâm tặc đã nhanh chân trốn thoát.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col items-center text-center gap-6 border-red-500/20">
+                    <div class="w-16 h-16 rounded-2xl bg-red-950/30 flex items-center justify-center border border-red-500/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ef4444" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 6h2.75m-2.75 0h18.5M3 12h18.5M3 7.5h18.5M21 3v1.5M21 21v-6" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-red-400 mb-2">"Mù" dữ liệu sinh học</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">Không có bất kỳ dữ liệu số hóa liên tục nào về độ trù phú sinh vật để đánh giá biến đổi hệ sinh thái.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Giải pháp -->
+        <div class="slide flex-col items-center justify-center w-full max-w-5xl h-full">
+            <h2 class="font-header text-3xl font-bold text-white mb-10 text-center">Kiến trúc bảo vệ tự động <span class="text-[#39FF14]">Edge-to-Cloud</span></h2>
+            
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 w-full relative">
+                <!-- Decorative Link Line -->
+                <div class="hidden md:block absolute top-1/2 left-20 right-20 h-[2px] bg-gradient-to-r from-emerald-500 via-lime-500 to-[#39FF14] -translate-y-1/2 opacity-35 z-0"></div>
+
+                <!-- Step 1 -->
+                <div class="glass-card p-6 rounded-2xl flex flex-col items-center text-center w-full md:w-72 gap-4 z-10">
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Bước 1</span>
+                    <div class="w-14 h-14 rounded-full bg-emerald-950/50 border border-[#39FF14]/30 flex items-center justify-center text-[#39FF14] text-lg font-bold">1</div>
+                    <div>
+                        <h3 class="text-white font-bold text-base mb-1">Cảm biến Edge AI</h3>
+                        <p class="text-slate-400 text-xs">Mạch ESP32 thu âm liên tục, xử lý tín hiệu và lọc nhiễu sơ bộ tại chỗ.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="glass-card p-6 rounded-2xl flex flex-col items-center text-center w-full md:w-72 gap-4 z-10">
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Bước 2</span>
+                    <div class="w-14 h-14 rounded-full bg-emerald-950/50 border border-[#39FF14]/30 flex items-center justify-center text-[#39FF14] text-lg font-bold">2</div>
+                    <div>
+                        <h3 class="text-white font-bold text-base mb-1">Truyền tin LoRaWAN</h3>
+                        <p class="text-slate-400 text-xs">Gửi gói tin JSON siêu nhẹ (< [Z] Bytes) qua tầm xa LoRaWAN tiết kiệm năng lượng.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="glass-card p-6 rounded-2xl flex flex-col items-center text-center w-full md:w-72 gap-4 z-10">
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Bước 3</span>
+                    <div class="w-14 h-14 rounded-full bg-emerald-950/50 border border-[#39FF14]/30 flex items-center justify-center text-[#39FF14] text-lg font-bold">3</div>
+                    <div>
+                        <h3 class="text-white font-bold text-base mb-1">Cloud Dashboard</h3>
+                        <p class="text-slate-400 text-xs">FastAPI & Next.js vẽ biểu đồ sức khỏe sinh thái và bật còi báo động đỏ thời gian thực.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: PyTorch Architecture -->
+        <div class="slide flex-col items-center justify-center w-full max-w-5xl h-full">
+            <h2 class="font-header text-3xl font-bold text-white mb-6 text-center">Core AI: Mô hình <span class="text-[#39FF14]">Multi-Task PyTorch Lõm</span></h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-stretch">
+                <!-- Left: Sơ đồ Network -->
+                <div class="glass-card p-6 rounded-2xl flex flex-col justify-between">
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-4">Sơ đồ mạng PyTorch nn.Module</span>
+                    <div class="flex-1 flex flex-col items-center justify-center gap-4">
+                        <div class="w-36 py-2 rounded bg-slate-800 text-center text-xs text-white border border-slate-700">Audio 5s Waveform</div>
+                        <div class="text-[#39FF14] font-bold">↓</div>
+                        <div class="w-36 py-2 rounded bg-emerald-950/50 text-[#39FF14] text-center text-xs border border-[#39FF14]/30">Mel-Spectrogram (3,224,224)</div>
+                        <div class="text-[#39FF14] font-bold">↓</div>
+                        <div class="w-48 py-3 rounded bg-slate-800 text-center text-xs text-white border border-slate-700 font-mono">
+                            EfficientNet-V2 Backbone<br>
+                            <span class="text-amber-500 text-[10px]">[Frozen Early Layers]</span>
+                        </div>
+                        <div class="text-[#39FF14] font-bold">↓</div>
+                        <div class="flex gap-4 w-full justify-center">
+                            <div class="flex-1 max-w-[150px] py-2 rounded bg-lime-950/30 text-center text-xs text-lime-400 border border-lime-500/20">
+                                <strong>Biodiversity Head</strong><br>
+                                <span class="text-[10px]">5 Động vật mục tiêu</span>
+                            </div>
+                            <div class="flex-1 max-w-[150px] py-2 rounded bg-red-950/30 text-center text-xs text-red-400 border border-red-500/20">
+                                <strong>Threat Head</strong><br>
+                                <span class="text-[10px]">Cưa máy / Súng săn</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Code PyTorch -->
+                <div class="glass-card p-6 rounded-2xl flex flex-col justify-between overflow-hidden">
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-4">Mã nguồn PyTorch (Khởi tạo Head Kép)</span>
+                    <pre class="bg-[#030610] text-emerald-400 text-xs p-4 rounded-xl font-mono overflow-x-auto flex-1 flex flex-col justify-center border border-[#39FF14]/10">
+<span class="text-purple-400">class</span> <span class="text-blue-400">BioListenModel</span>(nn.Module):
+    <span class="text-purple-400">def</span> <span class="text-blue-400">__init__</span>(self):
+        super().__init__()
+        self.backbone = models.efficientnet_v2_s(pretrained=<span class="text-orange-400">True</span>)
+        <span class="text-slate-500"># Custom Twin Heads</span>
+        self.species_head = nn.Linear(<span class="text-amber-400">1280</span>, <span class="text-amber-400">5</span>)
+        self.threat_head = nn.Linear(<span class="text-amber-400">1280</span>, <span class="text-amber-400">3</span>)
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">forward</span>(self, x):
+        features = self.backbone.features(x)
+        x = F.adaptive_avg_pool2d(features, <span class="text-amber-400">1</span>).flatten(<span class="text-amber-400">1</span>)
+        <span class="text-purple-400">return</span> self.species_head(x), self.threat_head(x)</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: XAI & Lọc nhiễu -->
+        <div class="slide flex-col items-center justify-center w-full max-w-5xl h-full">
+            <h2 class="font-header text-3xl font-bold text-white mb-8 text-center">XAI: Đập tan hộp đen AI & Triệt tiêu báo động giả</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                <!-- Grad-CAM -->
+                <div class="glass-card p-6 rounded-2xl flex flex-col justify-between gap-4">
+                    <div>
+                        <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider block mb-2">Trực quan hóa Grad-CAM</span>
+                        <h3 class="text-white font-bold text-lg mb-4">Minh bạch hóa dải tần AI lắng nghe</h3>
+                    </div>
+                    <!-- Mock Spectrogram + Grad-CAM overlay -->
+                    <div class="h-44 rounded-xl bg-[linear-gradient(to_bottom,transparent,#ef4444_20%,#f59e0b_40%,#10b981_60%,#0c1328_80%)] border border-[#39FF14]/20 relative overflow-hidden flex items-end p-2">
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_40%_50%,rgba(239,68,68,0.7)_0%,transparent_50%)]"></div>
+                        <span class="absolute top-2 left-2 text-[10px] px-2 py-0.5 rounded bg-black/60 text-[#39FF14] border border-[#39FF14]/30 font-mono">Chainsaw Dectection</span>
+                        <div class="w-full h-8 flex items-end gap-0.5 opacity-50">
+                            <div class="w-1 bg-[#39FF14] h-2"></div>
+                            <div class="w-1 bg-[#39FF14] h-6"></div>
+                            <div class="w-1 bg-[#39FF14] h-12"></div>
+                            <div class="w-1 bg-[#39FF14] h-16"></div>
+                            <div class="w-1 bg-[#39FF14] h-8"></div>
+                            <div class="w-1 bg-[#39FF14] h-4"></div>
+                            <div class="w-1 bg-[#39FF14] h-10"></div>
+                            <div class="w-1 bg-[#39FF14] h-2"></div>
+                        </div>
+                    </div>
+                    <p class="text-slate-400 text-xs">Activation maps khoanh đỏ dải tần 50Hz - 1kHz, giúp kiểm lâm tự tin đưa ra quyết định dựa trên minh chứng rõ ràng.</p>
+                </div>
+
+                <!-- MC-Dropout -->
+                <div class="glass-card p-6 rounded-2xl flex flex-col justify-between gap-4">
+                    <div>
+                        <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider block mb-2">MC-Dropout Uncertainty</span>
+                        <h3 class="text-white font-bold text-lg mb-4">Bộ lọc nhiễu tự nhiên (Mưa/Sấm)</h3>
+                    </div>
+                    <!-- Mock graph -->
+                    <div class="h-44 rounded-xl bg-[#030610] border border-[#39FF14]/10 relative flex items-center justify-center p-4">
+                        <!-- Simulated confidence range curve -->
+                        <svg class="w-full h-full" viewBox="0 0 100 50">
+                            <!-- Upper limit -->
+                            <path d="M0,10 Q30,5 60,15 T100,20" fill="none" stroke="rgba(57,255,20,0.15)" stroke-width="2" stroke-dasharray="2"/>
+                            <!-- Lower limit -->
+                            <path d="M0,40 Q30,35 60,42 T100,45" fill="none" stroke="rgba(57,255,20,0.15)" stroke-width="2" stroke-dasharray="2"/>
+                            <!-- Mean prediction -->
+                            <path d="M0,25 Q30,20 60,30 T100,32" fill="none" stroke="#39FF14" stroke-width="3"/>
+                            <!-- Shadow area -->
+                            <path d="M0,10 Q30,5 60,15 T100,20 L100,45 Q60,42 30,35 T0,40 Z" fill="rgba(57,255,20,0.05)"/>
+                        </svg>
+                        <span class="absolute top-2 left-2 text-[10px] px-2 py-0.5 rounded bg-black/60 text-amber-500 border border-amber-500/30 font-mono">Uncertainty > Threshold: Silent Alert</span>
+                    </div>
+                    <p class="text-slate-400 text-xs">Mô hình chạy lặp nhiều lần (Monte Carlo) để đo độ lệch chuẩn. Nếu độ lệch chuẩn cao do tạp âm mưa gió, hệ thống sẽ yên lặng đánh giá lại, giảm 95% báo động giả.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Shannon-Wiener Index -->
+        <div class="slide flex-col items-center justify-center w-full max-w-5xl h-full">
+            <h2 class="font-header text-3xl font-bold text-white mb-6 text-center">Số hóa Sức khỏe Rừng qua chỉ số Shannon-Wiener</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-center">
+                <!-- Left: Formula -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-center items-center text-center gap-6 h-full">
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider block">Công thức Sinh học Chỉ định</span>
+                    <div class="text-3xl font-serif text-[#39FF14] tracking-widest bg-black/40 px-6 py-4 rounded-xl border border-[#39FF14]/20 neon-glow font-bold">
+                        H' = - &Sigma; p<sub>i</sub> ln(p<sub>i</sub>)
+                    </div>
+                    <div class="text-xs text-slate-400 leading-relaxed">
+                        Với <strong>p<sub>i</sub></strong> là tỷ lệ xuất hiện của loài <strong>i</strong> trên tổng số lượt AI phát hiện trong vòng 1 giờ.
+                    </div>
+                </div>
+
+                <!-- Right: Chart preview -->
+                <div class="glass-card p-6 rounded-2xl flex flex-col justify-between h-full">
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-4">Biến động Chỉ số H' theo thời gian thực</span>
+                    <div class="h-48 flex items-end justify-between gap-4 p-2 relative">
+                        <!-- Y-axis indicators -->
+                        <div class="absolute left-0 bottom-0 top-0 flex flex-col justify-between text-[10px] text-slate-600 font-mono">
+                            <span>3.0</span>
+                            <span>1.5</span>
+                            <span>0.0</span>
+                        </div>
+                        <!-- Mock chart bars representing Shannon H' drops -->
+                        <div class="flex-1 h-3/4 bg-emerald-950/20 border-t border-[#39FF14]/30 rounded relative flex items-end justify-center">
+                            <div class="w-full bg-[#39FF14]/20 h-4/5 rounded-b"></div>
+                            <span class="absolute bottom-[-20px] text-[10px] text-slate-500 font-mono">H06</span>
+                        </div>
+                        <div class="flex-1 h-3/4 bg-emerald-950/20 border-t border-[#39FF14]/30 rounded relative flex items-end justify-center">
+                            <div class="w-full bg-[#39FF14]/20 h-5/6 rounded-b"></div>
+                            <span class="absolute bottom-[-20px] text-[10px] text-slate-500 font-mono">H12</span>
+                        </div>
+                        <div class="flex-1 h-3/4 bg-red-950/20 border-t border-red-500/30 rounded relative flex items-end justify-center">
+                            <div class="w-full bg-red-500/20 h-1/5 rounded-b"></div>
+                            <div class="absolute inset-0 bg-red-500/10 animate-pulse rounded"></div>
+                            <span class="absolute bottom-[-20px] text-[10px] text-red-500 font-mono">🚨 H18</span>
+                        </div>
+                        <div class="flex-1 h-3/4 bg-emerald-950/20 border-t border-[#39FF14]/30 rounded relative flex items-end justify-center">
+                            <div class="w-full bg-[#39FF14]/20 h-2/3 rounded-b"></div>
+                            <span class="absolute bottom-[-20px] text-[10px] text-slate-500 font-mono">H24</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-400 text-xs mt-6">Vùng đánh dấu đỏ 🚨 biểu thị mức độ trù phú giảm đột ngột tại H18 do có âm thanh đe dọa (phá rừng).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Metrics -->
+        <div class="slide flex-col items-center justify-center w-full max-w-5xl h-full">
+            <h2 class="font-header text-3xl font-bold text-white mb-10 text-center">Đo lường kiểm chứng hiệu năng</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+                <!-- Metric 1 -->
+                <div class="glass-card p-10 rounded-2xl flex flex-col items-center text-center gap-4 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-[#39FF14]"></div>
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Độ chính xác phân loại</span>
+                    <h3 class="font-header font-extrabold text-6xl text-white">[X]%</h3>
+                    <p class="text-slate-400 text-xs">Độ tin cậy nhận diện cưa xích/súng và 5 loài đặc hữu trên tập test.</p>
+                </div>
+
+                <!-- Metric 2 -->
+                <div class="glass-card p-10 rounded-2xl flex flex-col items-center text-center gap-4 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-[#39FF14]"></div>
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Inference Latency</span>
+                    <h3 class="font-header font-extrabold text-6xl text-white">&lt; [Y]ms</h3>
+                    <p class="text-slate-400 text-xs">Tốc độ chạy dự báo trên thiết bị Edge CPU, không phụ thuộc GPU đám mây.</p>
+                </div>
+
+                <!-- Metric 3 -->
+                <div class="glass-card p-10 rounded-2xl flex flex-col items-center text-center gap-4 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-[#39FF14]"></div>
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider">LoRaWAN Payload</span>
+                    <h3 class="font-header font-extrabold text-6xl text-white">&lt; [Z]B</h3>
+                    <p class="text-slate-400 text-xs">Dữ liệu nén gọn nhẹ tối đa để truyền sóng xa qua vật cản tán cây rừng.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Simulated Edge Cost -->
+        <div class="slide flex-col items-center justify-center w-full max-w-5xl h-full">
+            <h2 class="font-header text-3xl font-bold text-white mb-10 text-center">Kiến trúc Edge Giá rẻ: Hiện thực hóa tiềm năng</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-stretch">
+                <!-- Comparison chart -->
+                <div class="glass-card p-6 rounded-2xl flex flex-col justify-between">
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-6">So sánh Chi phí đầu tư phần cứng / Trạm</span>
+                    <div class="flex-1 flex flex-col gap-6 justify-center">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-400">Trạm thu âm sinh học truyền thống (AudioMoth, v.v.)</span>
+                                <span class="text-white font-mono font-bold">> $100</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
+                                <div class="bg-slate-500 h-full rounded-full w-full"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-[#39FF14] font-semibold">Trạm BioListen VN (ESP32-S3 + Mic I2S)</span>
+                                <span class="text-[#39FF14] font-mono font-bold">&lt; $[Cost]</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
+                                <div class="bg-[#39FF14] h-full rounded-full w-[15%] neon-border"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hardware info -->
+                <div class="glass-card p-6 rounded-2xl flex flex-col justify-between">
+                    <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-4">Thông số "Simulated Edge" Model</span>
+                    <div class="flex-1 flex flex-col justify-center gap-4 text-xs font-mono">
+                        <div class="flex justify-between py-2 border-b border-slate-800">
+                            <span class="text-slate-400">Runtime Engine</span>
+                            <span class="text-[#39FF14]">ONNX Runtime (CPU quantized)</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-slate-800">
+                            <span class="text-slate-400">VRAM/RAM Usage</span>
+                            <span class="text-[#39FF14]">&lt; [M] MB</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-slate-800">
+                            <span class="text-slate-400">Power Supply</span>
+                            <span class="text-[#39FF14]">Pin mặt trời 5V + Pin LiPo 18650</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-400 text-xs mt-4">Không stream âm thanh nặng nề. Xử lý logic tại Edge, tối ưu hóa băng thông truyền tin qua mạng LoRa.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Roadmap -->
+        <div class="slide flex-col items-center justify-center w-full max-w-5xl h-full">
+            <h2 class="font-header text-3xl font-bold text-white mb-12 text-center">Lộ trình triển khai Agile bền vững</h2>
+            
+            <div class="flex flex-col md:flex-row gap-6 w-full items-stretch relative">
+                <!-- Step 1 -->
+                <div class="glass-card p-8 rounded-2xl flex-1 flex flex-col gap-4 relative">
+                    <div class="absolute -top-4 -left-4 w-10 h-10 rounded-full bg-[#39FF14] text-black font-bold flex items-center justify-center font-header shadow-lg">1</div>
+                    <h3 class="text-white font-bold text-lg border-b border-slate-800 pb-2">Tháng 01</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">Hoàn thiện bản vẽ in mạch PCB và chế tạo khuôn in 3D hộp cảm biến ngoài trời đạt tiêu chuẩn kháng nước chống bụi IP67.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="glass-card p-8 rounded-2xl flex-1 flex flex-col gap-4 relative">
+                    <div class="absolute -top-4 -left-4 w-10 h-10 rounded-full bg-[#39FF14] text-black font-bold flex items-center justify-center font-header shadow-lg">2</div>
+                    <h3 class="text-white font-bold text-lg border-b border-slate-800 pb-2">Tháng 03</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">Phối hợp cùng Ban Quản Lý VQG Cúc Phương lắp đặt thử nghiệm trạm cảm biến POC đầu tiên thực địa để thu thập real data tinh chỉnh mô hình.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="glass-card p-8 rounded-2xl flex-1 flex flex-col gap-4 relative">
+                    <div class="absolute -top-4 -left-4 w-10 h-10 rounded-full bg-[#39FF14] text-black font-bold flex items-center justify-center font-header shadow-lg">3</div>
+                    <h3 class="text-white font-bold text-lg border-b border-slate-800 pb-2">Tháng 06</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">Kêu gọi vòng Seed 1, bắt đầu sản xuất và triển khai lắp đặt [N] trạm phủ khắp các phân khu bảo vệ rừng đặc dụng.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Team & QA -->
+        <div class="slide flex-col items-center justify-center w-full max-w-5xl h-full">
+            <h2 class="font-header text-3xl font-bold text-white mb-10 text-center">Đội ngũ NeuraX.ai & Hỏi Đáp</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full items-center">
+                <!-- Team list -->
+                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Member 1 -->
+                    <div class="glass-card p-6 rounded-2xl text-center flex flex-col items-center gap-4">
+                        <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-[#39FF14] font-bold text-lg font-mono">H</div>
+                        <div>
+                            <h4 class="text-white font-bold text-sm">Lê Nguyễn Gia Hưng</h4>
+                            <span class="text-slate-500 text-[10px]">UI/UX & AI System Lead</span>
+                        </div>
+                    </div>
+                    <!-- Member 2 -->
+                    <div class="glass-card p-6 rounded-2xl text-center flex flex-col items-center gap-4">
+                        <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-[#39FF14] font-bold text-lg font-mono">V</div>
+                        <div>
+                            <h4 class="text-white font-bold text-sm">Huỳnh Quốc Việt</h4>
+                            <span class="text-slate-500 text-[10px]">AI Model Lead (PyTorch)</span>
+                        </div>
+                    </div>
+                    <!-- Member 3 -->
+                    <div class="glass-card p-6 rounded-2xl text-center flex flex-col items-center gap-4">
+                        <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-[#39FF14] font-bold text-lg font-mono">H</div>
+                        <div>
+                            <h4 class="text-white font-bold text-sm">Hồ Minh Hiếu</h4>
+                            <span class="text-slate-500 text-[10px]">Cloud & IoT Engineer</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QR Code & Link -->
+                <div class="glass-card p-6 rounded-2xl flex flex-col items-center gap-4 text-center">
+                    <div class="w-32 h-32 bg-white p-2 rounded-xl flex items-center justify-center">
+                        <!-- Mock QR code pattern -->
+                        <div class="w-full h-full bg-[radial-gradient(ellipse_at_center,black_60%,transparent_100%)] opacity-80 bg-slate-900" style="background-image: radial-gradient(circle, #000 10%, transparent 11%), radial-gradient(circle, #000 10%, transparent 11%); background-size: 8px 8px; background-position: 0 0, 4px 4px;"></div>
+                    </div>
+                    <div>
+                        <span class="text-[#39FF14] text-xs font-bold font-mono">Scan QR to View Code</span>
+                        <p class="text-slate-500 text-[10px] mt-1">GitHub & Live Demo Online Link</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Navigation & Status -->
+    <footer class="flex justify-between items-center z-10 w-full px-6 border-t border-slate-800/60 pt-4">
+        <div class="flex gap-2">
+            <button id="prevBtn" class="px-4 py-2 text-xs font-semibold rounded bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white transition-all text-slate-400">Previous</button>
+            <button id="nextBtn" class="px-4 py-2 text-xs font-semibold rounded bg-[#39FF14]/10 border border-[#39FF14]/30 hover:bg-[#39FF14]/20 text-[#39FF14] transition-all">Next</button>
+        </div>
+        <div class="flex items-center gap-2">
+            <div id="slideIndicators" class="flex gap-1.5">
+                <!-- JS will render indicators -->
+            </div>
+            <span id="slideCounter" class="text-xs text-slate-500 font-mono ml-4">1 / 10</span>
+        </div>
+    </footer>
+
+    <!-- Slide Navigation Engine -->
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slideCounter');
+        const slideIndicatorsContainer = document.getElementById('slideIndicators');
+        let currentSlide = 0;
+
+        // Initialize Indicators
+        slides.forEach((_, idx) => {
+            const ind = document.createElement('div');
+            ind.className = `w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-[#39FF14]' : 'bg-slate-700'}`;
+            ind.id = `ind-${idx}`;
+            slideIndicatorsContainer.appendChild(ind);
+        });
+
+        function updateSlide(targetIdx) {
+            if (targetIdx < 0 || targetIdx >= slides.length) return;
+            
+            // Toggle active classes
+            slides[currentSlide].classList.remove('active');
+            document.getElementById(`ind-${currentSlide}`).classList.remove('bg-[#39FF14]');
+            document.getElementById(`ind-${currentSlide}`).classList.add('bg-slate-700');
+
+            currentSlide = targetIdx;
+            slides[currentSlide].classList.add('active');
+            document.getElementById(`ind-${currentSlide}`).classList.remove('bg-slate-700');
+            document.getElementById(`ind-${currentSlide}`).classList.add('bg-[#39FF14]');
+
+            // Update Counter
+            slideCounter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentSlide > 0) updateSlide(currentSlide - 1);
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSlide < slides.length - 1) updateSlide(currentSlide + 1);
+        });
+
+        // Key listeners for slide deck standard behavior
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                if (currentSlide < slides.length - 1) updateSlide(currentSlide + 1);
+            } else if (e.key === 'ArrowLeft') {
+                if (currentSlide > 0) updateSlide(currentSlide - 1);
+            }
+        });
+    </script>
+</body>
+</html>
