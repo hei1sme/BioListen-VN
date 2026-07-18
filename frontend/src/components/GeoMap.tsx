@@ -225,14 +225,35 @@ export function GeoMap({ activeSensor, setActiveSensor, hasAlert }: GeoMapProps)
               onMouseLeave={() => setHoveredSensor(null)}
               onClick={() => setActiveSensor("demo-sensor-1")}
             />
-            <circle
-              cx="80"
-              cy="90"
-              r={activeSensor === "demo-sensor-1" ? "6" : "4"}
-              fill={activeSensor === "demo-sensor-1" ? "#00ff8f" : "#059669"}
-              className="pointer-events-none"
-            />
-            {activeSensor === "demo-sensor-1" && (
+            {hasAlert && activeSensor === "demo-sensor-1" ? (
+              <>
+                <circle
+                  cx="80"
+                  cy="90"
+                  r="6.5"
+                  fill="#f43f5e"
+                  className="pointer-events-none"
+                />
+                <circle
+                  cx="80"
+                  cy="90"
+                  r="14"
+                  fill="none"
+                  stroke="#f43f5e"
+                  strokeWidth="1.2"
+                  className="animate-ping pointer-events-none"
+                />
+              </>
+            ) : (
+              <circle
+                cx="80"
+                cy="90"
+                r={activeSensor === "demo-sensor-1" ? "6" : "4"}
+                fill={activeSensor === "demo-sensor-1" ? "#00ff8f" : "#059669"}
+                className="pointer-events-none"
+              />
+            )}
+            {activeSensor === "demo-sensor-1" && !hasAlert && (
               <circle
                 cx="80"
                 cy="90"
@@ -246,16 +267,22 @@ export function GeoMap({ activeSensor, setActiveSensor, hasAlert }: GeoMapProps)
             <text
               x="60"
               y="78"
-              fill={activeSensor === "demo-sensor-1" ? "#00ff8f" : "rgba(226, 232, 240, 0.4)"}
+              fill={
+                hasAlert && activeSensor === "demo-sensor-1"
+                  ? "#f43f5e"
+                  : activeSensor === "demo-sensor-1"
+                  ? "#00ff8f"
+                  : "rgba(226, 232, 240, 0.4)"
+              }
               fontSize="6"
               fontFamily="monospace"
               fontWeight="bold"
               className="pointer-events-none"
             >
-              TRẠM A
+              TRẠM A {hasAlert && activeSensor === "demo-sensor-1" && "(ALARM)"}
             </text>
           </g>
-
+ 
           {/* Station B Node - Đỉnh Mây */}
           <g className="cursor-pointer">
             {/* Stable invisible target to prevent flickering */}
@@ -268,14 +295,35 @@ export function GeoMap({ activeSensor, setActiveSensor, hasAlert }: GeoMapProps)
               onMouseLeave={() => setHoveredSensor(null)}
               onClick={() => setActiveSensor("demo-sensor-2")}
             />
-            <circle
-              cx="160"
-              cy="60"
-              r={activeSensor === "demo-sensor-2" ? "6" : "4"}
-              fill={activeSensor === "demo-sensor-2" ? "#00ff8f" : "#059669"}
-              className="pointer-events-none"
-            />
-            {activeSensor === "demo-sensor-2" && (
+            {hasAlert && activeSensor === "demo-sensor-2" ? (
+              <>
+                <circle
+                  cx="160"
+                  cy="60"
+                  r="6.5"
+                  fill="#f43f5e"
+                  className="pointer-events-none"
+                />
+                <circle
+                  cx="160"
+                  cy="60"
+                  r="14"
+                  fill="none"
+                  stroke="#f43f5e"
+                  strokeWidth="1.2"
+                  className="animate-ping pointer-events-none"
+                />
+              </>
+            ) : (
+              <circle
+                cx="160"
+                cy="60"
+                r={activeSensor === "demo-sensor-2" ? "6" : "4"}
+                fill={activeSensor === "demo-sensor-2" ? "#00ff8f" : "#059669"}
+                className="pointer-events-none"
+              />
+            )}
+            {activeSensor === "demo-sensor-2" && !hasAlert && (
               <circle
                 cx="160"
                 cy="60"
@@ -289,16 +337,22 @@ export function GeoMap({ activeSensor, setActiveSensor, hasAlert }: GeoMapProps)
             <text
               x="140"
               y="48"
-              fill={activeSensor === "demo-sensor-2" ? "#00ff8f" : "rgba(226, 232, 240, 0.4)"}
+              fill={
+                hasAlert && activeSensor === "demo-sensor-2"
+                  ? "#f43f5e"
+                  : activeSensor === "demo-sensor-2"
+                  ? "#00ff8f"
+                  : "rgba(226, 232, 240, 0.4)"
+              }
               fontSize="6"
               fontFamily="monospace"
               fontWeight="bold"
               className="pointer-events-none"
             >
-              TRẠM B
+              TRẠM B {hasAlert && activeSensor === "demo-sensor-2" && "(ALARM)"}
             </text>
           </g>
-
+ 
           {/* Station C Node - Rừng Già */}
           <g className="cursor-pointer">
             {/* Stable invisible target to prevent flickering */}
@@ -311,7 +365,7 @@ export function GeoMap({ activeSensor, setActiveSensor, hasAlert }: GeoMapProps)
               onMouseLeave={() => setHoveredSensor(null)}
               onClick={() => setActiveSensor("demo-sensor-3")}
             />
-            {hasAlert ? (
+            {hasAlert && activeSensor === "demo-sensor-3" ? (
               <>
                 <circle
                   cx="220"
@@ -354,7 +408,7 @@ export function GeoMap({ activeSensor, setActiveSensor, hasAlert }: GeoMapProps)
               x="195"
               y="155"
               fill={
-                hasAlert
+                hasAlert && activeSensor === "demo-sensor-3"
                   ? "#f43f5e"
                   : activeSensor === "demo-sensor-3"
                   ? "#00ff8f"
@@ -365,7 +419,7 @@ export function GeoMap({ activeSensor, setActiveSensor, hasAlert }: GeoMapProps)
               fontWeight="bold"
               className="pointer-events-none"
             >
-              TRẠM C {hasAlert && "(ALARM)"}
+              TRẠM C {hasAlert && activeSensor === "demo-sensor-3" && "(ALARM)"}
             </text>
           </g>
         </svg>

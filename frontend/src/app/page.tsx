@@ -126,7 +126,8 @@ export default function Home() {
     errorMessage,
     mounted,
     triggerSimulatorPreset,
-    handlePredictAudio
+    handlePredictAudio,
+    trendData
   } = useDashboardState(MOCK_HISTORY);
 
   const {
@@ -238,7 +239,7 @@ export default function Home() {
             <DashboardAnalytics
               mounted={mounted}
               prediction={prediction}
-              trendData={MOCK_TREND}
+              trendData={trendData && trendData.length > 0 ? trendData : MOCK_TREND}
             />
           )}
 

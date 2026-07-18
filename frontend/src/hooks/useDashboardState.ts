@@ -19,6 +19,29 @@ export function useDashboardState(initialHistory: HistoricalRecord[]) {
   const [history, setHistory] = useState<HistoricalRecord[]>(initialHistory);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [trendData, setTrendData] = useState<any[]>([]);
+
+  const fetchHistory = async () => {
+    try {
+      const data = await api.getDetectionHistory();
+      if (data && data.length > 0) {
+        setHistory(data);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch history from server, using local history", e);
+    }
+  };
+
+  const fetchTrendData = async () => {
+    try {
+      const data = await api.getHealthTrend();
+      if (data && data.length > 0) {
+        setTrendData(data);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch health trend from server", e);
+    }
+  };
 
   const sirenIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -185,6 +208,9 @@ export function useDashboardState(initialHistory: HistoricalRecord[]) {
       processing_time_ms: data.processing_time_ms,
     };
     setHistory((prev) => [newRecord, ...prev]);
+    // Sync with database/server
+    fetchHistory();
+    fetchTrendData();
   };
 
   const triggerSimulatorPreset = (presetIndex: number) => {
@@ -358,6 +384,8 @@ export function useDashboardState(initialHistory: HistoricalRecord[]) {
 
   useEffect(() => {
     setMounted(true);
+    fetchHistory();
+    fetchTrendData();
     return () => {
       stopSiren();
     };
@@ -383,6 +411,7 @@ export function useDashboardState(initialHistory: HistoricalRecord[]) {
     mounted,
     triggerSimulatorPreset,
     handlePredictAudio,
+    trendData,
   };
 }
 export { SENSORS };
