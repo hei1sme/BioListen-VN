@@ -20,10 +20,10 @@
 - [x] Viết system prompt cho Groq (Llama 3.1 70B) để chuyển đổi dữ liệu thô (ví dụ: `[chainsaw: 0.9]`) thành bản tin khuyến cáo tiếng Việt cụ thể cho kiểm lâm
 
 ### Hiếu (SE) — `feature/api`
-- [ ] Tạo router `backend/api/routes/audio.py` với các models Pydantic (`POST /predict`, `GET /history`)
-- [ ] Code mock dữ liệu dự đoán (trả về các loài chim & cưa xích ngẫu nhiên) để Hưng có thể gọi API ngay lập tức
-- [ ] Cài đặt Supabase, thiết kế bảng `detections` và `sensors`
-- [ ] Push code backend lên Railway và xác nhận URL API live hoạt động bình thường
+- [x] Tạo router `backend/api/routes/audio.py` với các models Pydantic (`POST /predict`, `GET /history`)
+- [x] Code mock dữ liệu dự đoán (trả về các loài chim & cưa xích ngẫu nhiên) để Hưng có thể gọi API ngay lập tức
+- [x] Cài đặt Supabase, thiết kế bảng `detections` và `sensors`
+- [x] Push code backend lên Railway và xác nhận URL API live hoạt động bình thường
 
 ---
 
@@ -44,9 +44,9 @@
 - [x] Xây dựng panel `ForestSimulator` cho phép giám khảo chọn chạy thử 5 kịch bản âm thanh mẫu (Yên bình, Bão, Cưa gỗ, Súng săn, v.v.)
 
 ### Hiếu (SE) — `feature/api`
-- [ ] Bật tính năng tự động lưu lịch sử phân tích vào database Supabase mỗi khi gọi `/predict`
-- [ ] Viết API lấy dữ liệu lịch sử (`GET /history`) phục vụ giao diện bảng biểu của Hưng
-- [ ] Đẩy code lên Vercel/Railway, cấu hình CORS và ENV kết nối giữa 2 dịch vụ
+- [x] Bật tính năng tự động lưu lịch sử phân tích vào database Supabase mỗi khi gọi `/predict`
+- [x] Viết API lấy dữ liệu lịch sử (`GET /history`) phục vụ giao diện bảng biểu của Hưng
+- [x] Đẩy code lên Vercel/Railway, cấu hình CORS và ENV kết nối giữa 2 dịch vụ
 - [ ] **🔴 Nộp Checkpoint 1 (Hạn chốt 11:00 Thứ Bảy):** Điền tên dự án, chọn track Nông nghiệp và paste phần mô tả giải pháp đã chuẩn bị.
 
 ---
@@ -65,7 +65,7 @@
 - [x] Tối ưu hóa UI: bổ sung hiệu ứng chuyển động, loading states khi đang gửi file audio
 
 ### Hiếu (SE) — `feature/api`
-- [ ] Tải 5 file âm thanh demo lên Supabase Storage làm tài nguyên cố định cho nút Simulator
+- [x] Tải 5 file âm thanh demo lên Supabase Storage làm tài nguyên cố định cho nút Simulator
 - [ ] Test hiệu năng backend (concurrency test) đảm bảo hệ thống không bị sập khi nhiều người truy cập
 - [ ] **🔴 Nộp Checkpoint 2 (Hạn chốt 23:00 Thứ Bảy):** Kiểm tra kỹ live Vercel URL và GitHub link (phải để PUBLIC), nộp lên hệ thống của BTC.
 
