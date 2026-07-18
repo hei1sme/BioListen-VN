@@ -46,10 +46,24 @@ def debug_log(msg: str):
 
 try:
     if MODEL_PATH.exists():
-        # Set CPUExecutionProvider since we are running on standard CPUs (edge simulation)
-        onnx_session = ort.InferenceSession(str(MODEL_PATH), providers=["CPUExecutionProvider"])
+        import onnx
+        # Load ONNX model graph in memory
+        model = onnx.load(str(MODEL_PATH))
+        
+        # Add getitem_144 intermediate node to outputs if not already registered
+        output_names = [o.name for o in model.graph.output]
+        if "getitem_144" not in output_names:
+            intermediate_info = onnx.helper.make_tensor_value_info(
+                name="getitem_144",
+                elem_type=onnx.TensorProto.FLOAT,
+                shape=[1, 1280, 7, 7]
+            )
+            model.graph.output.append(intermediate_info)
+            
+        model_bytes = model.SerializeToString()
+        onnx_session = ort.InferenceSession(model_bytes, providers=["CPUExecutionProvider"])
         ONNX_AVAILABLE = True
-        debug_log(f"[ONNX] Successfully loaded model from {MODEL_PATH}")
+        debug_log(f"[ONNX] Successfully loaded model from {MODEL_PATH} with dynamic XAI outputs.")
     else:
         debug_log(f"[ONNX] Model file not found at {MODEL_PATH}. Fallback to mock.")
 except Exception as e:
@@ -120,9 +134,9 @@ def preprocess_audio(file_path: str) -> np.ndarray:
     return input_tensor
 
 
-def generate_audio_visualizations(file_path: str):
+def generate_audio_visualizations(file_path: str, features: Optional[np.ndarray] = None):
     """
-    Generate real Mel Spectrogram and dynamic XAI heatmap (Grad-CAM approximation)
+    Generate real Mel Spectrogram and dynamic XAI heatmap (CNN feature activations)
     from the audio file, returning base64 encoded PNG URLs.
     """
     try:
@@ -163,16 +177,40 @@ def generate_audio_visualizations(file_path: str):
         spec_base64 = f"data:image/png;base64,{base64.b64encode(spec_buf).decode('utf-8')}"
 
         # 3. Generate Grad-CAM XAI Heatmap
-        # Apply thresholding to isolate loudest events (bird calls, chainsaw, storm)
-        threshold = 0.55
-        activation = np.where(normalized > threshold, normalized, 0.0)
-        
-        # Scale to uint8
-        act_uint8 = (activation * 255).astype(np.uint8)
-        act_resized = cv2.resize(act_uint8, (450, 176), interpolation=cv2.INTER_LINEAR)
-        
-        # Apply a large Gaussian blur to mimic the low resolution of CNN feature maps
-        blurred_act = cv2.GaussianBlur(act_resized, (35, 35), 0)
+        if features is not None:
+            # features shape: (1280, 7, 7)
+            # Compute mean absolute activation across channels
+            act_map = np.mean(np.abs(features), axis=0) # shape (7, 7)
+            
+            # Normalize to [0, 1]
+            act_min, act_max = act_map.min(), act_map.max()
+            if act_max - act_min > 1e-9:
+                act_norm = (act_map - act_min) / (act_max - act_min)
+            else:
+                act_norm = np.zeros_like(act_map)
+                
+            # Flip vertically to match flipped spectrogram
+            act_norm = np.flipud(act_norm)
+            
+            # Scale to uint8
+            act_uint8 = (act_norm * 255).astype(np.uint8)
+            
+            # Resize from (7, 7) to (450, 176) using bilinear interpolation
+            act_resized = cv2.resize(act_uint8, (450, 176), interpolation=cv2.INTER_LINEAR)
+            
+            # Apply a large Gaussian blur to mimic the low resolution of CNN feature maps
+            blurred_act = cv2.GaussianBlur(act_resized, (35, 35), 0)
+        else:
+            # Apply thresholding to isolate loudest events (bird calls, chainsaw, storm)
+            threshold = 0.55
+            activation = np.where(normalized > threshold, normalized, 0.0)
+            
+            # Scale to uint8
+            act_uint8 = (activation * 255).astype(np.uint8)
+            act_resized = cv2.resize(act_uint8, (450, 176), interpolation=cv2.INTER_LINEAR)
+            
+            # Apply a large Gaussian blur to mimic the low resolution of CNN feature maps
+            blurred_act = cv2.GaussianBlur(act_resized, (35, 35), 0)
         
         # Apply Jet colormap for classical red-to-blue Grad-CAM style
         cam_colored = cv2.applyColorMap(blurred_act, cv2.COLORMAP_JET)
@@ -321,10 +359,11 @@ async def predict_audio(file: UploadFile = File(...)):
                 # 1. Preprocess audio
                 input_tensor = preprocess_audio(tmp_path)
                 
-                # 2. Run ONNX Session (Input: input_spectrogram, Outputs: species_probabilities, threat_probabilities)
+                # 2. Run ONNX Session (Input: input_spectrogram, Outputs: species_probabilities, threat_probabilities, getitem_144)
                 outputs = onnx_session.run(None, {"input_spectrogram": input_tensor})
                 species_probs = outputs[0][0]
                 threat_probs = outputs[1][0]
+                features = outputs[2][0] if len(outputs) > 2 else None
                 
                 # Log raw prediction arrays
                 debug_log(f"[ONNX RAW RUN] Top threat index: {int(np.argmax(threat_probs))}, prob: {float(np.max(threat_probs))}")
@@ -422,7 +461,7 @@ async def predict_audio(file: UploadFile = File(...)):
                     spectrogram_type = "procedural_birds"
                 
                 # 8. Generate Real Spectrogram and Gradcam images
-                real_spec, real_cam = generate_audio_visualizations(tmp_path)
+                real_spec, real_cam = generate_audio_visualizations(tmp_path, features)
                     
             except Exception as inner_exc:
                 import traceback
