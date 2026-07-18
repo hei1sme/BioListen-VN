@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir \
 
 # Install app dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir "setuptools<82" numpy
+RUN pip install --no-cache-dir "setuptools<82" "numpy==1.26.4"
 RUN pip install --no-cache-dir --no-build-isolation -r requirements.txt
 
 COPY . .
