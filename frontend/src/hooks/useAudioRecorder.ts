@@ -68,9 +68,26 @@ export function useAudioRecorder() {
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-        const file = new File([audioBlob], "recorded_mic.wav", { type: "audio/wav" });
-        onAudioReady(file);
+        try {
+          const rawBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
+          const arrayBuffer = await rawBlob.arrayBuffer();
+          
+          // Use temporary AudioContext if audioContextRef.current is closed or suspended
+          let ctx = audioContextRef.current;
+          if (!ctx || ctx.state === "closed") {
+            ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+          }
+          
+          const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+          const wavBlob = bufferToWav(audioBuffer);
+          const file = new File([wavBlob], "recorded_mic.wav", { type: "audio/wav" });
+          onAudioReady(file);
+        } catch (err) {
+          console.warn("WAV conversion failed, falling back to raw browser blob:", err);
+          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
+          const file = new File([audioBlob], "recorded_mic.wav", { type: "audio/wav" });
+          onAudioReady(file);
+        }
       };
 
       mediaRecorder.start();
@@ -177,4 +194,61 @@ export function useAudioRecorder() {
     stopRecording,
     canvasRef,
   };
+}
+
+// ─── WAV Encoder Helper ──────────────────────────────────────────────────────
+function bufferToWav(buffer: AudioBuffer): Blob {
+  const numOfChan = buffer.numberOfChannels;
+  const length = buffer.length * numOfChan * 2 + 44;
+  const bufferArr = new ArrayBuffer(length);
+  const view = new DataView(bufferArr);
+  const channels: Float32Array[] = [];
+  let i;
+  let sample;
+  let offset = 0;
+  let pos = 0;
+
+  function setUint16(data: number) {
+    view.setUint16(pos, data, true);
+    pos += 2;
+  }
+
+  function setUint32(data: number) {
+    view.setUint32(pos, data, true);
+    pos += 4;
+  }
+
+  // write WAV header
+  setUint32(0x46464952);                         // "RIFF"
+  setUint32(length - 8);                         // file length - 8
+  setUint32(0x45564157);                         // "WAVE"
+
+  setUint32(0x20746d66);                         // "fmt " chunk
+  setUint32(16);                                 // chunk length
+  setUint16(1);                                  // sample format (raw PCM)
+  setUint16(numOfChan);
+  setUint32(buffer.sampleRate);
+  setUint32(buffer.sampleRate * numOfChan * 2);  // byte rate
+  setUint16(numOfChan * 2);                      // block align
+  setUint16(16);                                 // bits per sample
+
+  setUint32(0x61746164);                         // "data" chunk
+  setUint32(length - pos - 4);                   // chunk length
+
+  // write interleaved data
+  for (i = 0; i < buffer.numberOfChannels; i++) {
+    channels.push(buffer.getChannelData(i));
+  }
+
+  while (pos < length) {
+    for (i = 0; i < numOfChan; i++) {             // interleave channels
+      sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
+      sample = (sample < 0 ? sample * 0x8000 : sample * 0x7FFF); // scale to 16-bit signed int
+      view.setInt16(pos, sample, true);          // write 16-bit sample
+      pos += 2;
+    }
+    offset++;
+  }
+
+  return new Blob([bufferArr], { type: "audio/wav" });
 }

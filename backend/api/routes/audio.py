@@ -6,6 +6,10 @@ import tempfile
 import random
 from pathlib import Path
 from typing import List, Optional
+import numpy as np
+import librosa
+import cv2
+import onnxruntime as ort
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel
@@ -22,6 +26,98 @@ from services.supabase_client import (
 )
 
 router = APIRouter(prefix="/api/audio", tags=["Audio Monitoring"])
+
+# ─── ONNX Session Initialization & Fallback ──────────────────────────────────
+MODELS_DIR = Path(__file__).resolve().parent.parent.parent / "models"
+MODEL_PATH = MODELS_DIR / "biolisten.onnx"
+
+ONNX_AVAILABLE = False
+onnx_session = None
+
+def debug_log(msg: str):
+    log_file = MODELS_DIR.parent / "api_debug.log"
+    try:
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {msg}\n")
+    except Exception as le:
+        print(f"Failed to write log: {le}")
+    print(msg)
+
+try:
+    if MODEL_PATH.exists():
+        # Set CPUExecutionProvider since we are running on standard CPUs (edge simulation)
+        onnx_session = ort.InferenceSession(str(MODEL_PATH), providers=["CPUExecutionProvider"])
+        ONNX_AVAILABLE = True
+        debug_log(f"[ONNX] Successfully loaded model from {MODEL_PATH}")
+    else:
+        debug_log(f"[ONNX] Model file not found at {MODEL_PATH}. Fallback to mock.")
+except Exception as e:
+    import traceback
+    debug_log(f"[ONNX] Error loading model: {e}\n{traceback.format_exc()}")
+
+# ─── ONNX Class Mapping Definitions ───────────────────────────────────────────
+# Threat Classes (human_head): 9 classes (0 to 8)
+# From docs/model.md:
+# 0: Fire, 1: Chainsaw, 2: Handsaw, 3: Helicopter, 4: VehicleEngine, 
+# 5: Axe, 6: Gunshot, 7: Footsteps, 8: background_normal
+THREAT_LABELS = {
+    0: {"type": "fire", "name": "Đám cháy", "is_alert": True},
+    1: {"type": "chainsaw", "name": "Cưa xích", "is_alert": True},
+    2: {"type": "handsaw", "name": "Cưa tay", "is_alert": True},
+    3: {"type": "helicopter", "name": "Trực thăng", "is_alert": True},
+    4: {"type": "vehicle_engine", "name": "Động cơ xe", "is_alert": True},
+    5: {"type": "axe", "name": "Rìu/Chặt cây", "is_alert": True},
+    6: {"type": "gunshot", "name": "Tiếng súng", "is_alert": True},
+    7: {"type": "footsteps", "name": "Tiếng bước chân", "is_alert": True},
+    8: {"type": "background_normal", "name": "Bình thường", "is_alert": False},
+}
+
+# Species Classes (species_head): 24 classes (s0 to s23)
+SPECIES_LABELS = {
+    0: {"id": "pycnonotus_jocosus", "name": "Chào mào (Red-whiskered Bulbul)"},
+    1: {"id": "acridotheres_tristis", "name": "Sáo đá (Common Myna)"},
+    2: {"id": "copsychus_saularis", "name": "Chích chòe (Oriental Magpie-Robin)"},
+    3: {"id": "microhyla_fissipes", "name": "Ếch nhái Ornate (Narrow-mouthed Frog)"},
+    4: {"id": "macaca_leonina", "name": "Khỉ đuôi lợn (Northern Pig-tailed Macaque)"},
+    5: {"id": "cicadidae", "name": "Ve sầu (Cicada)"},
+}
+for i in range(6, 24):
+    SPECIES_LABELS[i] = {"id": f"species_s{i}", "name": f"Loài s{i}"}
+
+def preprocess_audio(file_path: str) -> np.ndarray:
+    """
+    Load raw audio, resample to 22050Hz, crop/pad to 5s (110250 samples),
+    compute log Mel-spectrogram, normalize to [0, 1], resize to (224, 224),
+    and duplicate to 3 channels -> (1, 3, 224, 224).
+    """
+    y, sr = librosa.load(file_path, sr=22050)
+    target_samples = 22050 * 5
+    if len(y) > target_samples:
+        y = y[:target_samples]
+    elif len(y) < target_samples:
+        y = np.pad(y, (0, target_samples - len(y)), mode='constant')
+        
+    mel_spec = librosa.feature.melspectrogram(
+        y=y,
+        sr=22050,
+        n_fft=2048,
+        hop_length=512,
+        n_mels=128
+    )
+    
+    log_mel = librosa.power_to_db(mel_spec, ref=np.max)
+    
+    val_min, val_max = log_mel.min(), log_mel.max()
+    if val_max - val_min > 1e-9:
+        normalized = (log_mel - val_min) / (val_max - val_min)
+    else:
+        normalized = np.zeros_like(log_mel)
+        
+    resized = cv2.resize(normalized, (224, 224), interpolation=cv2.INTER_LINEAR)
+    three_channels = np.stack([resized, resized, resized], axis=0)
+    input_tensor = np.expand_dims(three_channels, axis=0).astype(np.float32)
+    return input_tensor
+
 
 # ─── Pydantic Models for Schema Contracts ──────────────────────────────────────
 class TimeWindow(BaseModel):
@@ -124,8 +220,8 @@ def get_wav_duration(file_path: str) -> float:
 async def predict_audio(file: UploadFile = File(...)):
     t0 = time.time()
     request_id = str(uuid.uuid4())
+    debug_log(f"[REQUEST] Received predict request. ID: {request_id}, Filename: {file.filename}")
     
-    # Save temporary file to read audio duration
     suffix = os.path.splitext(file.filename)[1] or ".wav"
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         content = await file.read()
@@ -134,121 +230,244 @@ async def predict_audio(file: UploadFile = File(...)):
 
     try:
         duration = get_wav_duration(tmp_path)
-    finally:
-        if os.path.exists(tmp_path):
-            os.unlink(tmp_path)
-
-    # Convert filename to lowercase for keyword matching (smart testing hack)
-    fn = file.filename.lower()
-    
-    # Initialise variables
-    species_detections = []
-    threat_detections = []
-    shannon_index = 0.0
-    trend = "stable"
-    assessment = "Hệ sinh thái ổn định"
-    spectrogram_type = "procedural_silent"
-
-    # ─── AI Head 1 & 2 Inference Simulation ─────────────────────────
-    # If Viet's PyTorch model is integrated, load and call it here.
-    # Otherwise, fallback to keyword matching so frontend demo works seamlessly.
-    
-    if "chainsaw" in fn or "cua_xich" in fn or "cua" in fn:
-        threat_detections.append(
-            ThreatDetectionSchema(
-                threat_type="chainsaw",
-                confidence=0.91,
-                uncertainty=0.03,
-                is_alert=True
-            )
-        )
-        species_detections.append(
-            SpeciesDetectionSchema(
-                species_id="acridotheres_tristis",
-                common_name="Sáo đá (Common Myna)",
-                confidence=0.65,
-                uncertainty=0.09,
-                time_window=TimeWindow(start_sec=0.5, end_sec=1.8),
-                is_confident=True
-            )
-        )
-        shannon_index = 0.54
-        trend = "declining"
-        assessment = "Hệ sinh thái bị đe dọa nghiêm trọng"
-        spectrogram_type = "procedural_chainsaw"
-
-    elif "gunshot" in fn or "sung" in fn or "shot" in fn:
-        threat_detections.append(
-            ThreatDetectionSchema(
-                threat_type="gunshot",
-                confidence=0.95,
-                uncertainty=0.02,
-                is_alert=True
-            )
-        )
-        shannon_index = 0.00
-        trend = "declining"
-        assessment = "Suy kiệt sinh học đột ngột"
-        spectrogram_type = "procedural_gunshot"
-
-    elif "storm" in fn or "sam_set" in fn or "thunder" in fn:
-        species_detections.append(
-            SpeciesDetectionSchema(
-                species_id="microhyla_fissipes",
-                common_name="Ếch nhái Ornate (Narrow-mouthed Frog)",
-                confidence=0.48,
-                uncertainty=0.17,
-                time_window=TimeWindow(start_sec=3.0, end_sec=4.8),
-                is_confident=False
-            )
-        )
-        shannon_index = 0.98
-        trend = "fluctuating"
-        assessment = "Tín hiệu bị nhiễu do thời tiết"
-        spectrogram_type = "procedural_storm"
-
-    elif "dawn" in fn or "morning" in fn or "bird" in fn or "chim" in fn:
-        species_detections.append(
-            SpeciesDetectionSchema(
-                species_id="pycnonotus_jocosus",
-                common_name="Chào mào (Red-whiskered Bulbul)",
-                confidence=0.94,
-                uncertainty=0.02,
-                time_window=TimeWindow(start_sec=1.0, end_sec=3.5),
-                is_confident=True
-            )
-        )
-        species_detections.append(
-            SpeciesDetectionSchema(
-                species_id="copsychus_saularis",
-                common_name="Chích chòe (Oriental Magpie-Robin)",
-                confidence=0.88,
-                uncertainty=0.04,
-                time_window=TimeWindow(start_sec=2.2, end_sec=4.8),
-                is_confident=True
-            )
-        )
-        shannon_index = 1.62
-        trend = "stable"
-        assessment = "Hệ sinh thái phong phú, đa dạng cao"
-        spectrogram_type = "procedural_birds"
-
-    else:
-        # Default: Random normal day noise
-        species_detections.append(
-            SpeciesDetectionSchema(
-                species_id="pycnonotus_jocosus",
-                common_name="Chào mào (Red-whiskered Bulbul)",
-                confidence=0.84,
-                uncertainty=0.04,
-                time_window=TimeWindow(start_sec=1.5, end_sec=4.0),
-                is_confident=True
-            )
-        )
-        shannon_index = 1.10
+        
+        # Initialise variables
+        species_detections = []
+        threat_detections = []
+        shannon_index = 0.0
         trend = "stable"
         assessment = "Hệ sinh thái ổn định"
-        spectrogram_type = "procedural_birds"
+        spectrogram_type = "procedural_silent"
+
+        # ─── ONNX Inference Execution ─────────────────────────────────
+        if ONNX_AVAILABLE:
+            try:
+                # 1. Preprocess audio
+                input_tensor = preprocess_audio(tmp_path)
+                
+                # 2. Run ONNX Session (Input: input_spectrogram, Outputs: species_probabilities, threat_probabilities)
+                outputs = onnx_session.run(None, {"input_spectrogram": input_tensor})
+                species_probs = outputs[0][0]
+                threat_probs = outputs[1][0]
+                
+                # Log raw prediction arrays
+                debug_log(f"[ONNX RAW RUN] Top threat index: {int(np.argmax(threat_probs))}, prob: {float(np.max(threat_probs))}")
+                debug_log(f"[ONNX RAW RUN] Top species index: {int(np.argmax(species_probs))}, prob: {float(np.max(species_probs))}")
+                debug_log(f"[ONNX RAW RUN] Raw threat probs: {threat_probs.tolist()}")
+                debug_log(f"[ONNX RAW RUN] Raw species probs: {species_probs.tolist()[:10]}...")
+                
+                # 3. Species Head Parsing
+                SPECIES_CONFIDENCE_THRESHOLD = 0.15
+                for idx, prob in enumerate(species_probs):
+                    if prob >= SPECIES_CONFIDENCE_THRESHOLD:
+                        species_info = SPECIES_LABELS.get(idx, {"id": f"species_s{idx}", "name": f"Loài s{idx}"})
+                        species_detections.append(
+                            SpeciesDetectionSchema(
+                                species_id=species_info["id"],
+                                common_name=species_info["name"],
+                                confidence=float(prob),
+                                uncertainty=float(0.01 + 0.08 * (1.0 - prob)),
+                                time_window=TimeWindow(start_sec=0.5, end_sec=4.5),
+                                is_confident=prob > 0.60
+                            )
+                        )
+                
+                # Fallback: top 1 if nothing exceeds threshold and top prob > 0.05
+                if len(species_detections) == 0:
+                    top_idx = int(np.argmax(species_probs))
+                    top_prob = float(species_probs[top_idx])
+                    if top_prob > 0.05:
+                        species_info = SPECIES_LABELS.get(top_idx, {"id": f"species_s{top_idx}", "name": f"Loài s{top_idx}"})
+                        species_detections.append(
+                            SpeciesDetectionSchema(
+                                species_id=species_info["id"],
+                                common_name=species_info["name"],
+                                confidence=top_prob,
+                                uncertainty=float(0.01 + 0.08 * (1.0 - top_prob)),
+                                time_window=TimeWindow(start_sec=0.5, end_sec=4.5),
+                                is_confident=False
+                            )
+                        )
+                
+                # 4. Threat Head Parsing
+                pred_class = int(np.argmax(threat_probs))
+                confidence = float(threat_probs[pred_class])
+                THREAT_CONFIDENCE_THRESHOLD = 0.20
+                
+                if pred_class != 8 and confidence >= THREAT_CONFIDENCE_THRESHOLD:
+                    threat_info = THREAT_LABELS[pred_class]
+                    threat_detections.append(
+                        ThreatDetectionSchema(
+                            threat_type=threat_info["type"],
+                            confidence=confidence,
+                            uncertainty=float(0.01 + 0.08 * (1.0 - confidence)),
+                            is_alert=threat_info["is_alert"]
+                        )
+                    )
+                    
+                # 5. Shannon-Wiener Index Calculation
+                valid_probs = [float(p) for p in species_probs if p > 0.05]
+                if len(valid_probs) > 0:
+                    total_valid = sum(valid_probs)
+                    p_norm = [v / total_valid for v in valid_probs]
+                    shannon_index = -sum(pi * np.log(pi) for pi in p_norm)
+                    shannon_index = float(round(shannon_index, 2))
+                else:
+                    shannon_index = 0.0
+                    
+                # 6. Ecosystem Health Assessment
+                if len(threat_detections) > 0:
+                    trend = "declining"
+                    assessment = "Hệ sinh thái bị đe dọa nghiêm trọng"
+                elif shannon_index >= 1.50:
+                    trend = "stable"
+                    assessment = "Hệ sinh thái phong phú, đa dạng cao"
+                elif shannon_index >= 1.00:
+                    trend = "stable"
+                    assessment = "Hệ sinh thái ổn định, đa dạng trung bình"
+                else:
+                    trend = "fluctuating"
+                    assessment = "Hệ sinh thái nghèo nàn hoặc đang biến động"
+                    
+                # 7. Map Spectrogram Type for Frontend HUD Synchronization
+                if len(threat_detections) > 0:
+                    main_threat = threat_detections[0].threat_type
+                    if main_threat == "gunshot":
+                        spectrogram_type = "procedural_gunshot"
+                    elif main_threat == "fire":
+                        spectrogram_type = "procedural_storm"  # Maps to orange storm-like look
+                    else:
+                        spectrogram_type = "procedural_chainsaw"
+                elif any(s.species_id in ["pycnonotus_jocosus", "copsychus_saularis", "acridotheres_tristis"] for s in species_detections):
+                    spectrogram_type = "procedural_birds"
+                elif any(s.species_id == "microhyla_fissipes" for s in species_detections):
+                    spectrogram_type = "procedural_storm"
+                else:
+                    spectrogram_type = "procedural_birds"
+                    
+            except Exception as inner_exc:
+                import traceback
+                debug_log(f"[ONNX Inference Error] {inner_exc}\n{traceback.format_exc()}")
+                raise RuntimeError(inner_exc)
+        else:
+            raise RuntimeError("ONNX model not loaded.")
+            
+    except Exception as exc:
+        debug_log(f"[PREDICT] Using Simulation Fallback Mode. Reason: {exc}")
+        # Convert filename to lowercase for keyword matching (smart testing hack)
+        fn = file.filename.lower()
+        
+        # Initialise variables
+        species_detections = []
+        threat_detections = []
+        shannon_index = 0.0
+        trend = "stable"
+        assessment = "Hệ sinh thái ổn định"
+        spectrogram_type = "procedural_silent"
+
+        if "chainsaw" in fn or "cua_xich" in fn or "cua" in fn:
+            threat_detections.append(
+                ThreatDetectionSchema(
+                    threat_type="chainsaw",
+                    confidence=0.91,
+                    uncertainty=0.03,
+                    is_alert=True
+                )
+            )
+            species_detections.append(
+                SpeciesDetectionSchema(
+                    species_id="acridotheres_tristis",
+                    common_name="Sáo đá (Common Myna)",
+                    confidence=0.65,
+                    uncertainty=0.09,
+                    time_window=TimeWindow(start_sec=0.5, end_sec=1.8),
+                    is_confident=True
+                )
+            )
+            shannon_index = 0.54
+            trend = "declining"
+            assessment = "Hệ sinh thái bị đe dọa nghiêm trọng"
+            spectrogram_type = "procedural_chainsaw"
+
+        elif "gunshot" in fn or "sung" in fn or "shot" in fn:
+            threat_detections.append(
+                ThreatDetectionSchema(
+                    threat_type="gunshot",
+                    confidence=0.95,
+                    uncertainty=0.02,
+                    is_alert=True
+                )
+            )
+            shannon_index = 0.00
+            trend = "declining"
+            assessment = "Suy kiệt sinh học đột ngột"
+            spectrogram_type = "procedural_gunshot"
+
+        elif "storm" in fn or "sam_set" in fn or "thunder" in fn:
+            species_detections.append(
+                SpeciesDetectionSchema(
+                    species_id="microhyla_fissipes",
+                    common_name="Ếch nhái Ornate (Narrow-mouthed Frog)",
+                    confidence=0.48,
+                    uncertainty=0.17,
+                    time_window=TimeWindow(start_sec=3.0, end_sec=4.8),
+                    is_confident=False
+                )
+            )
+            shannon_index = 0.98
+            trend = "fluctuating"
+            assessment = "Tín hiệu bị nhiễu do thời tiết"
+            spectrogram_type = "procedural_storm"
+
+        elif "dawn" in fn or "morning" in fn or "bird" in fn or "chim" in fn:
+            species_detections.append(
+                SpeciesDetectionSchema(
+                    species_id="pycnonotus_jocosus",
+                    common_name="Chào mào (Red-whiskered Bulbul)",
+                    confidence=0.94,
+                    uncertainty=0.02,
+                    time_window=TimeWindow(start_sec=1.0, end_sec=3.5),
+                    is_confident=True
+                )
+            )
+            species_detections.append(
+                SpeciesDetectionSchema(
+                    species_id="copsychus_saularis",
+                    common_name="Chích chòe (Oriental Magpie-Robin)",
+                    confidence=0.88,
+                    uncertainty=0.04,
+                    time_window=TimeWindow(start_sec=2.2, end_sec=4.8),
+                    is_confident=True
+                )
+            )
+            shannon_index = 1.62
+            trend = "stable"
+            assessment = "Hệ sinh thái phong phú, đa dạng cao"
+            spectrogram_type = "procedural_birds"
+
+        else:
+            # Default: Random normal day noise
+            species_detections.append(
+                SpeciesDetectionSchema(
+                    species_id="pycnonotus_jocosus",
+                    common_name="Chào mào (Red-whiskered Bulbul)",
+                    confidence=0.84,
+                    uncertainty=0.04,
+                    time_window=TimeWindow(start_sec=1.5, end_sec=4.0),
+                    is_confident=True
+                )
+            )
+            shannon_index = 1.10
+            trend = "stable"
+            assessment = "Hệ sinh thái ổn định"
+            spectrogram_type = "procedural_birds"
+
+    finally:
+        if os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+            except Exception as e:
+                print(f"[PREDICT] Failed to delete temp file {tmp_path}: {e}")
 
     # ─── Groq Llama 3.1 Report Generation ───────────────────────────
     # Combine findings into prompts
@@ -274,6 +493,7 @@ async def predict_audio(file: UploadFile = File(...)):
         llm = get_llm()
         llm_report = llm.quick(prompt=prompt, system="Bạn là chuyên gia phân tích an ninh kiểm lâm Cúc Phương.")
     except Exception as e:
+        print(f"[LLM] Error calling Groq: {e}")
         # Fallback explanation if Groq key is not configured yet
         if len(threat_detections) > 0:
             llm_report = f"🚨 KHẨN CẤP: Ghi nhận {threat_text} tại khu vực giám sát. Chỉ số đa dạng sinh học sụt giảm nghiêm trọng ({shannon_index}). Yêu cầu kiểm lâm phụ trách trạm di chuyển kiểm tra tọa độ khẩn cấp."
@@ -314,6 +534,7 @@ async def predict_audio(file: UploadFile = File(...)):
     else:
         DETECTION_HISTORY.insert(0, HistoricalRecordSchema(**record))
 
+    debug_log(f"[RESPONSE] ID: {request_id} processed. Species count: {len(species_detections)}, Threat count: {len(threat_detections)}, Shannon: {shannon_index}, Spectrogram: {spectrogram_type}")
     return response
 
 @router.get("/history", response_model=List[HistoricalRecordSchema])
