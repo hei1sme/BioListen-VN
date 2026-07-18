@@ -200,6 +200,13 @@ Chúng ta đã tạo thành công và cấu hình 3 file Jupyter notebook phục
   * Output Metadata TP: `/content/drive/MyDrive/Datasets/BioListenVN/processed/rfcx_tp_processed_metadata.csv`
   * Output nén FP (False Positives): `/content/drive/MyDrive/Datasets/BioListenVN/processed/rfcx_fp_processed.zip`
   * Output Metadata FP: `/content/drive/MyDrive/Datasets/BioListenVN/processed/rfcx_fp_processed_metadata.csv`
+* **Dữ liệu phân nhóm đầu vào (BioListenVN/grouping/):**
+  * Dữ liệu nguồn: Trích xuất và phân nhóm trực tiếp từ `rfcx_tp_processed.zip` (Chim, Ếch) và tiền xử lý in-memory từ `insect_Train.zip`/`insect_Validation.zip` (Côn trùng) thông qua script `notebooks/grouping_data.ipynb`.
+  * Thư mục lưu trữ:
+    * `/content/drive/MyDrive/Datasets/BioListenVN/grouping/Bird/` (Chim - Nhãn 0)
+    * `/content/drive/MyDrive/Datasets/BioListenVN/grouping/Frog/` (Ếch - Nhãn 1)
+    * `/content/drive/MyDrive/Datasets/BioListenVN/grouping/Insect/` (Côn trùng - Nhãn 2)
+    * `/content/drive/MyDrive/Datasets/BioListenVN/grouping/Bat/` (Dơi - Nhãn 3, nhãn chờ phát triển trong tương lai)
 
 ### 6.3. Báo cáo Kết quả Tiền xử lý & Độ sẵn sàng của Mô hình (Preprocessing Readiness Report)
 Dữ liệu đầu ra của quy trình tiền xử lý đã đạt trạng thái sẵn sàng hoàn toàn để đưa vào huấn luyện mô hình Multi-task nhờ các yếu tố sau:
