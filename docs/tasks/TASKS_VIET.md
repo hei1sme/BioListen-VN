@@ -1,46 +1,62 @@
 # BioListen VN — AI Lead (Việt) Task Board & Guidelines
 
 **Role:** Huỳnh Quốc Việt (AI Lead) | **Branch:** `feature/ai`  
-**Core Stack:** PyTorch, Torchaudio, ONNX, MC-Dropout, Grad-CAM  
+**Core Stack:** PyTorch, Torchaudio, ONNX, MC-Dropout, Grad-CAM, Google Colab + Google Drive, Local Debugging, FPT AI Factory  
 **Technical Plan:** [docs/BIOLISTEN_PLAN.md](../BIOLISTEN_PLAN.md)
 
 ---
 
-## 📅 Hướng dẫn Lộ trình 48 giờ
+## 📅 Quy trình phát triển & Workflow chung (AI & Data Pipeline)
 
-### Phase 1: Foundation (Giờ H0–H6 | Thứ Sáu 12:00 – 18:00)
-- [ ] **1. Tải và chuẩn bị Dataset (Target: 13:00):**
-  - Tải tập dữ liệu **ESC-50** (`git clone https://github.com/karolpiczak/ESC-50.git`).
-  - Viết script Python sử dụng thư viện `requests` cào dữ liệu âm thanh từ **Xeno-canto API** cho 5 loài mục tiêu bám sát Track: Chào mào (*Pycnonotus jocosus*), Sáo đá (*Acridotheres tristis*), Ếch nhái (*Microhyla fissipes*), Khỉ đuôi lợn (*Macaca leonina*), Ve sầu (*Cicadidae*).
-- [ ] **2. Xây dựng Preprocessing Pipeline (Target: 14:30):**
-  - Viết class `AudioDataset` trong file `backend/services/audio_dataset.py`.
-  - Quy chuẩn hóa âm thanh đầu vào: Tần số lấy mẫu (sample_rate) `22050Hz`, thời gian `5s` cố định (110,250 samples).
-  - Trích xuất Mel-spectrogram (`n_fft=2048`, `hop_length=512`, `n_mels=128`).
-  - Resize Mel-spectrogram về kích thước `(224, 224)` và nhân bản (repeat) thành 3 channels màu `(3, 224, 224)` để tương thích hoàn toàn với backbone `EfficientNet-V2-S`.
-- [ ] **3. Viết Kiến trúc Model Multi-Task (Target: 16:00):**
-  - Code class `BioListenModel` trong `backend/services/biolisten_model.py`.
-  - Sử dụng chung backbone `features` của EfficientNet-V2-S có sẵn trong repo.
-  - Thiết kế 2 heads riêng biệt: `species_head` (Phân loại 5 loài) và `threat_head` (Phân loại cưa xích/súng/không có mối đe dọa).
-- [ ] **3. Tiến hành Training (Target: 16:00):**
-  - Viết file `scripts/train.py` hoặc Jupyter Notebook để train trên **Google Colab**. 
-  - Khởi chạy training loop đầu tiên (~20 epochs).
-  - Tải file model weights `models/biolisten_v1.pt` từ Colab về máy tính cá nhân để chuẩn bị export.
+### Phase 1: Data Collection & Storage (Google Colab & Drive)
+- [ ] **1. Thiết lập môi trường lưu trữ & phát triển:**
+  - Kết nối Google Colab với Google Drive (sử dụng Google Pro 5TB) để lưu trữ dữ liệu raw và lưu weights trong quá trình train.
+  - Đồng bộ mã nguồn về môi trường Local để thực hiện viết code, debug và trực quan hóa dữ liệu (Visualization).
+- [ ] **2. Thu thập và chuẩn bị các bộ Datasets chính:**
+  - Tải tập dữ liệu **FSC22** cho nhánh `human_head` (các hoạt động của con người: súng - guns, phương tiện - vehicles, cưa xích - chainsaw,...).
+  - Tải tập dữ liệu **RFCx** cho nhánh `species_head` (phân loại các loài Chim - Bird và Ếch - Frog).
+- [ ] **3. Chuẩn bị các bộ Datasets phụ (Bổ sung khi imbalance):**
+  - Tải tập dữ liệu **Anuraset** (bổ sung cho Frog Species).
+  - Tải tập dữ liệu **Zenodo** (bổ sung cho Bird Species).
 
-### Phase 2: Integration (Giờ H6–H24 | Thứ Sáu 18:00 – Thứ Bảy 12:00)
-- [ ] **1. Tối ưu hóa Model (Target: 20:00):**
-  - Kiểm tra độ chính xác trên tập validation. Nếu đạt yêu cầu, xuất model PyTorch sang định dạng `.onnx` và lưu tại `models/biolisten_edge.onnx`.
-- [ ] **2. Giả lập tính toán tại Biên (Target: 22:00):**
-  - Viết class `ONNXAudioService` trong file `backend/services/onnx_service.py` sử dụng thư viện `onnxruntime` chạy suy luận (inference) model ONNX trên CPU (giả lập Raspberry Pi).
-- [ ] **3. Đấu nối API:**
-  - Hỗ trợ Hiếu đưa file `ONNXAudioService` thay thế cho mock data trong API `/predict` của FastAPI.
-- [ ] **4. Chỉ số sức khỏe hệ sinh thái:**
-  - Viết hàm tính toán Chỉ số đa dạng sinh học Shannon-Wiener dựa trên tổng số lượt đếm (counts) các loài được phát hiện theo giờ, đảm bảo tính toán học chuẩn xác thay vì dùng Softmax tức thời.
+### Phase 2: EDA & Preprocessing Pipeline
+- [ ] **1. Kiểm tra chất lượng và trực quan hóa dữ liệu (EDA):**
+  - Phân tích phân phối lớp, độ dài file, chất lượng âm thanh của hai bộ dữ liệu chính **FSC22** và **RFCx**.
+  - Trực quan hóa dữ liệu âm thanh (Waveform, Spectrogram) trước và sau khi tiền xử lý (Preprocessing) tại môi trường Local để kiểm tra trực quan.
+- [ ] **2. Thiết kế Preprocessing Pipeline riêng biệt:**
+  - Xây dựng 2 luồng tiền xử lý (preprocessing) riêng: một cho `human_head` (đặc trưng tiếng súng, cưa xích...) và một cho `species_head` (đặc trưng tiếng chim, tiếng ếch...) do sự khác biệt lớn về tần số và đặc tính âm học.
+- [ ] **3. Xử lý mất cân bằng (Imbalance Handling) và tích hợp tập phụ:**
+  - Nếu dữ liệu loài (RFCx) bị thiếu hụt hoặc mất cân bằng, tiến hành tích hợp thêm **Anuraset** (Ếch) và **Zenodo** (Chim).
+  - Đảm bảo tiền xử lý (preprocessing) các bộ bổ sung này đồng bộ hoàn toàn với bộ chính RFCx.
+- [ ] **4. Xây dựng PyTorch Data Pipeline:**
+  - Triển khai class `AudioDataset` và `DataLoader` để tối ưu hóa việc đọc/ghi và tải dữ liệu từ Google Drive vào model PyTorch.
 
-### Phase 3: Polish & AI Safety (Giờ H24–H36 | Thứ Bảy 12:00 – 23:00)
-- [ ] **1. Bayesian Uncertainty (MC-Dropout):**
-  - Viết giải thuật chạy model 10 lần với Dropout bật (`model.train()`). Đo lường độ lệch chuẩn (std) của các lần chạy. Nếu std > 0.15, đánh dấu cảnh báo độ tin cậy thấp (Low confidence).
-- [ ] **2. Grad-CAM trên Spectrogram:**
-  - Viết hàm Grad-CAM lấy activation maps từ lớp convolutional cuối của EfficientNet để vẽ ra ảnh heatmap, chỉ rõ khu vực tần số/thời gian nào trên spectrogram đã kích hoạt quyết định của AI.
+### Phase 3: Baseline Model Architecture
+- [ ] **1. Thiết kế Mô hình Multi-Task (PyTorch):**
+  - Xây dựng kiến trúc `BioListenModel` sử dụng chung một Backbone trích xuất đặc trưng (ví dụ: EfficientNet-V2-S hoặc một CNN Backbone phù hợp).
+  - Thiết kế 2 heads riêng biệt:
+    - `species_head`: Phát hiện và phân loại các loài (Chim & Ếch).
+    - `human_head`: Phát hiện và phân loại các âm thanh đe dọa từ con người (súng, cưa, xe cộ,...).
+
+### Phase 4: Training & Evaluation
+- [ ] **1. Kiểm thử mã nguồn huấn luyện (Light Epochs):**
+  - Chạy thử nghiệm các cell train model với số lượng epochs rất nhỏ (light epochs) tại Local hoặc Google Colab để kiểm tra tính đúng đắn của pipeline, đảm bảo không gặp lỗi runtime hay OOM trước khi đem đi huấn luyện lớn.
+  - Đánh giá nhanh các chỉ số cơ bản (Accuracy, F1-Score).
+- [ ] **2. Huấn luyện chính thức trên FPT AI Factory:**
+  - Sau khi code chạy ổn định, đẩy mô hình lên hệ thống **FPT AI Factory** (sử dụng gói credit $30 được tài trợ cho đội thi VAIC2026) để huấn luyện chính thức với số epochs lớn hơn trên tài nguyên GPU hiệu năng cao.
+  - Tích hợp **Early Stopping** dựa trên validation loss/accuracy để tối ưu thời gian train, tránh lãng phí credit và chống overfitting.
+- [ ] **3. Giải thích mô hình (Explainable AI - XAI):**
+  - Áp dụng **Grad-CAM** lên lớp convolutional cuối của backbone để xuất spectrogram heatmap, chỉ rõ khu vực thời gian-tần số nào quyết định việc AI phân loại loài hoặc mối đe dọa.
+
+### Phase 5: Optimization & Deployment
+- [ ] **1. Tối ưu hóa Model & Hyperparameters:**
+  - Tìm kiếm và tinh chỉnh các hyperparameters (Learning rate, Batch size, Optimizer).
+  - Thực hiện các kỹ thuật tối ưu hóa mô hình (ví dụ: Pruning hoặc Quantization).
+- [ ] **2. Export ONNX và Giả lập Edge Inference:**
+  - Xuất mô hình PyTorch sang định dạng `.onnx` (`models/biolisten_edge.onnx`).
+  - Viết/Cập nhật class `ONNXAudioService` (`backend/services/onnx_service.py`) chạy suy luận trên CPU (giả lập Raspberry Pi).
+- [ ] **3. Bayesian Uncertainty (MC-Dropout):**
+  - Chạy mô hình nhiều lần với Dropout bật (`model.train()`) để đo lường độ tin cậy của dự đoán, gán nhãn "Độ tin cậy thấp" nếu độ lệch chuẩn (std) vượt quá ngưỡng cho phép.
 
 ---
 
@@ -48,7 +64,7 @@
 
 Khi Việt dùng AI Agent hỗ trợ code model, hãy bảo Agent của mình:
 - **Đọc kỹ file:** `backend/services/pytorch_components.py` để sử dụng đúng cách lazy loading của repo.
-- **Cấu hình Audio Mel-spectrogram:**
+- **Cấu hình Audio Mel-spectrogram:** (Cần được thảo luận và tối ưu hóa tùy thuộc vào đặc tính tần số của chim/ếch vs súng/cưa).
 ```python
 AUDIO_CONFIG = {
     "sample_rate": 22050,
@@ -58,4 +74,4 @@ AUDIO_CONFIG = {
     "n_mels": 128,
 }
 ```
-- **Lưu ý Fallback:** Nếu model không hội tụ vào 23:00 tối Thứ Sáu, Việt sẽ đổi sang nạp dataset `PlantVillage` để phân loại bệnh lá cây bằng EfficientNet.
+- **Lưu ý Fallback:** Luôn theo dõi độ hội tụ của mô hình trên tập validation. Nếu có vấn đề với các đặc trưng quá phức tạp, điều chỉnh tham số FFT và Mel bins.

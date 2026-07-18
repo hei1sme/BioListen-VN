@@ -41,7 +41,12 @@ Thumbs.db
 *.log
 logs/
 
-# Data (nếu có sensitive data)
-data/raw/
+# Data & Datasets (nếu có sensitive data)
+data/
 *.csv
 !docs/*.csv
+
+# Models & Checkpoints (too large for git)
+models/
+*.onnx
+
