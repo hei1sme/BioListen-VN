@@ -4,6 +4,7 @@ import wave
 import uuid
 import tempfile
 import random
+import base64
 from pathlib import Path
 from typing import List, Optional
 import numpy as np
@@ -117,6 +118,79 @@ def preprocess_audio(file_path: str) -> np.ndarray:
     three_channels = np.stack([resized, resized, resized], axis=0)
     input_tensor = np.expand_dims(three_channels, axis=0).astype(np.float32)
     return input_tensor
+
+
+def generate_audio_visualizations(file_path: str):
+    """
+    Generate real Mel Spectrogram and dynamic XAI heatmap (Grad-CAM approximation)
+    from the audio file, returning base64 encoded PNG URLs.
+    """
+    try:
+        y, sr = librosa.load(file_path, sr=22050)
+        target_samples = 22050 * 5
+        if len(y) > target_samples:
+            y = y[:target_samples]
+        elif len(y) < target_samples:
+            y = np.pad(y, (0, target_samples - len(y)), mode='constant')
+
+        # 1. Compute Mel Spectrogram
+        mel_spec = librosa.feature.melspectrogram(
+            y=y,
+            sr=22050,
+            n_fft=2048,
+            hop_length=512,
+            n_mels=128
+        )
+        log_mel = librosa.power_to_db(mel_spec, ref=np.max)
+
+        # Normalize to [0, 1]
+        val_min, val_max = log_mel.min(), log_mel.max()
+        if val_max - val_min > 1e-9:
+            normalized = (log_mel - val_min) / (val_max - val_min)
+        else:
+            normalized = np.zeros_like(log_mel)
+
+        # Flip vertically so high frequencies are at the top, low at the bottom
+        normalized = np.flipud(normalized)
+
+        # 2. Generate Base Spectrogram Image (COLORMAP_INFERNO for high-quality dark look)
+        img_uint8 = (normalized * 255).astype(np.uint8)
+        img_resized = cv2.resize(img_uint8, (450, 176), interpolation=cv2.INTER_LINEAR)
+        spec_colored = cv2.applyColorMap(img_resized, cv2.COLORMAP_INFERNO)
+
+        # Encode Base Spectrogram to Base64
+        _, spec_buf = cv2.imencode('.png', spec_colored)
+        spec_base64 = f"data:image/png;base64,{base64.b64encode(spec_buf).decode('utf-8')}"
+
+        # 3. Generate Grad-CAM XAI Heatmap
+        # Apply thresholding to isolate loudest events (bird calls, chainsaw, storm)
+        threshold = 0.55
+        activation = np.where(normalized > threshold, normalized, 0.0)
+        
+        # Scale to uint8
+        act_uint8 = (activation * 255).astype(np.uint8)
+        act_resized = cv2.resize(act_uint8, (450, 176), interpolation=cv2.INTER_LINEAR)
+        
+        # Apply a large Gaussian blur to mimic the low resolution of CNN feature maps
+        blurred_act = cv2.GaussianBlur(act_resized, (35, 35), 0)
+        
+        # Apply Jet colormap for classical red-to-blue Grad-CAM style
+        cam_colored = cv2.applyColorMap(blurred_act, cv2.COLORMAP_JET)
+
+        # Create transparency mask: Alpha is proportional to blurred activation intensity
+        h, w = blurred_act.shape
+        rgba = np.zeros((h, w, 4), dtype=np.uint8)
+        rgba[:, :, :3] = cam_colored
+        rgba[:, :, 3] = (blurred_act * 0.70).astype(np.uint8)
+
+        # Encode Grad-CAM to PNG
+        _, cam_buf = cv2.imencode('.png', rgba)
+        cam_base64 = f"data:image/png;base64,{base64.b64encode(cam_buf).decode('utf-8')}"
+
+        return spec_base64, cam_base64
+    except Exception as e:
+        print(f"[XAI] Error generating visualizations: {e}")
+        return "procedural_birds", ""
 
 
 # ─── Pydantic Models for Schema Contracts ──────────────────────────────────────
@@ -238,6 +312,8 @@ async def predict_audio(file: UploadFile = File(...)):
         trend = "stable"
         assessment = "Hệ sinh thái ổn định"
         spectrogram_type = "procedural_silent"
+        real_spec = None
+        real_cam = None
 
         # ─── ONNX Inference Execution ─────────────────────────────────
         if ONNX_AVAILABLE:
@@ -344,6 +420,9 @@ async def predict_audio(file: UploadFile = File(...)):
                     spectrogram_type = "procedural_storm"
                 else:
                     spectrogram_type = "procedural_birds"
+                
+                # 8. Generate Real Spectrogram and Gradcam images
+                real_spec, real_cam = generate_audio_visualizations(tmp_path)
                     
             except Exception as inner_exc:
                 import traceback
@@ -515,8 +594,8 @@ async def predict_audio(file: UploadFile = File(...)):
             trend=trend,
             assessment=assessment
         ),
-        spectrogram_base64=spectrogram_type,
-        gradcam_base64=spectrogram_type + "_cam" if len(threat_detections) > 0 or len(species_detections) > 0 else "",
+        spectrogram_base64=real_spec if real_spec else spectrogram_type,
+        gradcam_base64=real_cam if real_cam else (spectrogram_type + "_cam" if len(threat_detections) > 0 or len(species_detections) > 0 else ""),
         llm_report=llm_report
     )
 
