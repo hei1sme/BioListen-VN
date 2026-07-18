@@ -245,7 +245,10 @@ export function SpectrogramViewer({
               Cường độ âm (dB)
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-20 bg-gradient-to-t from-border-deep via-primary-dark to-primary border border-border-light rounded-[2px]" />
+              <div
+                className="w-3 h-20 border border-border-light rounded-[2px]"
+                style={{ background: "linear-gradient(to top, #000004, #57106e, #bc3754, #f98e09, #fcffa4)" }}
+              />
               <div className="flex flex-col justify-between h-20 text-[8px] text-foreground/30 font-mono">
                 <span>-10 dB (Lớn)</span>
                 <span>-50 dB (Trung)</span>
