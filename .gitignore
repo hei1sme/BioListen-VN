@@ -45,3 +45,7 @@ logs/
 data/raw/
 *.csv
 !docs/*.csv
+
+# Local Storage Cache
+backend/local_storage/
+

@@ -66,9 +66,9 @@ async def health():
     return {"status": "healthy"}
 
 # ─── Registered Routers ───────────────────────────────────────────────────────
-from backend.api.routes.audio import router as audio_router
+from api.routes.audio import router as audio_router
 app.include_router(audio_router)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Union
 
-from backend.config import settings
+from config import settings
 from storage3.exceptions import StorageApiError
 from supabase import Client, create_client
 

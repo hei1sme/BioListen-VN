@@ -9,8 +9,8 @@ from typing import List, Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel
-from backend.services.ai_services import get_llm
-from backend.services.supabase_client import (
+from services.ai_services import get_llm
+from services.supabase_client import (
     is_supabase_configured,
     insert_detection_record,
     fetch_detection_history,
