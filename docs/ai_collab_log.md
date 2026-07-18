@@ -34,6 +34,7 @@
 | [14:28 17/07] | Antigravity | Triển khai Phase 1: Mở rộng ApiClient và dựng giao diện Next.js Technical HUD | ✅ | Chấp thuận kế hoạch và mã nguồn giao diện tích hợp Web Audio & Recharts. |
 | [15:10 17/07] | Antigravity | Triển khai audio router backend, sửa lỗi build setuptools trên Docker/pip | ✅ | Lưu trữ mã nguồn router, Dockerfile và requirements.txt phục vụ tích hợp. |
 | [19:00 17/07] | Antigravity | Thiết kế lại UI/UX toàn diện sang Light Theme hiện đại (Emerald Green) và sửa các lỗi linter hoisting | ✅ | Phê duyệt thiết kế Light Mode dã chiến/chuyên dụng thân thiện với kiểm lâm thay vì cyberpunk hacker. |
+| [23:55 18/07] | Antigravity | Tích hợp mô hình baseline ONNX thật (biolisten.onnx) vào backend FastAPI, sửa bộ giải mã wav trên trình duyệt | ✅ | Tích hợp thành công mô hình ONNX thật, tinh chỉnh ngưỡng nhạy và tham số log mel spectrogram giúp nhận diện chính xác cưa máy thực tế. |
 
 ---
 
