@@ -405,13 +405,14 @@ def _list_local_storage_files(bucket_id: str, path: Optional[str] = None) -> Lis
     for file_path in search_root.rglob("*"):
         if file_path.is_file():
             rel = file_path.relative_to(root)
+            rel_str = str(rel).replace("\\", "/")
             results.append(
                 {
-                    "name": str(rel).replace("\\", "/"),
-                    "id": str(rel).replace("\\", "/"),
+                    "name": rel_str,
+                    "id": rel_str,
                     "size": file_path.stat().st_size,
                     "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(file_path.stat().st_mtime)),
-                    "public_url": f"/local_storage/{bucket_id}/{str(rel).replace('\\', '/')}"
+                    "public_url": f"/local_storage/{bucket_id}/{rel_str}"
                 }
             )
     return results
