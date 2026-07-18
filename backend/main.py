@@ -57,8 +57,8 @@ async def root():
         "status": "ok",
         "team": "NeuraX.ai",
         "competition": "VAIC 2026",
-        "pytorch": torch.__version__,
-        "cuda": torch.cuda.is_available(),
+        "pytorch": torch.__version__ if torch is not None else "Not Available",
+        "cuda": torch.cuda.is_available() if torch is not None else False,
     }
 
 @app.get("/health")
