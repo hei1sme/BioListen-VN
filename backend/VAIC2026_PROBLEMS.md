@@ -1,0 +1,4 @@
+### **NÔNG NGHIỆP**
+
+**Biodiversity monitoring through Ecological acoustics**  
+Context: Vietnam has some of Southeast Asia's richest national parks and biosphere reserves, but species inventories still rely on camera traps and manual surveys. No large-scale AI system for analyzing environmental audio yet exists in Vietnam. Requirements: Build a model that classifies animal calls (birds, frogs/amphibians, primates, insects) from continuous 24/7 audio captured by devices placed in the forest. The system must separate target species' sounds from background rain/wind/insect noise, detect chainsaw or hunting-rifle sounds (illegal logging/poaching alerts), and estimate an ecosystem-health index over time. Constraint: devices run on battery/solar and must process at the edge to reduce data transmission.

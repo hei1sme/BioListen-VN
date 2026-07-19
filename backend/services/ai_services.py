@@ -2,13 +2,23 @@
 PyTorch AI Services — track-agnostic utilities
 Thêm các class/function cụ thể sau khi biết đề bài
 """
-import torch
-import torch.nn as nn
+try:
+    import torch
+    import torch.nn as nn
+except ImportError:
+    torch = None
+    nn = object  # Fallback dummy class for subclassing
+
 from pathlib import Path
 
 # ─── Device Management ────────────────────────────────────────────────────────
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"[AI] Using device: {DEVICE}")
+if torch is not None:
+    DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"[AI] Using device: {DEVICE}")
+else:
+    DEVICE = "cpu"
+    print("[AI] PyTorch is not available; running in local CPU simulation mode.")
+
 MODELS_DIR = Path(__file__).parent.parent / "models"
 MODELS_DIR.mkdir(exist_ok=True)
 
@@ -53,15 +63,17 @@ class ImageClassifierService:
         weights = models.EfficientNet_V2_S_Weights.IMAGENET1K_V1
         self._model = models.efficientnet_v2_s(weights=weights)
         self._model = self._model.to(DEVICE)
-        self._model.eval()
+        self._model.train(False)
         print(f"[ImageClassifier] {self.model_name} loaded ✓")
 
-    @torch.no_grad()
-    def predict(self, image_tensor: torch.Tensor) -> torch.Tensor:
+    def predict(self, image_tensor):
+        if torch is None:
+            raise RuntimeError("PyTorch is not available. Cannot run prediction.")
         if self._model is None:
             self.load()
         image_tensor = image_tensor.to(DEVICE)
-        return self._model(image_tensor)
+        with torch.no_grad():
+            return self._model(image_tensor)
 
 
 # ─── LLM Client — Groq (fast & free) ─────────────────────────────────────────

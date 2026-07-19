@@ -52,3 +52,6 @@ BioListen_AI_Collaboration_Log.zip
 Nhat_ky_cong_tac_AI.md
 *.onnx
 
+# Local Storage Cache
+backend/local_storage/
+

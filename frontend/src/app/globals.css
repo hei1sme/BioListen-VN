@@ -1,23 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f6f5;
-  --foreground: #0f172a;
+  --background: #090d0b;
+  --foreground: #e2e8f0;
+  
+  /* Tactical Cyber Forest Custom Color Tokens */
+  --color-primary: #00ff8f;
+  --color-primary-dark: #059669;
+  --color-accent-green: #10b981;
+  --color-alert-crimson: #f43f5e;
+  --color-warning-amber: #f59e0b;
+  --color-border-deep: #16221c;
+  --color-border-light: #253b30;
+  --color-panel-bg: #0c1310;
+  --color-surface-hover: #14201a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-forest-emerald: #059669;
-  --color-forest-emerald-light: #ecfdf5;
-  --color-forest-emerald-dark: #047857;
-  --color-forest-amber: #d97706;
-  --color-forest-amber-light: #fffbeb;
-  --color-forest-crimson: #dc2626;
-  --color-forest-crimson-light: #fef2f2;
-  --color-forest-slate: #ffffff;
-  --color-forest-border: #e2e8f0;
   
+  --color-primary: var(--color-primary);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-accent-green: var(--color-accent-green);
+  --color-alert-crimson: var(--color-alert-crimson);
+  --color-warning-amber: var(--color-warning-amber);
+  --color-border-deep: var(--color-border-deep);
+  --color-border-light: var(--color-border-light);
+  --color-panel-bg: var(--color-panel-bg);
+  --color-surface-hover: var(--color-surface-hover);
+
   --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
 }
@@ -34,14 +46,68 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f4f6f5;
+  background: #090d0b;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #16221c;
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #059669;
+  background: #00ff8f;
 }
 
+/* Ranger Dashboard Technical Scanlines overlay */
+.scanlines {
+  position: relative;
+  overflow: hidden;
+}
+.scanlines::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(0, 255, 143, 0.02), rgba(0, 255, 143, 0.01), rgba(0, 255, 143, 0.02));
+  z-index: 10;
+  background-size: 100% 4px, 6px 100%;
+  pointer-events: none;
+  opacity: 0.35;
+}
 
+/* Digital Grid Background texture */
+.grid-bg {
+  background-size: 20px 20px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 255, 143, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 255, 143, 0.02) 1px, transparent 1px);
+}
+
+/* Custom blink animation for threat alerts */
+@keyframes threat-pulse {
+  0%, 100% {
+    border-color: rgba(244, 63, 94, 0.2);
+    box-shadow: 0 0 5px rgba(244, 63, 94, 0);
+  }
+  50% {
+    border-color: rgba(244, 63, 94, 0.8);
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.25);
+  }
+}
+
+.animate-threat-pulse {
+  animation: threat-pulse 2s infinite ease-in-out;
+}
+
+@keyframes screen-border-pulse {
+  0%, 100% {
+    border-color: rgba(244, 63, 94, 0.2);
+    box-shadow: inset 0 0 10px rgba(244, 63, 94, 0.1);
+  }
+  50% {
+    border-color: rgba(244, 63, 94, 0.8);
+    box-shadow: inset 0 0 25px rgba(244, 63, 94, 0.35);
+  }
+}
+
+.animate-screen-border {
+  animation: screen-border-pulse 1.5s infinite ease-in-out;
+}

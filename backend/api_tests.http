@@ -14,7 +14,26 @@ Accept: application/json
 GET {{baseUrl}}/
 Accept: application/json
 
-### 3. Phân tích văn bản bằng LLM (Groq)
+### 3. Kiểm tra Audio Prediction
+POST {{baseUrl}}/api/audio/predict
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="cua_xich.wav"
+Content-Type: audio/wav
+
+< ./cua_xich.wav
+--boundary--
+
+### 4. Kiểm tra History Endpoint
+GET {{baseUrl}}/api/audio/history?limit=10
+Accept: application/json
+
+### 5. Kiểm tra Health Trend Endpoint
+GET {{baseUrl}}/api/audio/health-trend?days=7
+Accept: application/json
+
+### 6. Phân tích văn bản bằng LLM (Groq)
 POST {{baseUrl}}/api/ai/analyze
 Content-Type: application/json
 

@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
+# Pre-install compatible numpy and setuptools to prevent PyTorch from pulling NumPy 2.x
+RUN pip install --no-cache-dir "setuptools<82" "numpy==1.26.4"
+
 # Install PyTorch CPU (nhẹ hơn cho deploy)
 RUN pip install --no-cache-dir \
     torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 \
@@ -16,7 +19,6 @@ RUN pip install --no-cache-dir \
 
 # Install app dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir "setuptools<82" numpy
 RUN pip install --no-cache-dir --no-build-isolation -r requirements.txt
 
 COPY . .

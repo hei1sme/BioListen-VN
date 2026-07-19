@@ -17,7 +17,7 @@
   - Cập nhật file `backend/requirements.txt` thêm `torch`, `torchvision`, `torchaudio`, `librosa`, `onnx`, và `onnxruntime`.
 - [x] **3. Triển khai Mock Endpoint (Target: 14:00):**
   - Viết code mock dữ liệu dự đoán trả về ngẫu nhiên các loại chim và threat (chainsaw/gunshot) để Hưng đấu nối frontend.
-- [ ] **4. Thiết lập Supabase Database (Target: 17:00):**
+- [x] **4. Thiết lập Supabase Database (Target: 17:00):**
   - Đăng ký project Supabase. Tạo bảng `detections` (lưu vết phân tích) và `sensors` (dữ liệu vị trí địa lý trạm) bằng cách chạy script SQL dưới đây trong SQL Editor của Supabase:
     ```sql
     CREATE TABLE detections (
@@ -51,9 +51,9 @@
   - Triển khai backend FastAPI trống lên Railway để xác nhận live API url hoạt động bình thường, không lỗi CORS.
 
 ### Phase 2: Integration (Giờ H6–H24 | Thứ Sáu 18:00 – Thứ Bảy 12:00)
-- [ ] **1. Lưu vết lịch sử phân tích:**
+- [x] **1. Lưu vết lịch sử phân tích:**
   - Viết logic lưu bản ghi phân tích vào bảng `detections` của Supabase mỗi khi client gọi `/predict`.
-- [ ] **2. Viết API Lịch sử & Analytics (Target: 22:00):**
+- [x] **2. Viết API Lịch sử & Analytics (Target: 22:00):**
   - Code endpoint `GET /api/audio/history` và `GET /api/audio/health-trend` đọc từ database Supabase để gửi dữ liệu cho Hưng vẽ biểu đồ.
 - [x] **3. Cấu hình môi trường (ENV):**
   - Thiết lập liên kết giữa Vercel (Frontend) và Railway (Backend) thông qua Next.js Native Rewrites. Cấu hình đúng `NEXT_PUBLIC_API_URL`.
@@ -61,7 +61,7 @@
   - Đảm bảo Việt/Hiếu điền và nộp thông tin dự án BioListen VN lên platform của BTC.
 
 ### Phase 3: Polish & Deploy (Giờ H24–H36 | Thứ Bảy 12:00 – 23:00)
-- [ ] **1. Supabase Storage cho Demo Assets:**
+- [x] **1. Supabase Storage cho Demo Assets:**
   - Tạo bucket trong Supabase Storage để lưu trữ 5 file audio test mẫu cho bộ Simulator.
 - [ ] **2. Backup ngrok:**
   - Viết script run ngrok nhanh để làm phương án backup nếu Railway bị quá tải giới hạn gói cước miễn phí trong buổi demo.
