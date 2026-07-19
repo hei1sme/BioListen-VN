@@ -111,3 +111,16 @@ Tài liệu này tổng hợp toàn bộ các câu hỏi chuyên sâu về mặt
   * **Ý nghĩa thực tế:**
     * **Tại thiết bị Edge biên ngoài rừng:** Thiết bị có thể đưa 1 tệp tin âm thanh duy nhất (`batch_size = 1`) vào suy luận theo thời gian thực để tiết kiệm RAM.
     * **Tại Máy chủ Backend Trạm trung tâm:** Máy chủ có thể gom một lô 32 hoặc 64 tệp tin âm thanh từ nhiều cảm biến gửi về (`batch_size = 32`) để suy luận song song đồng thời với tốc độ tối đa.
+
+---
+
+### ❓ Q10: Chỉ số Shannon-Wiener Index là gì? Tại sao hệ thống BioListen VN lại áp dụng chỉ số này?
+* **Trả lời:**
+  * **Khái niệm:** Shannon-Wiener Diversity Index ($H'$) là chỉ số tiêu chuẩn quốc tế trong Sinh thái học (Ecology) dùng để đo lường mức độ đa dạng sinh học của một khu vực dựa trên 2 yếu tố: **Độ phong phú loài (Species Richness)** và **Độ đồng đều quần thể (Species Evenness)**.
+    $$H' = -\sum_{i=1}^{S} p_i \ln(p_i)$$
+    *(Trong đó $S$ là tổng số nhóm/loài sinh vật phát hiện được, $p_i$ là tỉ lệ lần xuất hiện của nhóm $i$ so với tổng số lần xuất hiện của tất cả các loài).*
+  * **Tại sao BioListen VN lại tích hợp chỉ số này?**
+    * **Đánh giá Sức khỏe Hệ sinh thái tự động:** Thay vì chỉ báo cáo các âm thanh phát hiện riêng lẻ, BioListen VN tổng hợp các xác suất nhận diện từ nhánh `species_head` (Chim, Ếch, Côn trùng) theo thời gian (giờ/ngày/tuần) để tự động tính toán chỉ số $H'$ theo thời gian thực.
+    * **Cảnh báo suy giảm đa dạng sinh học:** Khi khu vực rừng đạt chỉ số $H'$ cao ($H' > 2.0$), hệ sinh thái được đánh giá là giàu có và cân bằng. Ngược lại, nếu chỉ số $H'$ sụt giảm đột ngột trùng khớp với thời điểm phát hiện tiếng cưa xích hay tiếng súng (từ nhánh `human_head`), hệ thống sẽ đưa ra cảnh báo sớm về nguy cơ xua đuổi động vật hoang dã hoặc suy thoái môi trường sống.
+    * **Báo cáo chuẩn hóa cho Kiểm lâm & Nhà nghiên cứu:** Chuyển đổi dữ liệu suy luận AI thuần túy thành các chỉ số sinh thái tiêu chuẩn giúp lực lượng kiểm lâm và các nhà quản lý môi trường dễ dàng theo dõi, báo cáo và đưa ra quyết định bảo tồn chính xác.
+
