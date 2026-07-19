@@ -63,7 +63,7 @@ class ImageClassifierService:
         weights = models.EfficientNet_V2_S_Weights.IMAGENET1K_V1
         self._model = models.efficientnet_v2_s(weights=weights)
         self._model = self._model.to(DEVICE)
-        self._model.eval()
+        self._model.train(False)
         print(f"[ImageClassifier] {self.model_name} loaded ✓")
 
     def predict(self, image_tensor):

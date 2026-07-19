@@ -124,7 +124,7 @@ class PhoBERTAnalyzer:
             print(f"[PhoBERT] Loading '{self.MODEL_NAME}'...")
             self._tokenizer = AutoTokenizer.from_pretrained(self.MODEL_NAME)
             self._model = AutoModel.from_pretrained(self.MODEL_NAME).to(DEVICE)
-            self._model.eval()
+            self._model.train(False)
             print("[PhoBERT] Ready ✓")
 
     @torch.no_grad()
@@ -210,7 +210,7 @@ class EfficientNetClassifier:
             self._model = models.efficientnet_v2_s(
                 weights=models.EfficientNet_V2_S_Weights.IMAGENET1K_V1
             ).to(DEVICE)
-            self._model.eval()
+            self._model.train(False)
             self._preprocess = models.EfficientNet_V2_S_Weights.IMAGENET1K_V1.transforms()
             print("[EfficientNet] Ready ✓")
 
