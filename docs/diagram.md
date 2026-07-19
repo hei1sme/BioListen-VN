@@ -68,7 +68,7 @@ flowchart TD
         FC1_Spec["Linear Layer (1280 -> 256)"]
         ReLU_Spec["ReLU Activation"]
         Drop_Spec["Dropout (p=0.3) <br> (MC-Dropout Active during Inference)"]
-        FC2_Spec["Linear Layer (256 -> 24)"]
+        FC2_Spec["Linear Layer (256 -> 3)"]
         
         FC1_Spec --> ReLU_Spec --> Drop_Spec --> FC2_Spec
     end
@@ -88,8 +88,8 @@ flowchart TD
     %% Training Phase
     subgraph TrainingPhase["Huấn luyện (Adaptive Loss)"]
         LossCalc["Tính Multi-task Loss thích ứng"]
-        BCELoss["BCEWithLogitsLoss <br> (Chỉ tính cho tập RFCx)"]
-        CELoss["CrossEntropyLoss <br> (Chỉ tính cho tập FSC22/ESC-50)"]
+        BCELoss["BCEWithLogitsLoss <br> (Chỉ tính cho tập grouping loài)"]
+        CELoss["CrossEntropyLoss <br> (Chỉ tính cho tập FSC22/ESC-50 đe dọa)"]
         
         LossCalc --> BCELoss & CELoss
     end
@@ -101,7 +101,7 @@ flowchart TD
         Sigmoid["Sigmoid Function <br> (Nhúng vào đồ thị ONNX)"]
         Softmax["Softmax Function (dim=1) <br> (Nhúng vào đồ thị ONNX)"]
         
-        ONNXOutput1["Species Probabilities <br> Shape: (B, 24) <br> Giá trị: [0.0, 1.0]"]
+        ONNXOutput1["Species Probabilities <br> Shape: (B, 3) <br> Giá trị: [0.0, 1.0]"]
         ONNXOutput2["Threat Probabilities <br> Shape: (B, 9) <br> Giá trị: [0.0, 1.0]"]
         
         Sigmoid --> ONNXOutput1
@@ -120,7 +120,7 @@ flowchart TD
 1. **Spectrogram Input:** Mỗi batch gồm $B$ mẫu, kích thước hình ảnh $224 \times 224$ với 3 kênh đặc trưng.
 2. **Backbone Conv Features:** Trải qua các khối Mobile Inverted Bottleneck Conv (MBConv) của EfficientNet, thu về Feature Map cuối cùng kích thước `(B, 1280, 7, 7)`.
 3. **GAP Output (Embedding):** Lớp Global Average Pooling triệt tiêu chiều cao và rộng của ảnh, đưa về vector embedding biểu diễn ngữ cảnh âm thanh cô đọng kích thước `(B, 1280)`.
-4. **Species Head Output:** Trải qua tầng tuyến tính thu hẹp chiều, đưa ra 24 logits đại diện cho 24 loài sinh vật.
+4. **Species Head Output:** Trải qua tầng tuyến tính thu hẹp chiều, đưa ra 3 logits đại diện cho 3 nhóm loài lớn (Chim, Ếch, Côn trùng).
 5. **Human Threat Head Output:** Đưa ra 9 logits đại diện cho 8 mối đe dọa thực tế + 1 lớp nền an toàn.
 
 ### 3.2. Cấu hình triển khai ONNX Runtime:
