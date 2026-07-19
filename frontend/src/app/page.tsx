@@ -20,12 +20,12 @@ const MOCK_HISTORY: HistoricalRecord[] = [
     sensor_id: "demo-sensor-1",
     timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 mins ago
     species: [
-      { species_id: "pycnonotus_jocosus", common_name: "Chào mào (Red-whiskered Bulbul)", confidence: 0.92, uncertainty: 0.03, time_window: { start_sec: 1.2, end_sec: 3.8 }, is_confident: true }
+      { species_id: "birds", common_name: "Nhóm Chim (Birds)", confidence: 0.92, uncertainty: 0.03, time_window: { start_sec: 1.2, end_sec: 3.8 }, is_confident: true }
     ],
     threats: [],
     shannon_index: 1.22,
     is_alert: false,
-    llm_report: "Ghi nhận hoạt động sinh học bình thường của loài Chào mào tại khu vực Suối Lớn. Tần số ổn định.",
+    llm_report: "Ghi nhận hoạt động sinh học bình thường của nhóm Chim tại khu vực Suối Lớn. Tần số ổn định.",
     processing_time_ms: 124
   },
   {
@@ -33,12 +33,13 @@ const MOCK_HISTORY: HistoricalRecord[] = [
     sensor_id: "demo-sensor-2",
     timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 mins ago
     species: [
-      { species_id: "copsychus_saularis", common_name: "Chích chòe (Oriental Magpie-Robin)", confidence: 0.88, uncertainty: 0.04, time_window: { start_sec: 0.5, end_sec: 4.2 }, is_confident: true }
+      { species_id: "birds", common_name: "Nhóm Chim (Birds)", confidence: 0.88, uncertainty: 0.04, time_window: { start_sec: 0.5, end_sec: 4.2 }, is_confident: true },
+      { species_id: "insects", common_name: "Nhóm Côn trùng (Insects)", confidence: 0.76, uncertainty: 0.06, time_window: { start_sec: 2.0, end_sec: 4.5 }, is_confident: true }
     ],
     threats: [],
     shannon_index: 1.34,
     is_alert: false,
-    llm_report: "Phát hiện tiếng hót đặc trưng của Chích chòe lửa tại Đỉnh Mây. Không phát hiện tiếng động cơ hay súng săn.",
+    llm_report: "Phát hiện tiếng hót đặc trưng của nhóm Chim rừng và nhóm Côn trùng tại Đỉnh Mây. Không phát hiện tiếng động cơ hay súng săn.",
     processing_time_ms: 135
   },
   {
@@ -57,55 +58,39 @@ const MOCK_HISTORY: HistoricalRecord[] = [
 ];
 
 const MOCK_TREND = [
-  { timestamp: "08:00", shannon_index: 1.45, species_richness: 4 },
-  { timestamp: "10:00", shannon_index: 1.58, species_richness: 5 },
-  { timestamp: "12:00", shannon_index: 1.12, species_richness: 3 },
-  { timestamp: "14:00", shannon_index: 1.62, species_richness: 6 },
-  { timestamp: "16:00", shannon_index: 1.35, species_richness: 4 },
-  { timestamp: "18:00", shannon_index: 1.42, species_richness: 5 },
-  { timestamp: "20:00", shannon_index: 0.95, species_richness: 2 }
+  { timestamp: "08:00", shannon_index: 1.45, species_richness: 2 },
+  { timestamp: "10:00", shannon_index: 1.58, species_richness: 3 },
+  { timestamp: "12:00", shannon_index: 1.12, species_richness: 1 },
+  { timestamp: "14:00", shannon_index: 1.62, species_richness: 3 },
+  { timestamp: "16:00", shannon_index: 1.35, species_richness: 2 },
+  { timestamp: "18:00", shannon_index: 1.42, species_richness: 2 },
+  { timestamp: "20:00", shannon_index: 0.95, species_richness: 1 }
 ];
 
 const SPECIES_CATALOG = [
   {
-    id: "pycnonotus_jocosus",
-    name: "Chào mào (Red-whiskered Bulbul)",
-    scientific: "Pycnonotus jocosus",
-    frequencyRange: "1.5 kHz - 4.5 kHz",
-    description: "Loài chim có mào đặc trưng, giọng hót cao, lảnh lót. Thường hoạt động mạnh vào sáng sớm ở tầng tán rừng Cúc Phương.",
+    id: "birds",
+    name: "Nhóm Chim (Birds)",
+    scientific: "Aves",
+    frequencyRange: "1.0 kHz - 8.0 kHz",
+    description: "Nhóm chim rừng hoang dã bao gồm các loài chim hót đặc trưng (Chào mào, Chích chòe, Khướu) phân bố rộng khắp các tầng tán cây, là chỉ thị quan trọng cho sự đa dạng sinh học tầng cao.",
     icon: "🐦"
   },
   {
-    id: "acridotheres_tristis",
-    name: "Sáo đá (Common Myna)",
-    scientific: "Acridotheres tristis",
-    frequencyRange: "1.2 kHz - 3.8 kHz",
-    description: "Loài chim thông minh, có tiếng hót đa dạng, đôi khi bắt chước âm thanh khác. Phổ biến ở khu vực bìa rừng và trạm quản lý.",
-    icon: "🦅"
-  },
-  {
-    id: "copsychus_saularis",
-    name: "Chích chòe (Oriental Magpie-Robin)",
-    scientific: "Copsychus saularis",
-    frequencyRange: "2.0 kHz - 6.0 kHz",
-    description: "Giọng hót réo rắt nhiều âm điệu phức tạp, tần số âm thanh trung bình-cao. Chỉ thị tốt cho tình trạng thảm thực vật rừng rậm.",
-    icon: "🕊️"
-  },
-  {
-    id: "halcyon_smyrnensis",
-    name: "Bói cá trắng (White-throated Kingfisher)",
-    scientific: "Halcyon smyrnensis",
-    frequencyRange: "2.5 kHz - 5.0 kHz",
-    description: "Tiếng kêu chói tai, rền rĩ đặc trưng khi bay dọc các khe suối trong công viên quốc gia.",
-    icon: "🪶"
-  },
-  {
-    id: "microhyla_fissipes",
-    name: "Ếch nhái Ornate (Narrow-mouthed Frog)",
-    scientific: "Microhyla fissipes",
-    frequencyRange: "300 Hz - 1.2 kHz",
-    description: "Âm thanh trầm đục, lặp đi lặp lại phát ra sát mặt đất rụng lá ẩm ướt sau các cơn mưa dông rừng nhiệt đới.",
+    id: "frogs",
+    name: "Nhóm Ếch nhái (Frogs/Amphibians)",
+    scientific: "Anura",
+    frequencyRange: "200 Hz - 2.0 kHz",
+    description: "Các loài lưỡng cư sinh sống ở các khe suối, vũng nước rụng lá ẩm ướt. Tiếng kêu phát ra đặc trưng sau cơn mưa, là chỉ thị nhạy cảm cho độ ẩm sinh cảnh và thay đổi khí hậu tầng sát đất.",
     icon: "🐸"
+  },
+  {
+    id: "insects",
+    name: "Nhóm Côn trùng (Insects/Cicadas)",
+    scientific: "Insecta",
+    frequencyRange: "3.0 kHz - 12.0 kHz",
+    description: "Bao gồm ve sầu (Cicadidae), dế và các loài côn trùng kêu cánh phát tần số cao liên tục, chỉ thị tình trạng nhiệt độ rừng mùa hè.",
+    icon: "🦗"
   }
 ];
 
@@ -238,7 +223,6 @@ export default function Home() {
           {activeTab === "analytics" && (
             <DashboardAnalytics
               mounted={mounted}
-              prediction={prediction}
               trendData={trendData && trendData.length > 0 ? trendData : MOCK_TREND}
             />
           )}

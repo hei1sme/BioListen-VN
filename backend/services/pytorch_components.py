@@ -8,8 +8,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict
 import time
+import random
+import pandas as pd
+import numpy as np
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MODELS_DIR = Path(__file__).parent.parent / "models"
@@ -128,7 +131,7 @@ class PhoBERTAnalyzer:
             print("[PhoBERT] Ready ✓")
 
     @torch.no_grad()
-    def get_embeddings(self, texts: list[str]) -> torch.Tensor:
+    def get_embeddings(self, texts: List[str]) -> torch.Tensor:
         """
         Trả về embeddings [batch_size, hidden_size] cho downstream tasks.
         """
@@ -153,7 +156,7 @@ class PhoBERTAnalyzer:
         return float(sim.item())
 
     @torch.no_grad()
-    def classify_zero_shot(self, text: str, labels: list[str]) -> dict:
+    def classify_zero_shot(self, text: str, labels: List[str]) -> Dict:
         """
         Zero-shot classification — không cần train lại.
         So sánh embedding của text với embedding của từng label.
@@ -301,6 +304,193 @@ class BioListenModel(nn.Module):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# COMPONENT 5: BioListenDataset — Multi-Task Audio Preprocessing & Dataset (PyTorch)
+# Supports RFCx (species) and ESC-50 (threats)
+# ═══════════════════════════════════════════════════════════════════════════════
+class BioListenDataset(torch.utils.data.Dataset):
+    """
+    Multi-task PyTorch Dataset for BioListen VN.
+    Supports RFCx (species_head) and ESC-50 (human_head) datasets.
+    """
+    def __init__(self, rfcx_df=None, esc50_df=None, rfcx_audio_dir=None, esc50_audio_dir=None, is_train=True, config=None):
+        self.rfcx_df = rfcx_df if rfcx_df is not None else pd.DataFrame()
+        self.esc50_df = esc50_df if esc50_df is not None else pd.DataFrame()
+        self.rfcx_audio_dir = Path(rfcx_audio_dir) if rfcx_audio_dir else None
+        self.esc50_audio_dir = Path(esc50_audio_dir) if esc50_audio_dir else None
+        self.is_train = is_train
+        
+        # Audio configuration
+        self.config = config or {
+            "sample_rate": 32000,
+            "duration_sec": 5,
+            "n_fft": 2048,
+            "hop_length": 512,
+            "n_mels": 128,
+            "fmin_human": 50,
+            "fmin_species": 200,
+            "fmax": 15000,
+        }
+        self.target_samples = self.config["sample_rate"] * self.config["duration_sec"]
+        
+        # List of 14 focal classes for BioListen VN
+        self.biolisten_classes = [
+            'chainsaw', 'airplane', 'breathing', 'engine', 'helicopter',
+            'rain', 'laughing', 'wind', 'sneezing', 'snoring',
+            'thunderstorm', 'crickets', 'footsteps', 'fireworks'
+        ]
+        # Threat mapping (category name -> threat index, where 0 is reserved for no_threat / others)
+        self.threat_map = {cls: idx + 1 for idx, cls in enumerate(self.biolisten_classes)}
+        
+        self.samples = []
+        
+        # Add RFCx samples
+        if not self.rfcx_df.empty and self.rfcx_audio_dir:
+            grouped = self.rfcx_df.groupby('recording_id')
+            for rec_id, group in grouped:
+                species_vector = np.zeros(24, dtype=np.float32)
+                for _, row in group.iterrows():
+                    species_id = int(row['species_id'])
+                    if 0 <= species_id < 24:
+                        species_vector[species_id] = 1.0
+                
+                t_center = None
+                if 't_min' in group.columns and 't_max' in group.columns:
+                    t_center = float((group['t_min'].min() + group['t_max'].max()) / 2)
+                
+                file_path = self.rfcx_audio_dir / f"{rec_id}.flac"
+                if not file_path.exists():
+                    file_path = self.rfcx_audio_dir / f"{rec_id}.wav"
+                    
+                self.samples.append({
+                    'type': 'rfcx',
+                    'file_path': str(file_path),
+                    'species_label': species_vector,
+                    'threat_label': 0,  # no_threat
+                    't_center': t_center
+                })
+                
+        # Add ESC-50 samples
+        if not self.esc50_df.empty and self.esc50_audio_dir:
+            has_category = 'category' in self.esc50_df.columns
+            for _, row in self.esc50_df.iterrows():
+                fname = row['filename']
+                if has_category:
+                    category = row['category']
+                    threat_label = self.threat_map.get(category, 0)
+                else:
+                    # Fallback mapping if category is missing (e.g. basic tests with targets only)
+                    target = int(row['target'])
+                    target_to_cat = {28: 'chainsaw', 40: 'helicopter'}
+                    cat_name = target_to_cat.get(target, 'other')
+                    threat_label = self.threat_map.get(cat_name, 0)
+                
+                file_path = self.esc50_audio_dir / fname
+                self.samples.append({
+                    'type': 'esc50',
+                    'file_path': str(file_path),
+                    'species_label': np.zeros(24, dtype=np.float32),
+                    'threat_label': threat_label,
+                    't_center': None
+                })
+                
+    def __len__(self):
+        return len(self.samples)
+        
+    def __getitem__(self, idx):
+        sample = self.samples[idx]
+        file_path = sample['file_path']
+        t_center = sample['t_center']
+        
+        try:
+            import torchaudio
+            import torchaudio.transforms as T
+            waveform, sr = torchaudio.load(file_path)
+            
+            if waveform.shape[0] > 1:
+                waveform = torch.mean(waveform, dim=0, keepdim=True)
+                
+            target_sr = self.config["sample_rate"]
+            if sr != target_sr:
+                resampler = T.Resample(orig_freq=sr, new_freq=target_sr)
+                waveform = resampler(waveform)
+                
+            total_samples = waveform.shape[1]
+            if t_center is not None:
+                center_sample = int(t_center * target_sr)
+                start_sample = max(0, center_sample - self.target_samples // 2)
+                end_sample = start_sample + self.target_samples
+                if end_sample > total_samples:
+                    end_sample = total_samples
+                    start_sample = max(0, end_sample - self.target_samples)
+                waveform = waveform[:, start_sample:end_sample]
+            else:
+                if total_samples > self.target_samples:
+                    if self.is_train:
+                        max_start = total_samples - self.target_samples
+                        start_sample = random.randint(0, max_start)
+                        waveform = waveform[:, start_sample:start_sample+self.target_samples]
+                    else:
+                        waveform = waveform[:, :self.target_samples]
+            
+            num_samples = waveform.shape[1]
+            if num_samples < self.target_samples:
+                pad_len = self.target_samples - num_samples
+                waveform = torch.nn.functional.pad(waveform, (0, pad_len))
+                
+            if self.is_train:
+                if random.random() < 0.3:
+                    shift = random.randint(-target_sr // 2, target_sr // 2)
+                    waveform = torch.roll(waveform, shift, dims=1)
+            
+            fmin = self.config["fmin_species"] if sample['type'] == 'rfcx' else self.config["fmin_human"]
+            mel_transform = T.MelSpectrogram(
+                sample_rate=target_sr,
+                n_fft=self.config["n_fft"],
+                hop_length=self.config["hop_length"],
+                n_mels=self.config["n_mels"],
+                f_min=fmin,
+                f_max=self.config["fmax"]
+            )
+            mel_spec = mel_transform(waveform)
+            
+            amplitude_to_db = T.AmplitudeToDB()
+            spec_db = amplitude_to_db(mel_spec)
+            
+            min_val = spec_db.min()
+            max_val = spec_db.max()
+            if max_val - min_val > 1e-9:
+                spec_norm = (spec_db - min_val) / (max_val - min_val)
+            else:
+                spec_norm = torch.zeros_like(spec_db)
+                
+            spec_resized = torch.nn.functional.interpolate(
+                spec_norm.unsqueeze(0),
+                size=(224, 224),
+                mode='bilinear',
+                align_corners=False
+            ).squeeze(0)
+            
+            if self.is_train and random.random() < 0.4:
+                freq_mask = T.FrequencyMasking(freq_mask_param=15)
+                spec_resized = freq_mask(spec_resized)
+                time_mask = T.TimeMasking(time_mask_param=20)
+                spec_resized = time_mask(spec_resized)
+                
+            x = spec_resized.repeat(3, 1, 1)
+            
+        except Exception as e:
+            x = torch.zeros((3, 224, 224), dtype=torch.float32)
+            
+        species_label = torch.tensor(sample['species_label'], dtype=torch.float32)
+        threat_label = torch.tensor(sample['threat_label'], dtype=torch.long)
+        
+        mask_species = 1.0 if sample['type'] == 'rfcx' else 0.0
+        mask_threat = 1.0 if sample['type'] == 'esc50' else 0.0
+        
+        return x, species_label, threat_label, mask_species, mask_threat
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # SINGLETON REGISTRY — lazy load, không load tất cả lúc startup
 # ═══════════════════════════════════════════════════════════════════════════════
 _registry: dict = {}
@@ -327,19 +517,51 @@ def get_efficientnet() -> EfficientNetClassifier:
 # ═══════════════════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
     print("=" * 60)
-    print("VAIC 2026 — PyTorch Components Test")
+    print("VAIC 2026 -- PyTorch Components Test")
     print("=" * 60)
     print(f"PyTorch: {torch.__version__}")
     print(f"Device:  {DEVICE}")
     print(f"CUDA:    {torch.cuda.is_available()}")
 
+    # Test BioListenModel shape compatibility
+    print("\n[Test] BioListenModel forward pass shape check...")
+    model = BioListenModel(n_species=24, n_threats=14)
+    dummy_input = torch.randn(2, 3, 224, 224)
+    species_out, threat_out = model(dummy_input)
+    print(f"  -> Input shape:        {dummy_input.shape}")
+    print(f"  -> Species logits:     {species_out.shape} (Expected: [2, 24])")
+    print(f"  -> Threat logits:      {threat_out.shape} (Expected: [2, 15])")
+
+    # Test BioListenDataset creation with empty/mock dataframes
+    print("\n[Test] BioListenDataset initialization...")
+    mock_rfcx = pd.DataFrame({
+        'recording_id': ['rec1', 'rec2'],
+        'species_id': [3, 14],
+        't_min': [1.2, 5.4],
+        't_max': [3.4, 7.8]
+    })
+    mock_esc50 = pd.DataFrame({
+        'filename': ['file1.wav', 'file2.wav'],
+        'target': [28, 40],
+        'category': ['chainsaw', 'helicopter']
+    })
+    dataset = BioListenDataset(
+        rfcx_df=mock_rfcx, 
+        esc50_df=mock_esc50,
+        rfcx_audio_dir="mock_dir",
+        esc50_audio_dir="mock_dir",
+        is_train=True
+    )
+    print(f"  -> Dataset size:       {len(dataset)} samples (Expected: 4)")
+    print(f"  -> Threat map checks:  {dataset.threat_map}")
+
     # Test PhoBERT (không cần file audio)
     print("\n[Test] PhoBERT zero-shot classification...")
     phobert = get_phobert()
     result = phobert.classify_zero_shot(
-        text="Học sinh gặp khó khăn trong việc phát âm tiếng Anh",
-        labels=["vấn đề giáo dục", "vấn đề y tế", "vấn đề tài chính"]
+        text="Hoc sinh gap kho khan trong viec phat am tieng Anh",
+        labels=["van de giao duc", "van de y te", "van de tai chinh"]
     )
-    print(f"  → Top label: {result['top_label']} ({result['top_score']:.2%})")
+    print(f"  -> Top label: {result['top_label']} ({result['top_score']:.2%})")
 
-    print("\n✅ PyTorch components ready for VAIC 2026!")
+    print("\n[Test] PyTorch components ready for VAIC 2026!")

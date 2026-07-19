@@ -41,10 +41,16 @@ Thumbs.db
 *.log
 logs/
 
-# Data (nếu có sensitive data)
-data/raw/
+# Data & Datasets (nếu có sensitive data)
+data/
 *.csv
 !docs/*.csv
+
+# Models & Checkpoints (too large for git)
+models/
+BioListen_AI_Collaboration_Log.zip
+Nhat_ky_cong_tac_AI.md
+*.onnx
 
 # Local Storage Cache
 backend/local_storage/

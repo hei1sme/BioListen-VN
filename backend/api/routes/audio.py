@@ -92,9 +92,9 @@ THREAT_LABELS = {
 
 # Species Classes (species_head): 3 classes (aligned with Việt's model output shape)
 SPECIES_LABELS = {
-    0: {"id": "copsychus_saularis", "name": "Chích chòe (Oriental Magpie-Robin)"},  # Bird (Chim)
-    1: {"id": "microhyla_fissipes", "name": "Ếch nhái Ornate (Narrow-mouthed Frog)"}, # Frog (Ếch)
-    2: {"id": "cicadidae", "name": "Ve sầu (Cicada)"},                              # Insect (Ve sầu)
+    0: {"id": "birds", "name": "Nhóm Chim (Birds)"},
+    1: {"id": "frogs", "name": "Nhóm Ếch nhái (Frogs)"},
+    2: {"id": "insects", "name": "Nhóm Côn trùng (Insects)"},
 }
 
 def preprocess_audio(file_path: str) -> np.ndarray:
@@ -447,9 +447,9 @@ async def predict_audio(file: UploadFile = File(...)):
                 spectrogram_type = "procedural_storm"  # Maps to orange storm-like look
             else:
                 spectrogram_type = "procedural_chainsaw"
-        elif any(s.species_id in ["pycnonotus_jocosus", "copsychus_saularis", "acridotheres_tristis"] for s in species_detections):
+        elif any(s.species_id == "birds" for s in species_detections):
             spectrogram_type = "procedural_birds"
-        elif any(s.species_id == "microhyla_fissipes" for s in species_detections):
+        elif any(s.species_id == "frogs" for s in species_detections):
             spectrogram_type = "procedural_storm"
         else:
             spectrogram_type = "procedural_birds"

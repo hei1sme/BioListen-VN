@@ -98,3 +98,38 @@ $$M_{i,j} = \text{ReLU}\left( \frac{1}{C} \sum_{k=1}^{C} |A^k_{i,j}| \right)$$
 *Trong đó:*
 * $C = 1280$ là số kênh đặc trưng của mạng EfficientNet-V2-S.
 * $M_{i,j}$ là bản đồ kích hoạt thô kích thước $7 \times 7$ pixel thể hiện mức độ phản hồi của mô hình đối với tín hiệu âm thanh tại vị trí tần số và thời gian tương ứng.
+
+---
+
+## 5. Giới hạn & Hướng phát triển tương lai (Future Work)
+
+### 5.1. Giới hạn hiện tại — Phân loại theo Nhóm (Group-Level Classification)
+
+Mô hình **Species Head** trong phiên bản hiện tại (v1) được huấn luyện để phân loại âm thanh sinh học ở cấp độ **nhóm sinh vật chỉ thị lớn** thay vì từng loài đơn lẻ:
+
+| Đầu ra Species Head | Nhóm | Mô tả |
+|---|---|---|
+| Index 0 | `birds` | Toàn bộ các loài chim (từ dữ liệu RFCx) |
+| Index 1 | `frogs` | Toàn bộ các loài ếch nhái (từ dữ liệu RFCx) |
+| Index 2 | `insects` | 459+ loài côn trùng (Orthoptera + Cicadidae, từ Zenodo) |
+
+**Lý do thiết kế theo nhóm:** Tối ưu hóa hiệu năng thiết bị biên (3 lớp thay vì 24+ lớp), đồng thời tăng tính ổn định trong môi trường rừng có nhiễu tự nhiên cao.
+
+**Nhánh Threat Head giữ nguyên** với 9 lớp đầu ra (cưa xích, súng săn, v.v.) bằng hàm Sigmoid đa nhãn — nhánh này không thay đổi.
+
+### 5.2. Lộ trình nâng cấp — Individual Species Detection (v2)
+
+> **Mục tiêu:** Nâng cấp Species Head từ 3 nhóm lớn lên phân biệt **từng loài sinh học đơn lẻ** (individual species-level), phục vụ nghiên cứu đa dạng sinh học chuyên sâu và cải thiện độ chính xác của chỉ số Shannon-Wiener H'.
+
+**Các bước triển khai:**
+1. **Thu thập dữ liệu thực địa Cúc Phương:** Triển khai trạm prototype để ghi lại tiếng kêu các loài bản địa đặc hữu, phối hợp gán nhãn chuyên gia với kiểm lâm.
+2. **Mở rộng tập dữ liệu:** Từ 3 nhóm lên 20–50+ lớp loài. Sử dụng **Few-Shot Learning** hoặc **Prototype Networks** để xử lý mất cân bằng nhãn (< 50 mẫu/loài hiếm).
+3. **Kiến trúc Hierarchical Classification:** Phân loại nhóm trước (Chim / Ếch / Côn trùng) → rồi chạy bộ phân loại fine-grained chuyên biệt cho từng nhóm.
+4. **Chỉ số H' chính xác hơn:** Khi có dữ liệu loài đơn lẻ, chỉ số Shannon-Wiener sẽ phản ánh đúng sự đa dạng sinh học thực tế của từng khu vực.
+
+### 5.3. Các hướng cải thiện hệ thống khác
+
+* **Phần cứng thực địa:** Thiết kế hộp cảm biến chống nước IP67 thực sự tích hợp ESP32-S3 + pin mặt trời để triển khai dài hạn không cần bảo trì.
+* **Kết nối LoRaWAN thực tế:** Thay thế kết nối demo Cloud bằng LoRaWAN để truyền dữ liệu trong rừng không có sóng di động (payload < 20 Bytes JSON).
+* **Phát hiện nhóm Dơi (Bat):** Tích hợp cảm biến siêu âm để mở rộng phạm vi giám sát lên dải tần > 20,000 Hz — nhóm loài chỉ thị sinh thái quan trọng hiện chưa được hỗ trợ.
+

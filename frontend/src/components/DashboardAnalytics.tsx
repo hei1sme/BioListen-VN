@@ -20,15 +20,10 @@ interface TrendPoint {
 
 interface DashboardAnalyticsProps {
   mounted: boolean;
-  prediction: {
-    ecosystem_health: {
-      shannon_index: number;
-    };
-  } | null;
   trendData: TrendPoint[];
 }
 
-export function DashboardAnalytics({ mounted, prediction, trendData }: DashboardAnalyticsProps) {
+export function DashboardAnalytics({ mounted, trendData }: DashboardAnalyticsProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       {/* Trend Chart */}

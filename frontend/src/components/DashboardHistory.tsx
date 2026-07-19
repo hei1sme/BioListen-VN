@@ -25,7 +25,7 @@ export function DashboardHistory({ history, onViewDetails }: DashboardHistoryPro
               <th className="py-3 px-3">Trạm cảm biến</th>
               <th className="py-3 px-3">Kết quả cảnh báo</th>
               <th className="py-3 px-3">Khu hệ sinh vật phát hiện</th>
-              <th className="py-3 px-3 text-right">Chỉ số Shannon H'</th>
+              <th className="py-3 px-3 text-right">Chỉ số Shannon H&apos;</th>
               <th className="py-3 px-3 text-right">Độ trễ AI</th>
               <th className="py-3 px-3 text-right">Thao tác</th>
             </tr>
