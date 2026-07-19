@@ -1,244 +1,215 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 562.5" width="100%" height="100%">
-  <!-- Definitions for styling, filters, and markers -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 562.5" width="100%" height="100%" role="img" aria-label="BioListen VN AI model architecture">
   <defs>
-    <!-- Drop Shadow Filter for nodes -->
-    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
-      <feDropShadow dx="2" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="135%">
+      <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.18"/>
     </filter>
-
-    <!-- Glowing Border Filter for active components -->
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="3" result="blur" />
+    <filter id="glow" x="-22%" y="-22%" width="144%" height="144%">
+      <feGaussianBlur stdDeviation="2.4" result="glow-blur"/>
+      <feFlood flood-color="#22c55e" flood-opacity="0.48" result="glow-color"/>
+      <feComposite in="glow-color" in2="glow-blur" operator="in" result="glow-soft"/>
       <feMerge>
-        <feMergeNode in="blur" />
-        <feMergeNode in="SourceGraphic" />
+        <feMergeNode in="glow-soft"/>
+        <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-
-    <!-- Arrowhead markers -->
-    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#00ff8f" />
+    <linearGradient id="model-grad-input" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ecfeff" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#f0fdf4" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="model-grad-pre" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eff6ff" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#f8fafc" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="model-grad-cnn" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff7ed" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="model-grad-head" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0fdf4" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#ecfdf5" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="model-grad-threat" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff1f2" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#fef2f2" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="model-grad-xai" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ecfeff" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#f0fdfa" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="model-spec-grad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#312e81"/>
+      <stop offset="0.35" stop-color="#7e22ce"/>
+      <stop offset="0.63" stop-color="#f97316"/>
+      <stop offset="1" stop-color="#fde047"/>
+    </linearGradient>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a"/>
     </marker>
-    <marker id="arrow-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669" />
+    <marker id="arrow-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0d9488"/>
+    </marker>
+    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#e11d48"/>
     </marker>
   </defs>
 
-  <!-- Background grid lines for tech-blueprint styling -->
-  <g stroke="rgba(0, 255, 143, 0.03)" stroke-width="1">
-    <!-- Vertical lines -->
-    <line x1="100" y1="0" x2="100" y2="562.5" />
-    <line x1="200" y1="0" x2="200" y2="562.5" />
-    <line x1="300" y1="0" x2="300" y2="562.5" />
-    <line x1="400" y1="0" x2="400" y2="562.5" />
-    <line x1="500" y1="0" x2="500" y2="562.5" />
-    <line x1="600" y1="0" x2="600" y2="562.5" />
-    <line x1="700" y1="0" x2="700" y2="562.5" />
-    <line x1="800" y1="0" x2="800" y2="562.5" />
-    <line x1="900" y1="0" x2="900" y2="562.5" />
-    <!-- Horizontal lines -->
-    <line x1="0" y1="100" x2="1000" y2="100" />
-    <line x1="0" y1="200" x2="1000" y2="200" />
-    <line x1="0" y1="300" x2="1000" y2="300" />
-    <line x1="0" y1="400" x2="1000" y2="400" />
-    <line x1="0" y1="500" x2="1000" y2="500" />
+  <g stroke="#94a3b8" stroke-opacity="0.16" stroke-width="0.8">
+    <line x1="150" y1="38" x2="150" y2="526"/>
+    <line x1="333" y1="38" x2="333" y2="526"/>
+    <line x1="474" y1="38" x2="474" y2="526"/>
+    <line x1="742" y1="38" x2="742" y2="526"/>
+    <line x1="24" y1="281" x2="976" y2="281"/>
   </g>
 
-  <!-- ==================== CONNECTIONS / FLOW ARROWS ==================== -->
-  <g fill="none" stroke-width="1.5">
-    <!-- 1. Waveform to Preprocessing -->
-    <path d="M 125, 230 L 165, 230" stroke="#00ff8f" marker-end="url(#arrow-green)" />
-    
-    <!-- 2. Preprocessing to Mel-spectrogram -->
-    <path d="M 285, 230 L 315, 230" stroke="#00ff8f" marker-end="url(#arrow-green)" />
-
-    <!-- 3. Mel-spectrogram to CNN Backbone Input -->
-    <path d="M 405, 230 L 445, 230" stroke="#00ff8f" marker-end="url(#arrow-green)" />
-
-    <!-- 4. Inside CNN: MBConv Blocks to getitem_144 -->
-    <path d="M 545, 230 L 575, 230" stroke="#00ff8f" marker-end="url(#arrow-green)" />
-
-    <!-- 5. getitem_144 to GAP -->
-    <path d="M 685, 230 L 715, 230" stroke="#00ff8f" marker-end="url(#arrow-green)" />
-
-    <!-- 6. Branching from getitem_144 to XAI / Grad-CAM -->
-    <path d="M 630, 260 L 630, 345" stroke="#059669" marker-end="url(#arrow-teal)" />
-
-    <!-- 7. GAP Vector to Dual Heads (Branching) -->
-    <!-- Species Head Branch -->
-    <path d="M 795, 220 C 810, 220 810, 140 825, 140" stroke="#00ff8f" marker-end="url(#arrow-green)" />
-    <!-- Threat Head Branch -->
-    <path d="M 795, 240 C 810, 240 810, 320 825, 320" stroke="#00ff8f" marker-end="url(#arrow-green)" />
-
-    <!-- 8. Heads to final output metrics -->
-    <path d="M 925, 140 L 950, 140" stroke="#059669" marker-end="url(#arrow-teal)" />
-    <path d="M 925, 320 L 950, 320" stroke="#059669" marker-end="url(#arrow-teal)" />
-  </g>
-
-  <!-- ==================== TẦNG 1: INPUT WAVEFORM (LEFT) ==================== -->
-  <g transform="translate(15, 180)" filter="url(#shadow)">
-    <rect x="0" y="0" width="110" height="100" fill="#0b130e" stroke="#00ff8f" stroke-width="1.2" rx="4" />
-    <text x="55" y="22" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5" text-anchor="middle">INPUT AUDIO</text>
-    <text x="55" y="34" font-family="monospace" font-size="7" fill="rgba(250,249,245,0.4)" text-anchor="middle">5.0s .wav / .mp3</text>
-    
-    <!-- Waveform visualizer drawing -->
-    <path d="M 15,65 L 25,50 L 35,80 L 45,35 L 55,75 L 65,45 L 75,85 L 85,60 L 95,65" fill="none" stroke="#00ff8f" stroke-width="1.5" />
-    <text x="55" y="90" font-family="monospace" font-size="7" fill="#00ff8f" text-anchor="middle">SR: 22,050 Hz</text>
-  </g>
-
-  <!-- ==================== TẦNG 2: PREPROCESSING (MIDDLE LEFT) ==================== -->
-  <g transform="translate(165, 145)" filter="url(#shadow)">
-    <rect x="0" y="0" width="120" height="170" fill="#0b130e" stroke="#00ff8f" stroke-width="1.2" rx="4" />
-    <text x="60" y="20" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5" text-anchor="middle">PREPROCESSING</text>
-    <line x1="10" y1="28" x2="110" y2="28" stroke="rgba(0,255,143,0.15)" stroke-width="0.75" />
-
-    <!-- Process step 1 -->
-    <g transform="translate(8, 38)">
-      <rect x="0" y="0" width="104" height="24" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.15)" stroke-width="0.5" rx="2" />
-      <text x="52" y="15" font-family="monospace" font-size="7.5" fill="#FAF9F5" text-anchor="middle">1. Resample to 22k</text>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" fill="#0f172a">
+    <g id="model-input-block" transform="translate(22 178)" filter="url(#shadow)">
+      <rect width="118" height="156" rx="8" fill="url(#model-grad-input)" stroke="#14b8a6" stroke-width="1.25"/>
+      <text x="59" y="22" text-anchor="middle" font-size="11" font-weight="800">ÂM THANH VÀO</text>
+      <g transform="translate(15 42)" fill="none" stroke="#0f766e" stroke-width="1.8" stroke-linecap="round">
+        <path d="M 0 30 C 7 7 14 7 21 30 S 35 53 42 30 S 56 7 63 30 S 77 53 88 28"/>
+        <line x1="0" y1="61" x2="88" y2="61" stroke="#94a3b8" stroke-width="0.9"/>
+      </g>
+      <text x="14" y="117" font-size="9" fill="#334155">Tệp .wav dài 5.0 giây</text>
+      <text x="14" y="132" font-size="9" fill="#334155">Tần số mẫu: 22,050 Hz</text>
+      <text x="14" y="147" font-size="9" fill="#334155">110,250 mẫu</text>
     </g>
 
-    <!-- Process step 2 -->
-    <g transform="translate(8, 70)">
-      <rect x="0" y="0" width="104" height="24" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.15)" stroke-width="0.5" rx="2" />
-      <text x="52" y="15" font-family="monospace" font-size="7.5" fill="#FAF9F5" text-anchor="middle">2. log-Mel Spec</text>
+    <g id="model-preprocess-block" transform="translate(160 82)" filter="url(#shadow)">
+      <rect width="164" height="318" rx="8" fill="url(#model-grad-pre)" stroke="#2563eb" stroke-width="1.25"/>
+      <rect x="12" y="13" width="85" height="19" rx="9.5" fill="#dbeafe" stroke="#93c5fd" stroke-width="0.7"/>
+      <text x="54.5" y="26" text-anchor="middle" font-size="8.5" font-weight="800" fill="#1d4ed8">librosa</text>
+      <text x="12" y="55" font-size="12" font-weight="800">TIỀN XỬ LÝ</text>
+      <g font-size="8.2" fill="#334155">
+        <rect x="12" y="75" width="140" height="27" rx="5" fill="#ffffff" fill-opacity="0.8" stroke="#bfdbfe"/>
+        <text x="20" y="92">1. Lấy mẫu lại → 22,050 Hz</text>
+        <rect x="12" y="110" width="140" height="43" rx="5" fill="#ffffff" fill-opacity="0.8" stroke="#bfdbfe"/>
+        <text x="20" y="127">2. Log Mel-Spectrogram</text>
+        <text x="20" y="140">n_fft=2048 | hop=512</text>
+        <text x="20" y="151">n_mels=128</text>
+        <rect x="12" y="161" width="140" height="27" rx="5" fill="#ffffff" fill-opacity="0.8" stroke="#bfdbfe"/>
+        <text x="20" y="178">3. Công suất → dB (log)</text>
+        <rect x="12" y="196" width="140" height="27" rx="5" fill="#ffffff" fill-opacity="0.8" stroke="#bfdbfe"/>
+        <text x="20" y="213">4. Chuẩn hóa [0, 1]</text>
+        <rect x="12" y="231" width="140" height="27" rx="5" fill="#ffffff" fill-opacity="0.8" stroke="#bfdbfe"/>
+        <text x="20" y="248">5. Resize song tuyến → 224 × 224</text>
+        <rect x="12" y="266" width="140" height="27" rx="5" fill="#ffffff" fill-opacity="0.8" stroke="#bfdbfe"/>
+        <text x="20" y="283">6. Lặp kênh: 1 → 3 (RGB)</text>
+      </g>
+      <rect x="13" y="302" width="138" height="24" rx="5" fill="#eff6ff" stroke="#60a5fa"/>
+      <text x="82" y="317" text-anchor="middle" font-size="8.2" font-weight="800" fill="#1d4ed8">Tensor: (1, 3, 224, 224) float32</text>
     </g>
 
-    <!-- Process step 3 -->
-    <g transform="translate(8, 102)">
-      <rect x="0" y="0" width="104" height="24" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.15)" stroke-width="0.5" rx="2" />
-      <text x="52" y="15" font-family="monospace" font-size="7.5" fill="#FAF9F5" text-anchor="middle">3. Normalise [0,1]</text>
+    <g id="model-mel-block" transform="translate(345 178)" filter="url(#shadow)">
+      <rect width="110" height="156" rx="8" fill="#ffffff" fill-opacity="0.96" stroke="#7c3aed" stroke-width="1.25"/>
+      <text x="55" y="22" text-anchor="middle" font-size="10.5" font-weight="800">PHỔ MEL</text>
+      <rect x="16" y="43" width="78" height="70" rx="5" fill="#1e1b4b" stroke="#4c1d95"/>
+      <g transform="translate(21 50)">
+        <rect x="0" y="44" width="8" height="12" fill="#fde047"/>
+        <rect x="10" y="33" width="8" height="23" fill="#fb923c"/>
+        <rect x="20" y="18" width="8" height="38" fill="#f43f5e"/>
+        <rect x="30" y="7" width="8" height="49" fill="#a855f7"/>
+        <rect x="40" y="14" width="8" height="42" fill="#ec4899"/>
+        <rect x="50" y="27" width="8" height="29" fill="#f97316"/>
+        <rect x="60" y="39" width="8" height="17" fill="#fde047"/>
+        <path d="M 0 10 C 18 35 34 5 67 27" fill="none" stroke="url(#model-spec-grad)" stroke-width="2"/>
+      </g>
+      <text x="55" y="137" text-anchor="middle" font-size="11" font-weight="800" fill="#6d28d9">3 × 224 × 224</text>
     </g>
 
-    <!-- Process step 4 -->
-    <g transform="translate(8, 134)">
-      <rect x="0" y="0" width="104" height="28" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.15)" stroke-width="0.5" rx="2" />
-      <text x="52" y="12" font-family="monospace" font-size="7.5" fill="#FAF9F5" text-anchor="middle">4. Resize (224x224)</text>
-      <text x="52" y="22" font-family="monospace" font-size="6.5" fill="#00ff8f" text-anchor="middle">Repeat Channels (RGB)</text>
+    <g id="model-cnn-block" transform="translate(485 70)" filter="url(#shadow)">
+      <rect width="245" height="328" rx="8" fill="url(#model-grad-cnn)" stroke="#ea580c" stroke-width="1.25"/>
+      <text x="14" y="27" font-size="12" font-weight="800">BACKBONE CNN</text>
+      <text x="14" y="43" font-size="9" fill="#475569">EfficientNet-V2-S, tiền huấn luyện ImageNet, tinh chỉnh</text>
+      <g transform="translate(14 62)">
+        <rect width="217" height="34" rx="5" fill="#ffffff" fill-opacity="0.82" stroke="#fed7aa"/>
+        <text x="10" y="15" font-size="9" font-weight="800">Stem Conv2d</text>
+        <text x="10" y="27" font-size="8" fill="#475569">kernel 3×3, stride=2</text>
+      </g>
+      <g transform="translate(14 107)">
+        <rect width="217" height="42" rx="5" fill="#ffffff" fill-opacity="0.82" stroke="#fed7aa"/>
+        <text x="10" y="16" font-size="9" font-weight="800">Fused-MBConv Blocks</text>
+        <text x="10" y="29" font-size="8" fill="#475569">Lớp 1–3 (đóng băng)</text>
+      </g>
+      <g transform="translate(14 160)">
+        <rect width="217" height="42" rx="5" fill="#ffffff" fill-opacity="0.82" stroke="#fed7aa"/>
+        <text x="10" y="16" font-size="9" font-weight="800">MBConv Blocks</text>
+        <text x="10" y="29" font-size="8" fill="#475569">Lớp 4–7 (tinh chỉnh)</text>
+      </g>
+      <g id="model-getitem-block" transform="translate(14 213)" filter="url(#glow)">
+        <rect width="217" height="58" rx="6" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5"/>
+        <text x="10" y="16" font-size="9.4" font-weight="900">Conv2d cuối → getitem_144</text>
+        <text x="10" y="31" font-size="8.4" fill="#166534">Kích hoạt đầu ra: (1, 160, 14, 14)</text>
+        <text x="10" y="45" font-size="7.5" fill="#475569">Đăng ký làm output ONNX khi khởi động</text>
+      </g>
+      <g id="model-gap-block" transform="translate(14 284)">
+        <rect width="217" height="33" rx="5" fill="#fff7ed" stroke="#fb923c"/>
+        <text x="10" y="14" font-size="9" font-weight="800">Gộp trung bình toàn cục (GAP)</text>
+        <text x="10" y="26" font-size="8" fill="#475569">Vector đặc trưng: 1280 chiều</text>
+      </g>
+    </g>
+
+    <g id="model-species-head" transform="translate(762 58)" filter="url(#shadow)">
+      <rect width="214" height="142" rx="8" fill="url(#model-grad-head)" stroke="#16a34a" stroke-width="1.25"/>
+      <text x="14" y="25" font-size="12" font-weight="800">NHÁNH LOÀI</text>
+      <text x="14" y="45" font-size="8.7" fill="#334155">FC (1280 → 256) • ReLU • Dropout p=0.3</text>
+      <text x="14" y="62" font-size="8.7" fill="#334155">Linear (256 → 3) • Softmax</text>
+      <rect x="14" y="79" width="186" height="47" rx="6" fill="#ffffff" fill-opacity="0.82" stroke="#86efac"/>
+      <text x="107" y="95" text-anchor="middle" font-size="9" font-weight="800">Đầu ra: 3 nhóm lớp</text>
+      <text x="107" y="113" text-anchor="middle" font-size="8.5" fill="#15803d">chim | ếch nhái | côn trùng</text>
+    </g>
+
+    <g id="model-threat-head" transform="translate(762 242)" filter="url(#shadow)">
+      <rect width="214" height="142" rx="8" fill="url(#model-grad-threat)" stroke="#e11d48" stroke-width="1.25"/>
+      <text x="14" y="25" font-size="12" font-weight="800">NHÁNH NGUY CƠ</text>
+      <text x="14" y="45" font-size="8.7" fill="#334155">FC (1280 → 128) • ReLU • Dropout p=0.3</text>
+      <text x="14" y="62" font-size="8.7" fill="#334155">Linear (128 → 9) • Sigmoid đa nhãn</text>
+      <rect x="14" y="79" width="186" height="47" rx="6" fill="#ffffff" fill-opacity="0.82" stroke="#fecdd3"/>
+      <text x="107" y="95" text-anchor="middle" font-size="9" font-weight="800">Đầu ra: 9 lớp nguy cơ</text>
+      <text x="107" y="113" text-anchor="middle" font-size="8.2" fill="#be123c">cưa máy | súng | ... (9 nguy cơ)</text>
+    </g>
+
+    <g id="model-dropout-box" transform="translate(792 400)" filter="url(#shadow)">
+      <rect width="184" height="72" rx="8" fill="#f8fafc" fill-opacity="0.96" stroke="#64748b" stroke-width="1.1"/>
+      <text x="12" y="20" font-size="9.4" font-weight="800">ĐỘ BẤT ĐỊNH MC-DROPOUT</text>
+      <text x="12" y="37" font-size="7.7" fill="#334155">N = 10 lượt, bật dropout</text>
+      <text x="12" y="50" font-size="7.7" fill="#334155">σ² = (1/N) Σ(yₙ - μ)²</text>
+      <text x="12" y="63" font-size="7.7" fill="#334155">σ_max &gt; 0.15 → độ tin cậy thấp</text>
+    </g>
+
+    <g id="model-xai-block" transform="translate(485 420)" filter="url(#shadow)">
+      <rect width="285" height="112" rx="8" fill="url(#model-grad-xai)" stroke="#0d9488" stroke-width="1.25"/>
+      <text x="14" y="24" font-size="12" font-weight="800" fill="#0f766e">LUỒNG XAI / GRAD-CAM</text>
+      <text x="14" y="43" font-size="8.2" fill="#334155">1. Trích tensor kích hoạt (160, 14, 14)</text>
+      <text x="14" y="57" font-size="8.2" fill="#334155">2. Trung bình |Abs| qua 160 kênh → (14, 14)</text>
+      <text x="14" y="70" font-size="8.2" fill="#334155">M[i,j] = (1/160) Σ|Aᵏ[i,j]|</text>
+      <text x="14" y="83" font-size="8.2" fill="#334155">3. Phóng song tuyến: (14,14) → (450, 176)</text>
+      <text x="14" y="96" font-size="8.2" fill="#334155">4. Làm mờ Gaussian: kernel 45×45</text>
+      <text x="14" y="109" font-size="8.2" fill="#334155">5. COLORMAP_JET + alpha 80% • 6. PNG Base64</text>
+    </g>
+
+    <g id="model-xai-output" transform="translate(806 488)" filter="url(#glow)">
+      <rect width="170" height="44" rx="8" fill="#ecfdf5" stroke="#14b8a6" stroke-width="1.4"/>
+      <text x="85" y="19" text-anchor="middle" font-size="9.5" font-weight="900" fill="#0f766e">Bản đồ nhiệt Grad-CAM</text>
+      <text x="85" y="34" text-anchor="middle" font-size="8.3" fill="#0f766e">Lớp phủ PNG Base64</text>
+    </g>
+
+    <g id="model-flow-arrows" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path id="model-arrow-input-pre" d="M 140 256 L 160 256" stroke="#16a34a" stroke-width="2.2" marker-end="url(#arrow-green)"/>
+      <path id="model-arrow-pre-mel" d="M 324 256 L 345 256" stroke="#16a34a" stroke-width="2.2" marker-end="url(#arrow-green)"/>
+      <path id="model-arrow-mel-cnn" d="M 455 256 L 485 256" stroke="#16a34a" stroke-width="2.2" marker-end="url(#arrow-green)"/>
+      <path id="model-arrow-gap-species" d="M 730 370 C 746 370 742 129 762 129" stroke="#16a34a" stroke-width="2.1" marker-end="url(#arrow-green)"/>
+      <path id="model-arrow-gap-threat" d="M 730 370 C 746 370 742 313 762 313" stroke="#e11d48" stroke-width="2.1" marker-end="url(#arrow-rose)"/>
+      <path id="model-arrow-getitem-xai" d="M 607 341 L 607 420" stroke="#0d9488" stroke-width="2.1" marker-end="url(#arrow-teal)"/>
+      <path id="model-arrow-xai-output" d="M 770 506 L 806 506" stroke="#0d9488" stroke-width="2.1" marker-end="url(#arrow-teal)"/>
+      <path id="model-arrow-heads-dropout" d="M 884 200 L 884 242" stroke="#64748b" stroke-width="1.6" stroke-dasharray="4 4"/>
+      <path id="model-arrow-threat-dropout" d="M 884 384 L 884 400" stroke="#64748b" stroke-width="1.6" stroke-dasharray="4 4"/>
+    </g>
+
+    <g id="model-flow-labels" font-size="8.2" font-weight="700">
+      <rect x="526" y="402" width="138" height="15" rx="4" fill="#ffffff" fill-opacity="0.9"/>
+      <text x="595" y="413" text-anchor="middle" font-size="7.8" fill="#0f766e">getitem_144: nhánh XAI</text>
+      <rect x="733" y="341" width="27" height="15" rx="4" fill="#ffffff" fill-opacity="0.9"/>
+      <text x="746.5" y="352" text-anchor="middle" font-size="7.8" fill="#15803d">Gộp</text>
     </g>
   </g>
-
-  <!-- ==================== TẦNG 3: MEL-SPECTROGRAM VIEW (MIDDLE) ==================== -->
-  <g transform="translate(315, 170)" filter="url(#shadow)">
-    <rect x="0" y="0" width="90" height="120" fill="#000004" stroke="#00ff8f" stroke-width="1.2" rx="4" />
-    <text x="45" y="18" font-family="sans-serif" font-size="8" font-weight="bold" fill="#fcffa4" text-anchor="middle">SPECTROGRAM</text>
-    
-    <!-- Fake log-frequency bands -->
-    <g opacity="0.8">
-      <rect x="10" y="30" width="70" height="10" fill="none" stroke="#bc3754" stroke-width="2" />
-      <rect x="10" y="45" width="70" height="12" fill="none" stroke="#f98e09" stroke-width="4" />
-      <rect x="10" y="62" width="70" height="8" fill="none" stroke="#fcffa4" stroke-width="1.5" />
-      <rect x="10" y="75" width="70" height="15" fill="none" stroke="#57106e" stroke-width="3" />
-      <rect x="10" y="95" width="70" height="6" fill="none" stroke="#f98e09" stroke-width="1" />
-    </g>
-    
-    <text x="45" y="112" font-family="monospace" font-size="7" fill="rgba(255,255,255,0.4)" text-anchor="middle">3 x 224 x 224</text>
-  </g>
-
-  <!-- ==================== TẦNG 4: CNN BACKBONE — EFFICIENTNET-V2 (MIDDLE RIGHT) ==================== -->
-  <g transform="translate(445, 125)" filter="url(#shadow)">
-    <rect x="0" y="0" width="240" height="210" fill="#0b130e" stroke="#00ff8f" stroke-width="1.5" rx="6" />
-    <text x="120" y="22" font-family="sans-serif" font-size="10" font-weight="bold" fill="#FAF9F5" text-anchor="middle">CNN BACKBONE (EfficientNet-V2-S)</text>
-    <line x1="10" y1="32" x2="230" y2="32" stroke="rgba(0,255,143,0.15)" stroke-width="0.75" />
-
-    <!-- Sub Convolutional blocks -->
-    <!-- Conv Layer 1 -->
-    <g transform="translate(15, 45)">
-      <rect x="0" y="0" width="210" height="26" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.15)" stroke-width="0.5" rx="2" />
-      <text x="10" y="16" font-family="monospace" font-size="8" fill="#FAF9F5">Stem Conv2d (3x3, stride=2)</text>
-    </g>
-
-    <!-- MBConv Blocks -->
-    <g transform="translate(15, 80)">
-      <rect x="0" y="0" width="210" height="42" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.15)" stroke-width="0.5" rx="2" />
-      <text x="10" y="16" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#FAF9F5">MBConv / Fused-MBConv Blocks</text>
-      <text x="10" y="30" font-family="monospace" font-size="7.5" fill="rgba(250,249,245,0.4)">Layers 1 to 7 (Pre-trained &amp; Frozen early)</text>
-    </g>
-
-    <!-- Final Conv Layer: getitem_144 -->
-    <g transform="translate(15, 135)">
-      <rect x="0" y="0" width="210" height="60" fill="rgba(0,255,143,0.03)" stroke="#00ff8f" stroke-width="1" rx="2" filter="url(#glow)" />
-      <!-- Glowing dot -->
-      <circle cx="200" cy="30" r="3.5" fill="#00ff8f" />
-      <text x="10" y="18" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5">Final Conv2d (getitem_144)</text>
-      <text x="10" y="32" font-family="monospace" font-size="8" fill="#00ff8f">Activations output: 1280 x 7 x 7</text>
-      <text x="10" y="46" font-family="monospace" font-size="7.5" fill="rgba(250,249,245,0.4)">Dynamically registered as graph output</text>
-    </g>
-  </g>
-
-  <!-- ==================== TẦNG 4.5: XAI GRAD-CAM ENGINE (BOTTOM) ==================== -->
-  <g transform="translate(510, 355)" filter="url(#shadow)">
-    <!-- Main Box -->
-    <rect x="0" y="0" width="215" height="160" fill="#0b130e" stroke="#059669" stroke-width="1.2" rx="4" />
-    <text x="107.5" y="20" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5" text-anchor="middle">EXPLAINABLE AI (XAI) PIPELINE</text>
-    <line x1="10" y1="28" x2="205" y2="28" stroke="rgba(5,150,105,0.15)" stroke-width="0.75" />
-
-    <!-- math mean absolute -->
-    <g transform="translate(10, 38)">
-      <rect x="0" y="0" width="195" height="28" fill="rgba(5,150,105,0.03)" stroke="rgba(5,150,105,0.15)" stroke-width="0.5" rx="2" />
-      <text x="10" y="12" font-family="monospace" font-size="8" fill="#FAF9F5">1. Mean absolute activations</text>
-      <text x="10" y="22" font-family="monospace" font-size="7.5" fill="#00ff8f">mean(abs(features), axis=0) -> (7,7)</text>
-    </g>
-
-    <!-- bilinear interpolation -->
-    <g transform="translate(10, 72)">
-      <rect x="0" y="0" width="195" height="26" fill="rgba(5,150,105,0.03)" stroke="rgba(5,150,105,0.15)" stroke-width="0.5" rx="2" />
-      <text x="10" y="16" font-family="monospace" font-size="8" fill="#FAF9F5">2. Resize (7x7) -> (450x176)</text>
-    </g>
-
-    <!-- Gaussian blur + Jet Colormap -->
-    <g transform="translate(10, 104)">
-      <rect x="0" y="0" width="195" height="42" fill="rgba(5,150,105,0.03)" stroke="rgba(5,150,105,0.15)" stroke-width="0.5" rx="2" />
-      <text x="10" y="14" font-family="monospace" font-size="8" fill="#FAF9F5">3. Smooth &amp; Colormap JET</text>
-      <text x="10" y="25" font-family="monospace" font-size="7.5" fill="rgba(250,249,245,0.4)">cv2.GaussianBlur(kernel=35x35)</text>
-      <text x="10" y="35" font-family="monospace" font-size="7.5" fill="#00ff8f">Adds Alpha Transparency channel</text>
-    </g>
-  </g>
-
-  <!-- ==================== TẦNG 5: GLOBAL AVERAGE POOLING (RIGHT MIDDLE) ==================== -->
-  <g transform="translate(715, 195)" filter="url(#shadow)">
-    <rect x="0" y="0" width="80" height="70" fill="#0b130e" stroke="#00ff8f" stroke-width="1.2" rx="4" />
-    <text x="40" y="24" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#FAF9F5" text-anchor="middle">GAP LAYER</text>
-    <text x="40" y="42" font-family="monospace" font-size="9" fill="#00ff8f" text-anchor="middle">1280-dim</text>
-    <text x="40" y="56" font-family="monospace" font-size="7" fill="rgba(250,249,245,0.4)" text-anchor="middle">Feature Vector</text>
-  </g>
-
-  <!-- ==================== TẦNG 6: DUAL HEADS (RIGHT) ==================== -->
-  <!-- SPECIES HEAD (RIGHT TOP) -->
-  <g transform="translate(825, 90)" filter="url(#shadow)">
-    <rect x="0" y="0" width="100" height="90" fill="#0b130e" stroke="#00ff8f" stroke-width="1.2" rx="4" />
-    <text x="50" y="22" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5" text-anchor="middle">SPECIES HEAD</text>
-    <line x1="10" y1="30" x2="90" y2="30" stroke="rgba(0,255,143,0.15)" stroke-width="0.75" />
-    <text x="50" y="46" font-family="monospace" font-size="7.5" fill="rgba(250,249,245,0.5)" text-anchor="middle">FC (256) -> ReLU</text>
-    <text x="50" y="60" font-family="monospace" font-size="7.5" fill="rgba(250,249,245,0.5)" text-anchor="middle">Dropout (0.3)</text>
-    <text x="50" y="76" font-family="monospace" font-size="8" fill="#00ff8f" text-anchor="middle">Linear (24)</text>
-  </g>
-
-  <!-- THREAT HEAD (RIGHT BOTTOM) -->
-  <g transform="translate(825, 275)" filter="url(#shadow)">
-    <rect x="0" y="0" width="100" height="90" fill="#0b130e" stroke="#00ff8f" stroke-width="1.2" rx="4" />
-    <text x="50" y="22" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5" text-anchor="middle">THREAT HEAD</text>
-    <line x1="10" y1="30" x2="90" y2="30" stroke="rgba(0,255,143,0.15)" stroke-width="0.75" />
-    <text x="50" y="46" font-family="monospace" font-size="7.5" fill="rgba(250,249,245,0.5)" text-anchor="middle">FC (128) -> ReLU</text>
-    <text x="50" y="60" font-family="monospace" font-size="7.5" fill="rgba(250,249,245,0.5)" text-anchor="middle">Dropout (0.3)</text>
-    <text x="50" y="76" font-family="monospace" font-size="8" fill="#00ff8f" text-anchor="middle">Linear (9)</text>
-  </g>
-
-  <!-- ==================== OUTPUTS (RIGHT END) ==================== -->
-  <!-- Species Outputs -->
-  <g transform="translate(945, 95)">
-    <circle cx="10" cy="45" r="3" fill="#059669" />
-    <text x="22" y="32" font-family="sans-serif" font-size="9" font-weight="bold" fill="#00ff8f">SPECIES</text>
-    <text x="22" y="45" font-family="monospace" font-size="8" fill="#FAF9F5">Identifications</text>
-    <text x="22" y="58" font-family="monospace" font-size="7" fill="rgba(250,249,245,0.5)">Softmax (24 classes)</text>
-  </g>
-
-  <!-- Threat Outputs -->
-  <g transform="translate(945, 275)">
-    <circle cx="10" cy="45" r="3" fill="#059669" />
-    <text x="22" y="32" font-family="sans-serif" font-size="9" font-weight="bold" fill="#00ff8f">THREATS</text>
-    <text x="22" y="45" font-family="monospace" font-size="8" fill="#FAF9F5">Chainsaw/Gunshot</text>
-    <text x="22" y="58" font-family="monospace" font-size="7" fill="rgba(250,249,245,0.5)">Sigmoid (9 classes)</text>
-  </g>
-
 </svg>

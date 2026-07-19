@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import api, { AudioPredictionResponse, HistoricalRecord } from "@/lib/api";
+import api, { AudioPredictionResponse, HealthTrendPoint, HistoricalRecord } from "@/lib/api";
 
 const SENSORS = [
   { id: "demo-sensor-1", name: "Trạm A - Suối Lớn", lat: "20°14'14.3\"N", lng: "105°36'56.5\"E", status: "active", icon: "🟢" },
@@ -19,7 +19,7 @@ export function useDashboardState(initialHistory: HistoricalRecord[]) {
   const [history, setHistory] = useState<HistoricalRecord[]>(initialHistory);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [trendData, setTrendData] = useState<any[]>([]);
+  const [trendData, setTrendData] = useState<HealthTrendPoint[]>([]);
 
   const fetchHistory = async () => {
     try {
@@ -382,10 +382,11 @@ export function useDashboardState(initialHistory: HistoricalRecord[]) {
   }, [prediction, isMuted]);
 
   useEffect(() => {
-    setMounted(true);
+    const mountedTimer = window.setTimeout(() => setMounted(true), 0);
     fetchHistory();
     fetchTrendData();
     return () => {
+      window.clearTimeout(mountedTimer);
       stopSiren();
     };
   }, []);

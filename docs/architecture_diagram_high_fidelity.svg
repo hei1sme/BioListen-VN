@@ -1,229 +1,240 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 562.5" width="100%" height="100%">
-  <!-- Definitions for styling, filters, and markers -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 562.5" width="100%" height="100%" role="img" aria-label="BioListen VN system architecture">
   <defs>
-    <!-- Drop Shadow Filter for nodes -->
-    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
-      <feDropShadow dx="2" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="135%">
+      <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.18"/>
     </filter>
-
-    <!-- Glowing Border Filter for active components -->
     <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feGaussianBlur stdDeviation="2.2" result="glow-blur"/>
+      <feFlood flood-color="#22c55e" flood-opacity="0.42" result="glow-color"/>
+      <feComposite in="glow-color" in2="glow-blur" operator="in" result="glow-soft"/>
       <feMerge>
-        <feMergeNode in="blur" />
-        <feMergeNode in="SourceGraphic" />
+        <feMergeNode in="glow-soft"/>
+        <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-
-    <!-- Arrowhead markers -->
-    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#00ff8f" />
+    <linearGradient id="grad-edge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ecfeff" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#f0fdf4" stop-opacity="0.94"/>
+    </linearGradient>
+    <linearGradient id="grad-front" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eff6ff" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#f8fafc" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="grad-db" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ecfdf5" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#f0fdfa" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="grad-back" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff7ed" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#f8fafc" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="grad-groq" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#faf5ff" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#eef2ff" stop-opacity="0.96"/>
+    </linearGradient>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a"/>
     </marker>
-    <marker id="arrow-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669" />
+    <marker id="arrow-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0d9488"/>
+    </marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b"/>
     </marker>
   </defs>
 
-  <!-- Background grid lines for tech-blueprint styling -->
-  <g stroke="rgba(0, 255, 143, 0.03)" stroke-width="1">
-    <!-- Vertical lines -->
-    <line x1="100" y1="0" x2="100" y2="562.5" />
-    <line x1="200" y1="0" x2="200" y2="562.5" />
-    <line x1="300" y1="0" x2="300" y2="562.5" />
-    <line x1="400" y1="0" x2="400" y2="562.5" />
-    <line x1="500" y1="0" x2="500" y2="562.5" />
-    <line x1="600" y1="0" x2="600" y2="562.5" />
-    <line x1="700" y1="0" x2="700" y2="562.5" />
-    <line x1="800" y1="0" x2="800" y2="562.5" />
-    <line x1="900" y1="0" x2="900" y2="562.5" />
-    <!-- Horizontal lines -->
-    <line x1="0" y1="100" x2="1000" y2="100" />
-    <line x1="0" y1="200" x2="1000" y2="200" />
-    <line x1="0" y1="300" x2="1000" y2="300" />
-    <line x1="0" y1="400" x2="1000" y2="400" />
-    <line x1="0" y1="500" x2="1000" y2="500" />
+  <g stroke="#94a3b8" stroke-opacity="0.16" stroke-width="0.8">
+    <line x1="180" y1="34" x2="180" y2="528"/>
+    <line x1="460" y1="34" x2="460" y2="528"/>
+    <line x1="835" y1="34" x2="835" y2="528"/>
+    <line x1="26" y1="281" x2="974" y2="281"/>
   </g>
 
-  <!-- ==================== CONNECTIONS / FLOW ARROWS ==================== -->
-  <g fill="none" stroke-width="1.5">
-    <!-- 1. Ranger Ingestion to Vercel -->
-    <path d="M 125, 230 L 195, 230" stroke="#00ff8f" marker-end="url(#arrow-green)" />
-    
-    <!-- 2. Vercel Upload to Supabase Storage -->
-    <path d="M 450, 190 C 580, 190 580, 100 710, 100" stroke="#059669" marker-end="url(#arrow-teal)" stroke-dasharray="3 3" />
-    
-    <!-- 3. Supabase Storage returns audio URL -->
-    <path d="M 710, 120 C 590, 120 590, 210 450, 210" stroke="#059669" marker-end="url(#arrow-teal)" stroke-dasharray="3 3" />
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" fill="#0f172a">
+    <g id="arch-edge-zone" transform="translate(28 108)" filter="url(#shadow)">
+      <rect width="136" height="328" rx="8" fill="url(#grad-edge)" stroke="#14b8a6" stroke-width="1.2"/>
+      <rect x="12" y="12" width="112" height="18" rx="9" fill="#ccfbf1" stroke="#5eead4" stroke-width="0.7"/>
+      <text x="68" y="25" text-anchor="middle" font-size="9" font-weight="700" fill="#115e59">NÚT BIÊN</text>
+      <text x="14" y="54" font-size="11" font-weight="700" textLength="108" lengthAdjust="spacingAndGlyphs">3 trạm quan trắc</text>
+      <text x="14" y="73" font-size="9" fill="#334155">Mic dã ngoại</text>
+      <text x="14" y="89" font-size="9" fill="#334155">SR: 22,050 Hz</text>
+      <text x="14" y="105" font-size="9" fill="#334155">Thu âm .wav</text>
+      <g transform="translate(20 134)">
+        <path d="M 48 120 C 34 86 34 48 50 16" fill="none" stroke="#0f766e" stroke-width="1.1" stroke-dasharray="3 4"/>
+        <circle cx="50" cy="18" r="9" fill="#14b8a6" stroke="#0f766e" stroke-width="1.2"/>
+        <circle cx="38" cy="68" r="9" fill="#22c55e" stroke="#15803d" stroke-width="1.2"/>
+        <circle cx="64" cy="118" r="9" fill="#06b6d4" stroke="#0e7490" stroke-width="1.2"/>
+        <text x="68" y="21" font-size="9" font-weight="700">Trạm A</text>
+        <text x="56" y="71" font-size="9" font-weight="700">Trạm B</text>
+        <text x="82" y="121" font-size="9" font-weight="700">Trạm C</text>
+        <g transform="translate(14 184)" stroke="#0f766e" stroke-width="1.7" fill="none">
+          <path d="M 0 18 C 8 5 16 5 24 18 S 40 31 48 18 S 64 5 72 18"/>
+          <path d="M 8 35 L 8 51 M 8 35 C -1 35 -1 51 8 51"/>
+          <path d="M 64 35 L 64 51 M 64 35 C 73 35 73 51 64 51"/>
+        </g>
+      </g>
+    </g>
 
-    <!-- 4. Vercel client calls Railway POST /predict -->
-    <path d="M 325, 290 L 325, 335" stroke="#00ff8f" marker-end="url(#arrow-green)" />
+    <g id="arch-frontend-zone" transform="translate(196 48)" filter="url(#shadow)">
+      <rect width="250" height="468" rx="8" fill="url(#grad-front)" stroke="#2563eb" stroke-width="1.3"/>
+      <rect x="14" y="14" width="154" height="20" rx="10" fill="#dbeafe" stroke="#93c5fd" stroke-width="0.7"/>
+      <text x="91" y="28" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">Next.js 14 / TypeScript</text>
+      <text x="14" y="57" font-size="14" font-weight="800">GIAO DIỆN / Vercel</text>
+      <text x="14" y="74" font-size="9" fill="#475569">Bảng điều khiển web cho kiểm lâm</text>
+      <g transform="translate(15 96)">
+        <rect width="220" height="52" rx="6" fill="#ffffff" fill-opacity="0.78" stroke="#bfdbfe"/>
+        <text x="12" y="18" font-size="10" font-weight="800">GeoMap.tsx</text>
+        <text x="12" y="35" font-size="9" fill="#475569">Bản đồ radar GIS (không gian)</text>
+        <circle cx="190" cy="26" r="11" fill="#dcfce7" stroke="#22c55e"/>
+        <path d="M184 26 L190 20 L196 26 L190 32 Z" fill="#16a34a"/>
+      </g>
+      <g transform="translate(15 158)">
+        <rect width="220" height="58" rx="6" fill="#ffffff" fill-opacity="0.78" stroke="#bfdbfe"/>
+        <text x="12" y="18" font-size="10" font-weight="800">SpectrogramViewer.tsx</text>
+        <text x="12" y="35" font-size="9" fill="#475569">Mel-Spectrogram + lớp phủ XAI</text>
+        <g transform="translate(156 13)">
+          <rect width="48" height="30" rx="3" fill="#1e1b4b"/>
+          <rect x="4" y="20" width="7" height="6" fill="#fde047"/>
+          <rect x="13" y="15" width="7" height="11" fill="#fb923c"/>
+          <rect x="22" y="10" width="7" height="16" fill="#f43f5e"/>
+          <rect x="31" y="5" width="7" height="21" fill="#a855f7"/>
+          <rect x="40" y="17" width="4" height="9" fill="#38bdf8"/>
+        </g>
+      </g>
+      <g transform="translate(15 228)">
+        <rect width="220" height="58" rx="6" fill="#ffffff" fill-opacity="0.78" stroke="#bfdbfe"/>
+        <text x="12" y="18" font-size="10" font-weight="800">AudioIngestion.tsx</text>
+        <text x="12" y="35" font-size="9" fill="#475569">Kéo-thả / MediaRecorder API</text>
+        <path d="M182 35 L182 18 M171 29 L182 18 L193 29" stroke="#2563eb" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(15 298)">
+        <rect width="220" height="58" rx="6" fill="#ffffff" fill-opacity="0.78" stroke="#bfdbfe"/>
+        <text x="12" y="18" font-size="10" font-weight="800">DashboardAnalytics.tsx</text>
+        <text x="12" y="35" font-size="9" fill="#475569">Biểu đồ đa dạng sinh học Recharts</text>
+        <polyline points="160,38 171,29 182,33 195,18" fill="none" stroke="#16a34a" stroke-width="2"/>
+      </g>
+      <g transform="translate(15 368)">
+        <rect width="220" height="58" rx="6" fill="#ffffff" fill-opacity="0.78" stroke="#bfdbfe"/>
+        <text x="12" y="18" font-size="10" font-weight="800">useDashboardState.ts</text>
+        <text x="12" y="35" font-size="9" fill="#475569">Quản lý trạng thái, API client, mô phỏng</text>
+        <circle cx="178" cy="28" r="5" fill="#2563eb"/>
+        <circle cx="196" cy="28" r="5" fill="#22c55e"/>
+      </g>
+    </g>
 
-    <!-- 5. Railway saves record to Supabase DB -->
-    <path d="M 480, 420 L 710, 420" stroke="#059669" marker-end="url(#arrow-teal)" />
+    <g id="arch-supabase-zone" transform="translate(690 44)" filter="url(#shadow)">
+      <rect width="282" height="232" rx="8" fill="url(#grad-db)" stroke="#0d9488" stroke-width="1.3"/>
+      <rect x="14" y="14" width="151" height="20" rx="10" fill="#ccfbf1" stroke="#5eead4" stroke-width="0.7"/>
+      <text x="89.5" y="28" text-anchor="middle" font-size="9" font-weight="700" fill="#0f766e">PostgreSQL + lưu trữ S3</text>
+      <text x="14" y="57" font-size="14" font-weight="800">SUPABASE</text>
+      <g transform="translate(14 78)">
+        <rect width="254" height="31" rx="5" fill="#ffffff" fill-opacity="0.78" stroke="#99f6e4"/>
+        <text x="10" y="14" font-size="9.5" font-weight="800">Supabase Storage</text>
+        <text x="10" y="25" font-size="8" fill="#475569">Tệp .wav thô</text>
+      </g>
+      <g transform="translate(14 118)">
+        <rect width="254" height="43" rx="5" fill="#ffffff" fill-opacity="0.78" stroke="#99f6e4"/>
+        <text x="10" y="14" font-size="9.5" font-weight="800">Bảng: detections</text>
+        <text x="10" y="27" font-size="7.6" fill="#475569">UUID, sensor_id, timestamp, species JSON, threats JSON</text>
+        <text x="10" y="37" font-size="7.6" fill="#475569">shannon_index, llm_report</text>
+      </g>
+      <g transform="translate(14 171)">
+        <rect width="122" height="39" rx="5" fill="#ffffff" fill-opacity="0.78" stroke="#99f6e4"/>
+        <text x="10" y="15" font-size="9.5" font-weight="800">Bảng: sensors</text>
+        <text x="10" y="29" font-size="8" fill="#475569">tọa độ lat/lon</text>
+      </g>
+      <g transform="translate(146 171)">
+        <rect width="122" height="39" rx="5" fill="#ffffff" fill-opacity="0.78" stroke="#99f6e4"/>
+        <text x="10" y="15" font-size="9.5" font-weight="800">Realtime</text>
+        <text x="10" y="29" font-size="8" fill="#475569">bật subscription</text>
+      </g>
+    </g>
 
-    <!-- 6. Railway calls Groq API -->
-    <path d="M 480, 460 L 710, 460" stroke="#059669" marker-end="url(#arrow-teal)" />
+    <g id="arch-backend-zone" transform="translate(470 312)" filter="url(#shadow)">
+      <rect width="348" height="214" rx="8" fill="url(#grad-back)" stroke="#ea580c" stroke-width="1.3"/>
+      <rect x="14" y="14" width="129" height="20" rx="10" fill="#ffedd5" stroke="#fdba74" stroke-width="0.7"/>
+      <text x="78.5" y="28" text-anchor="middle" font-size="9" font-weight="700" fill="#c2410c">FastAPI / Python 3.11</text>
+      <text x="14" y="57" font-size="14" font-weight="800">BỘ XỬ LÝ / Railway</text>
+      <g transform="translate(14 76)">
+        <rect width="154" height="31" rx="5" fill="#ffffff" fill-opacity="0.82" stroke="#fed7aa"/>
+        <text x="10" y="14" font-size="9.3" font-weight="800">Route audio.py</text>
+        <text x="10" y="25" font-size="8" fill="#475569">POST /api/audio/predict</text>
+      </g>
+      <g transform="translate(180 76)">
+        <rect width="154" height="45" rx="5" fill="#ffffff" fill-opacity="0.82" stroke="#fed7aa"/>
+        <text x="10" y="14" font-size="9.3" font-weight="800">Tiền xử lý Librosa</text>
+        <text x="10" y="26" font-size="7.6" fill="#475569">n_fft=2048, hop=512, n_mels=128</text>
+        <text x="10" y="37" font-size="7.6" fill="#475569">chuẩn hóa [0,1], resize 224×224</text>
+      </g>
+      <g transform="translate(14 118)">
+        <rect width="154" height="49" rx="5" fill="#ffffff" fill-opacity="0.82" stroke="#fed7aa"/>
+        <text x="10" y="14" font-size="9.3" font-weight="800">ONNX Runtime CPU</text>
+        <text x="10" y="27" font-size="7.7" fill="#475569">biolisten_with_xai.onnx</text>
+        <text x="10" y="38" font-size="7.7" fill="#475569">backbone EfficientNet-V2-S</text>
+      </g>
+      <g transform="translate(180 132)">
+        <rect width="154" height="35" rx="5" fill="#ffffff" fill-opacity="0.82" stroke="#fed7aa"/>
+        <text x="10" y="14" font-size="9.3" font-weight="800">Đầu ra đa nhiệm</text>
+        <text x="10" y="26" font-size="7.8" fill="#475569">3 nhóm loài + 9 lớp nguy cơ</text>
+      </g>
+      <g transform="translate(14 178)">
+        <rect width="99" height="25" rx="5" fill="#f0fdf4" stroke="#86efac"/>
+        <text x="9" y="16" font-size="8.2" font-weight="700">H' Shannon-Wiener</text>
+      </g>
+      <g transform="translate(124 178)">
+        <rect width="99" height="25" rx="5" fill="#f0fdfa" stroke="#5eead4"/>
+        <text x="8" y="16" font-size="8.2" font-weight="700">MC-Dropout N=10</text>
+      </g>
+      <g transform="translate(234 178)" filter="url(#glow)">
+        <rect width="100" height="25" rx="5" fill="#ecfdf5" stroke="#22c55e" stroke-width="1.3"/>
+        <text x="8" y="16" font-size="8.2" font-weight="800">getitem_144 → XAI</text>
+      </g>
+      <text x="262" y="197" font-size="7.2" fill="#475569">(160,14,14)</text>
+    </g>
 
-    <!-- 7. Railway returns JSON predictions (Base64 Visuals, Health Indices, LLM Report) to Vercel -->
-    <path d="M 345, 345 L 345, 300" stroke="#00ff8f" marker-end="url(#arrow-green)" />
+    <g id="arch-groq-zone" transform="translate(846 330)" filter="url(#shadow)">
+      <rect width="126" height="176" rx="8" fill="url(#grad-groq)" stroke="#7c3aed" stroke-width="1.3"/>
+      <rect x="10" y="13" width="106" height="30" rx="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="0.7"/>
+      <text x="63" y="25" text-anchor="middle" font-size="8.2" font-weight="800" fill="#6d28d9">LLaMA-3-8B</text>
+      <text x="63" y="36" text-anchor="middle" font-size="7.6" fill="#6d28d9">qua Groq API</text>
+      <text x="14" y="68" font-size="12" font-weight="800">GROQ</text>
+      <rect x="13" y="84" width="100" height="32" rx="5" fill="#ffffff" fill-opacity="0.78" stroke="#ddd6fe"/>
+      <text x="63" y="97" text-anchor="middle" font-size="8.4" font-weight="700">Sinh báo cáo</text>
+      <text x="63" y="109" text-anchor="middle" font-size="8.4" font-weight="700">tuần tra tiếng Việt</text>
+      <rect x="13" y="126" width="100" height="35" rx="5" fill="#ffffff" fill-opacity="0.78" stroke="#ddd6fe"/>
+      <text x="63" y="140" text-anchor="middle" font-size="7.7">Đa dạng sinh học</text>
+      <text x="63" y="152" text-anchor="middle" font-size="7.7">+ nguy cơ → văn bản</text>
+    </g>
+
+    <g id="arch-connections" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path id="arch-arrow-edge-front" d="M 164 208 L 196 208" stroke="#16a34a" stroke-width="2.1" marker-end="url(#arrow-green)"/>
+      <path id="arch-arrow-front-store" d="M 446 126 C 548 126 580 96 690 96" stroke="#0d9488" stroke-width="1.9" stroke-dasharray="6 5" marker-end="url(#arrow-teal)"/>
+      <path id="arch-arrow-storage-url" d="M 690 144 C 580 144 548 166 446 166" stroke="#0d9488" stroke-width="1.9" stroke-dasharray="6 5" marker-end="url(#arrow-teal)"/>
+      <path id="arch-arrow-front-back" d="M 446 366 L 470 366" stroke="#16a34a" stroke-width="2.2" marker-end="url(#arrow-green)"/>
+      <path id="arch-arrow-back-front" d="M 470 488 C 456 488 456 488 446 488" stroke="#16a34a" stroke-width="2.2" marker-end="url(#arrow-green)"/>
+      <path id="arch-arrow-back-db" d="M 654 312 C 654 288 714 300 734 276" stroke="#0d9488" stroke-width="1.9" marker-end="url(#arrow-teal)"/>
+      <path id="arch-arrow-back-groq" d="M 818 390 L 846 390" stroke="#0d9488" stroke-width="1.9" marker-end="url(#arrow-teal)"/>
+      <path id="arch-arrow-groq-back" d="M 846 454 L 818 454" stroke="#0d9488" stroke-width="1.9" marker-end="url(#arrow-teal)"/>
+    </g>
+
+    <g id="arch-connection-labels" font-size="8.2" font-weight="700">
+      <rect x="60" y="78" width="92" height="25" rx="4" fill="#ffffff" fill-opacity="0.92"/>
+      <text x="106" y="88" text-anchor="middle" font-size="7.8" fill="#15803d">Tải âm thanh lên</text>
+      <text x="106" y="99" text-anchor="middle" font-size="7.8" fill="#15803d">/ ghi trực tiếp</text>
+      <rect x="542" y="103" width="54" height="15" rx="4" fill="#ffffff" fill-opacity="0.88"/>
+      <text x="569" y="114" text-anchor="middle" fill="#0f766e">Lưu .wav</text>
+      <rect x="548" y="149" width="60" height="15" rx="4" fill="#ffffff" fill-opacity="0.88"/>
+      <text x="578" y="160" text-anchor="middle" fill="#0f766e">URL âm thanh</text>
+      <rect x="448" y="350" width="20" height="15" rx="4" fill="#ffffff" fill-opacity="0.9"/>
+      <text x="458" y="361" text-anchor="middle" fill="#15803d">API</text>
+      <rect x="596" y="286" width="104" height="15" rx="4" fill="#ffffff" fill-opacity="0.9"/>
+      <text x="648" y="297" text-anchor="middle" fill="#0f766e">Ghi bản phát hiện</text>
+      <rect x="704" y="282" width="96" height="15" rx="4" fill="#ffffff" fill-opacity="0.9"/>
+      <text x="752" y="293" text-anchor="middle" fill="#0f766e">Báo cáo tiếng Việt</text>
+      <rect x="824" y="300" width="110" height="15" rx="4" fill="#ffffff" fill-opacity="0.9"/>
+      <text x="879" y="311" text-anchor="middle" fill="#0f766e">JSON phân tích → báo cáo</text>
+      <rect x="250" y="532" width="182" height="15" rx="4" fill="#ffffff" fill-opacity="0.92"/>
+      <text x="341" y="543" text-anchor="middle" fill="#15803d">JSON: loài, nguy cơ, XAI, chỉ số H'</text>
+    </g>
   </g>
-
-  <!-- Connection labels -->
-  <g font-family="monospace" font-size="9" fill="rgba(255, 255, 255, 0.4)" text-anchor="middle">
-    <!-- Ingest label -->
-    <rect x="130" y="212" width="60" height="14" fill="#090d0b" stroke="rgba(0,255,143,0.15)" stroke-width="0.5" rx="2" />
-    <text x="160" y="222" fill="#00ff8f">Ingestion</text>
-
-    <!-- Upload label -->
-    <rect x="520" y="125" width="80" height="14" fill="#090d0b" stroke="rgba(5,150,105,0.15)" stroke-width="0.5" rx="2" />
-    <text x="560" y="135" fill="#059669">Upload Audio</text>
-
-    <!-- Predict API label -->
-    <rect x="235" y="306" width="80" height="14" fill="#090d0b" stroke="rgba(0,255,143,0.15)" stroke-width="0.5" rx="2" />
-    <text x="275" y="316" fill="#00ff8f">POST /predict</text>
-
-    <!-- Save DB label -->
-    <rect x="555" y="403" width="90" height="14" fill="#090d0b" stroke="rgba(5,150,105,0.15)" stroke-width="0.5" rx="2" />
-    <text x="600" y="413" fill="#059669">Insert Detection</text>
-
-    <!-- Call LLM label -->
-    <rect x="555" y="468" width="90" height="14" fill="#090d0b" stroke="rgba(5,150,105,0.15)" stroke-width="0.5" rx="2" />
-    <text x="600" y="478" fill="#059669">Request Report</text>
-  </g>
-
-  <!-- ==================== TẦNG 1: SENSOR / CAPTURE (LEFT) ==================== -->
-  <g transform="translate(20, 180)" filter="url(#shadow)">
-    <!-- Main Box -->
-    <rect x="0" y="0" width="100" height="100" fill="#0b130e" stroke="#00ff8f" stroke-width="1.5" rx="4" filter="url(#glow)" />
-    <!-- Glowing Status Indicator -->
-    <circle cx="15" cy="15" r="3" fill="#00ff8f" />
-    <!-- Title -->
-    <text x="50" y="40" font-family="sans-serif" font-size="10" font-weight="bold" fill="#FAF9F5" text-anchor="middle">EDGE NODES</text>
-    <text x="50" y="55" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.5)" text-anchor="middle">Mic dã ngoại</text>
-    <text x="50" y="75" font-family="monospace" font-size="7" fill="#00ff8f" text-anchor="middle">Capture Audio</text>
-  </g>
-
-  <!-- ==================== TẦNG 2: PRESENTATION — VERCEL (MIDDLE TOP) ==================== -->
-  <g transform="translate(200, 90)" filter="url(#shadow)">
-    <!-- Container Box -->
-    <rect x="0" y="0" width="250" height="200" fill="#0b130e" stroke="#00ff8f" stroke-width="1.5" rx="6" />
-    <!-- Vercel logo marker -->
-    <polygon points="18,14 26,28 10,28" fill="#FAF9F5" />
-    <!-- Header -->
-    <text x="35" y="24" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FAF9F5">FRONTEND (Vercel)</text>
-    <text x="235" y="22" font-family="monospace" font-size="7" fill="#00ff8f" text-anchor="end">Next.js 14</text>
-    <line x1="10" y1="36" x2="240" y2="36" stroke="rgba(0,255,143,0.15)" stroke-width="1" />
-
-    <!-- Sub components -->
-    <!-- GIS Radar Map -->
-    <g transform="translate(15, 50)">
-      <rect x="0" y="0" width="220" height="26" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
-      <text x="10" y="16" font-family="sans-serif" font-size="9" fill="#FAF9F5">GIS Radar Map (GeoMap.tsx)</text>
-      <circle cx="205" cy="13" r="2.5" fill="#00ff8f" />
-    </g>
-
-    <!-- Spectrogram & XAI Viewer -->
-    <g transform="translate(15, 85)">
-      <rect x="0" y="0" width="220" height="26" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
-      <text x="10" y="16" font-family="sans-serif" font-size="9" fill="#FAF9F5">Visualizer (SpectrogramViewer.tsx)</text>
-      <circle cx="205" cy="13" r="2.5" fill="#00ff8f" />
-    </g>
-
-    <!-- Audio Ingestion -->
-    <g transform="translate(15, 120)">
-      <rect x="0" y="0" width="220" height="26" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
-      <text x="10" y="16" font-family="sans-serif" font-size="9" fill="#FAF9F5">Recorder/Ingester (AudioIngestion.tsx)</text>
-      <circle cx="205" cy="13" r="2.5" fill="#00ff8f" />
-    </g>
-
-    <!-- Recharts Analytics -->
-    <g transform="translate(15, 155)">
-      <rect x="0" y="0" width="220" height="30" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
-      <text x="10" y="14" font-family="sans-serif" font-size="9" fill="#FAF9F5">Recharts Dashboard (Analytics &amp; Logs)</text>
-      <text x="10" y="24" font-family="monospace" font-size="7" fill="rgba(250,249,245,0.4)">Syncs history &amp; trends via ApiClient</text>
-    </g>
-  </g>
-
-  <!-- ==================== TẦNG 3: PROCESSING — RAILWAY (MIDDLE BOTTOM) ==================== -->
-  <g transform="translate(200, 325)" filter="url(#shadow)">
-    <!-- Container Box -->
-    <rect x="0" y="0" width="250" height="200" fill="#0b130e" stroke="#00ff8f" stroke-width="1.5" rx="6" />
-    <!-- Railway Indicator Icon -->
-    <rect x="12" y="15" width="12" height="12" fill="#FAF9F5" rx="2" />
-    <!-- Header -->
-    <text x="32" y="25" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FAF9F5">BACKEND ENGINE (Railway)</text>
-    <text x="235" y="23" font-family="monospace" font-size="7" fill="#00ff8f" text-anchor="end">FastAPI + Python</text>
-    <line x1="10" y1="36" x2="240" y2="36" stroke="rgba(0,255,143,0.15)" stroke-width="1" />
-
-    <!-- Sub components inside Backend -->
-    <!-- Librosa Feature Extractor -->
-    <g transform="translate(15, 50)">
-      <rect x="0" y="0" width="220" height="26" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
-      <text x="10" y="16" font-family="sans-serif" font-size="9" fill="#FAF9F5">Librosa Mel-Spectrogram Gen</text>
-      <text x="210" y="16" font-family="monospace" font-size="7" fill="#00ff8f" text-anchor="end">Inferno</text>
-    </g>
-
-    <!-- ONNX Runtime CPU Inference -->
-    <g transform="translate(15, 85)">
-      <rect x="0" y="0" width="220" height="40" fill="rgba(0,255,143,0.03)" stroke="#00ff8f" stroke-width="0.75" rx="2" filter="url(#glow)" />
-      <!-- Small Status Light -->
-      <circle cx="205" cy="20" r="3" fill="#00ff8f" />
-      <text x="10" y="16" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5">ONNX CPU Execution Engine</text>
-      <text x="10" y="30" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.5)">Multi-Task CNN Backbone (EfficientNet-V2)</text>
-    </g>
-
-    <!-- Dynamic XAI / Grad-CAM Generator -->
-    <g transform="translate(15, 135)">
-      <rect x="0" y="0" width="220" height="48" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
-      <text x="10" y="15" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5">Real XAI / Grad-CAM Engine</text>
-      <text x="10" y="28" font-family="monospace" font-size="7.5" fill="rgba(250,249,245,0.6)">Intercepts conv-layer: 'getitem_144'</text>
-      <text x="10" y="39" font-family="monospace" font-size="7.5" fill="#00ff8f">Generates 1280x7x7 Heatmap Overlay</text>
-    </g>
-  </g>
-
-  <!-- ==================== TẦNG 4: DATABASE — SUPABASE (RIGHT TOP) ==================== -->
-  <g transform="translate(720, 80)" filter="url(#shadow)">
-    <!-- Container Box -->
-    <rect x="0" y="0" width="240" height="190" fill="#0b130e" stroke="#059669" stroke-width="1.5" rx="6" />
-    <!-- DB Cylinder Icon -->
-    <path d="M 22,25 C 22,21 34,21 34,25 C 34,29 22,29 22,25 Z M 22,25 L 22,33 C 22,37 34,37 34,33 L 34,25" stroke="#FAF9F5" fill="none" stroke-width="1" />
-    <!-- Header -->
-    <text x="44" y="28" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FAF9F5">DATABASE (Supabase)</text>
-    <line x1="10" y1="42" x2="230" y2="42" stroke="rgba(5,150,105,0.15)" stroke-width="1" />
-
-    <!-- Supabase Storage -->
-    <g transform="translate(15, 55)">
-      <rect x="0" y="0" width="210" height="35" fill="rgba(5,150,105,0.03)" stroke="rgba(5,150,105,0.2)" stroke-width="0.75" rx="2" />
-      <text x="10" y="16" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5">Supabase S3 Storage</text>
-      <text x="10" y="27" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.5)">Stores captured raw .wav files</text>
-    </g>
-
-    <!-- PostgreSQL Database Tables -->
-    <g transform="translate(15, 105)">
-      <rect x="0" y="0" width="210" height="70" fill="rgba(5,150,105,0.03)" stroke="rgba(5,150,105,0.2)" stroke-width="0.75" rx="2" />
-      <text x="10" y="16" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5">PostgreSQL Database</text>
-      <text x="15" y="32" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.6)">• table: 'detections' (Logs &amp; Index)</text>
-      <text x="15" y="46" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.6)">• table: 'sensors' (Geospatial Metadata)</text>
-      <text x="15" y="60" font-family="monospace" font-size="7.5" fill="#00ff8f">Enables Realtime Data Subscriptions</text>
-    </g>
-  </g>
-
-  <!-- ==================== TẦNG 5: REPORT ENGINE — GROQ LLM (RIGHT BOTTOM) ==================== -->
-  <g transform="translate(720, 390)" filter="url(#shadow)">
-    <!-- Container Box -->
-    <rect x="0" y="0" width="240" height="110" fill="#0b130e" stroke="#059669" stroke-width="1.5" rx="6" />
-    <!-- AI icon -->
-    <circle cx="28" cy="28" r="8" stroke="#FAF9F5" fill="none" stroke-width="1" />
-    <!-- Header -->
-    <text x="44" y="31" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FAF9F5">REPORT ENGINE (Groq)</text>
-    <line x1="10" y1="46" x2="230" y2="46" stroke="rgba(5,150,105,0.15)" stroke-width="1" />
-
-    <!-- Groq LLaMA-3 -->
-    <g transform="translate(15, 56)">
-      <rect x="0" y="0" width="210" height="40" fill="rgba(5,150,105,0.03)" stroke="rgba(5,150,105,0.2)" stroke-width="0.75" rx="2" />
-      <text x="10" y="16" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5">LLaMA-3-8B model</text>
-      <text x="10" y="30" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.5)">Generates Natural Ranger Reports</text>
-    </g>
-  </g>
-
 </svg>

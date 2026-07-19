@@ -2,6 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 
+type BrowserWindowWithAudio = Window & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
 export function useAudioRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -75,7 +79,12 @@ export function useAudioRecorder() {
           // Use temporary AudioContext if audioContextRef.current is closed or suspended
           let ctx = audioContextRef.current;
           if (!ctx || ctx.state === "closed") {
-            ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const AudioContextCtor =
+              window.AudioContext || (window as BrowserWindowWithAudio).webkitAudioContext;
+            if (!AudioContextCtor) {
+              throw new Error("Web Audio API is not available in this browser.");
+            }
+            ctx = new AudioContextCtor();
           }
           
           const audioBuffer = await ctx.decodeAudioData(arrayBuffer);

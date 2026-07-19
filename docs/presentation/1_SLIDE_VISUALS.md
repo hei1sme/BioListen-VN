@@ -90,11 +90,15 @@
 
 ### Slide 9: Lộ trình phát triển thực tế (Agile Roadmap)
 
-* **Visual chính:** Trục thời gian 3 mốc rõ ràng được trình bày bằng các thẻ màu kem/xanh rừng thanh lịch:
-  - **Tháng 1:** Hoàn thiện thiết kế PCB & vỏ hộp chống nước tiêu chuẩn IP67.
-  - **Tháng 3:** Triển khai thử nghiệm trạm POC đầu tiên tại Phân khu Rừng Già Cúc Phương để thu tập dữ liệu thực địa.
-  - **Tháng 6:** Gọi vốn Seed vòng 1 để sản xuất và phủ sóng 50 trạm toàn phân khu.
-- **Chữ trên slide:** "Mạch PCB IP67" -> "Pilot Cúc Phương" -> "Thương mại hóa diện rộng"
+* **Visual chính:** Ba thẻ Future Work đặt cạnh nhau trên nền kem/xanh rừng, mỗi thẻ có icon tương ứng:
+
+  - 🌿 **Làm giàu dữ liệu:** Tiến hành thu thập mẫu âm thanh rừng thực tế tại Cúc Phương để fine-tune mô hình AI nhạy bén hơn với môi trường bản địa. *(Nâng cấp từ phân nhóm → nhận diện từng loài đơn lẻ)*
+  - 🔗 **Tích hợp quy trình:** Liên kết luồng dữ liệu cảnh báo từ Cloud Dashboard thẳng tới hệ thống trực ca kiểm lâm của BQL VQG để thử nghiệm phản ứng nhanh.
+  - ⚙️ **Tối ưu thiết bị:** Phối hợp cùng đối tác lâm nghiệp thử nghiệm đóng gói phần cứng trong vỏ bảo vệ kháng nước IP67 tiêu chuẩn chịu thời tiết ẩm ướt.
+
+- **Chữ trên slide:** "Làm giàu dữ liệu" | "Tích hợp quy trình" | "Tối ưu thiết bị"
+- **Ghi chú kỹ thuật (footnote nhỏ dưới slide):** *Mô hình v1 hiện phân loại theo 3 nhóm chỉ thị (Chim / Ếch nhái / Côn trùng). Mục tiêu future work: nâng cấp lên individual species-level detection.*
+
 
 ### Slide 10: Đội ngũ & Q&A
 

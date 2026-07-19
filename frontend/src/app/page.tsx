@@ -223,7 +223,6 @@ export default function Home() {
           {activeTab === "analytics" && (
             <DashboardAnalytics
               mounted={mounted}
-              prediction={prediction}
               trendData={trendData && trendData.length > 0 ? trendData : MOCK_TREND}
             />
           )}
