@@ -10,7 +10,7 @@
 
 Dưới đây là sơ đồ dòng truyền nhận dữ liệu và phân tầng dịch vụ của hệ thống:
 
-![System Architecture](./architecture_diagram_high_fidelity.png)
+![System Architecture](./architecture_diagram_high_fidelity.svg)
 
 ---
 

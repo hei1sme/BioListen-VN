@@ -1,0 +1,229 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 562.5" width="100%" height="100%">
+  <!-- Definitions for styling, filters, and markers -->
+  <defs>
+    <!-- Drop Shadow Filter for nodes -->
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="2" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+
+    <!-- Glowing Border Filter for active components -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Arrowhead markers -->
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#00ff8f" />
+    </marker>
+    <marker id="arrow-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669" />
+    </marker>
+  </defs>
+
+  <!-- Background grid lines for tech-blueprint styling -->
+  <g stroke="rgba(0, 255, 143, 0.03)" stroke-width="1">
+    <!-- Vertical lines -->
+    <line x1="100" y1="0" x2="100" y2="562.5" />
+    <line x1="200" y1="0" x2="200" y2="562.5" />
+    <line x1="300" y1="0" x2="300" y2="562.5" />
+    <line x1="400" y1="0" x2="400" y2="562.5" />
+    <line x1="500" y1="0" x2="500" y2="562.5" />
+    <line x1="600" y1="0" x2="600" y2="562.5" />
+    <line x1="700" y1="0" x2="700" y2="562.5" />
+    <line x1="800" y1="0" x2="800" y2="562.5" />
+    <line x1="900" y1="0" x2="900" y2="562.5" />
+    <!-- Horizontal lines -->
+    <line x1="0" y1="100" x2="1000" y2="100" />
+    <line x1="0" y1="200" x2="1000" y2="200" />
+    <line x1="0" y1="300" x2="1000" y2="300" />
+    <line x1="0" y1="400" x2="1000" y2="400" />
+    <line x1="0" y1="500" x2="1000" y2="500" />
+  </g>
+
+  <!-- ==================== CONNECTIONS / FLOW ARROWS ==================== -->
+  <g fill="none" stroke-width="1.5">
+    <!-- 1. Ranger Ingestion to Vercel -->
+    <path d="M 125, 230 L 195, 230" stroke="#00ff8f" marker-end="url(#arrow-green)" />
+    
+    <!-- 2. Vercel Upload to Supabase Storage -->
+    <path d="M 450, 190 C 580, 190 580, 100 710, 100" stroke="#059669" marker-end="url(#arrow-teal)" stroke-dasharray="3 3" />
+    
+    <!-- 3. Supabase Storage returns audio URL -->
+    <path d="M 710, 120 C 590, 120 590, 210 450, 210" stroke="#059669" marker-end="url(#arrow-teal)" stroke-dasharray="3 3" />
+
+    <!-- 4. Vercel client calls Railway POST /predict -->
+    <path d="M 325, 290 L 325, 335" stroke="#00ff8f" marker-end="url(#arrow-green)" />
+
+    <!-- 5. Railway saves record to Supabase DB -->
+    <path d="M 480, 420 L 710, 420" stroke="#059669" marker-end="url(#arrow-teal)" />
+
+    <!-- 6. Railway calls Groq API -->
+    <path d="M 480, 460 L 710, 460" stroke="#059669" marker-end="url(#arrow-teal)" />
+
+    <!-- 7. Railway returns JSON predictions (Base64 Visuals, Health Indices, LLM Report) to Vercel -->
+    <path d="M 345, 345 L 345, 300" stroke="#00ff8f" marker-end="url(#arrow-green)" />
+  </g>
+
+  <!-- Connection labels -->
+  <g font-family="monospace" font-size="9" fill="rgba(255, 255, 255, 0.4)" text-anchor="middle">
+    <!-- Ingest label -->
+    <rect x="130" y="212" width="60" height="14" fill="#090d0b" stroke="rgba(0,255,143,0.15)" stroke-width="0.5" rx="2" />
+    <text x="160" y="222" fill="#00ff8f">Ingestion</text>
+
+    <!-- Upload label -->
+    <rect x="520" y="125" width="80" height="14" fill="#090d0b" stroke="rgba(5,150,105,0.15)" stroke-width="0.5" rx="2" />
+    <text x="560" y="135" fill="#059669">Upload Audio</text>
+
+    <!-- Predict API label -->
+    <rect x="235" y="306" width="80" height="14" fill="#090d0b" stroke="rgba(0,255,143,0.15)" stroke-width="0.5" rx="2" />
+    <text x="275" y="316" fill="#00ff8f">POST /predict</text>
+
+    <!-- Save DB label -->
+    <rect x="555" y="403" width="90" height="14" fill="#090d0b" stroke="rgba(5,150,105,0.15)" stroke-width="0.5" rx="2" />
+    <text x="600" y="413" fill="#059669">Insert Detection</text>
+
+    <!-- Call LLM label -->
+    <rect x="555" y="468" width="90" height="14" fill="#090d0b" stroke="rgba(5,150,105,0.15)" stroke-width="0.5" rx="2" />
+    <text x="600" y="478" fill="#059669">Request Report</text>
+  </g>
+
+  <!-- ==================== TẦNG 1: SENSOR / CAPTURE (LEFT) ==================== -->
+  <g transform="translate(20, 180)" filter="url(#shadow)">
+    <!-- Main Box -->
+    <rect x="0" y="0" width="100" height="100" fill="#0b130e" stroke="#00ff8f" stroke-width="1.5" rx="4" filter="url(#glow)" />
+    <!-- Glowing Status Indicator -->
+    <circle cx="15" cy="15" r="3" fill="#00ff8f" />
+    <!-- Title -->
+    <text x="50" y="40" font-family="sans-serif" font-size="10" font-weight="bold" fill="#FAF9F5" text-anchor="middle">EDGE NODES</text>
+    <text x="50" y="55" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.5)" text-anchor="middle">Mic dã ngoại</text>
+    <text x="50" y="75" font-family="monospace" font-size="7" fill="#00ff8f" text-anchor="middle">Capture Audio</text>
+  </g>
+
+  <!-- ==================== TẦNG 2: PRESENTATION — VERCEL (MIDDLE TOP) ==================== -->
+  <g transform="translate(200, 90)" filter="url(#shadow)">
+    <!-- Container Box -->
+    <rect x="0" y="0" width="250" height="200" fill="#0b130e" stroke="#00ff8f" stroke-width="1.5" rx="6" />
+    <!-- Vercel logo marker -->
+    <polygon points="18,14 26,28 10,28" fill="#FAF9F5" />
+    <!-- Header -->
+    <text x="35" y="24" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FAF9F5">FRONTEND (Vercel)</text>
+    <text x="235" y="22" font-family="monospace" font-size="7" fill="#00ff8f" text-anchor="end">Next.js 14</text>
+    <line x1="10" y1="36" x2="240" y2="36" stroke="rgba(0,255,143,0.15)" stroke-width="1" />
+
+    <!-- Sub components -->
+    <!-- GIS Radar Map -->
+    <g transform="translate(15, 50)">
+      <rect x="0" y="0" width="220" height="26" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
+      <text x="10" y="16" font-family="sans-serif" font-size="9" fill="#FAF9F5">GIS Radar Map (GeoMap.tsx)</text>
+      <circle cx="205" cy="13" r="2.5" fill="#00ff8f" />
+    </g>
+
+    <!-- Spectrogram & XAI Viewer -->
+    <g transform="translate(15, 85)">
+      <rect x="0" y="0" width="220" height="26" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
+      <text x="10" y="16" font-family="sans-serif" font-size="9" fill="#FAF9F5">Visualizer (SpectrogramViewer.tsx)</text>
+      <circle cx="205" cy="13" r="2.5" fill="#00ff8f" />
+    </g>
+
+    <!-- Audio Ingestion -->
+    <g transform="translate(15, 120)">
+      <rect x="0" y="0" width="220" height="26" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
+      <text x="10" y="16" font-family="sans-serif" font-size="9" fill="#FAF9F5">Recorder/Ingester (AudioIngestion.tsx)</text>
+      <circle cx="205" cy="13" r="2.5" fill="#00ff8f" />
+    </g>
+
+    <!-- Recharts Analytics -->
+    <g transform="translate(15, 155)">
+      <rect x="0" y="0" width="220" height="30" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
+      <text x="10" y="14" font-family="sans-serif" font-size="9" fill="#FAF9F5">Recharts Dashboard (Analytics &amp; Logs)</text>
+      <text x="10" y="24" font-family="monospace" font-size="7" fill="rgba(250,249,245,0.4)">Syncs history &amp; trends via ApiClient</text>
+    </g>
+  </g>
+
+  <!-- ==================== TẦNG 3: PROCESSING — RAILWAY (MIDDLE BOTTOM) ==================== -->
+  <g transform="translate(200, 325)" filter="url(#shadow)">
+    <!-- Container Box -->
+    <rect x="0" y="0" width="250" height="200" fill="#0b130e" stroke="#00ff8f" stroke-width="1.5" rx="6" />
+    <!-- Railway Indicator Icon -->
+    <rect x="12" y="15" width="12" height="12" fill="#FAF9F5" rx="2" />
+    <!-- Header -->
+    <text x="32" y="25" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FAF9F5">BACKEND ENGINE (Railway)</text>
+    <text x="235" y="23" font-family="monospace" font-size="7" fill="#00ff8f" text-anchor="end">FastAPI + Python</text>
+    <line x1="10" y1="36" x2="240" y2="36" stroke="rgba(0,255,143,0.15)" stroke-width="1" />
+
+    <!-- Sub components inside Backend -->
+    <!-- Librosa Feature Extractor -->
+    <g transform="translate(15, 50)">
+      <rect x="0" y="0" width="220" height="26" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
+      <text x="10" y="16" font-family="sans-serif" font-size="9" fill="#FAF9F5">Librosa Mel-Spectrogram Gen</text>
+      <text x="210" y="16" font-family="monospace" font-size="7" fill="#00ff8f" text-anchor="end">Inferno</text>
+    </g>
+
+    <!-- ONNX Runtime CPU Inference -->
+    <g transform="translate(15, 85)">
+      <rect x="0" y="0" width="220" height="40" fill="rgba(0,255,143,0.03)" stroke="#00ff8f" stroke-width="0.75" rx="2" filter="url(#glow)" />
+      <!-- Small Status Light -->
+      <circle cx="205" cy="20" r="3" fill="#00ff8f" />
+      <text x="10" y="16" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5">ONNX CPU Execution Engine</text>
+      <text x="10" y="30" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.5)">Multi-Task CNN Backbone (EfficientNet-V2)</text>
+    </g>
+
+    <!-- Dynamic XAI / Grad-CAM Generator -->
+    <g transform="translate(15, 135)">
+      <rect x="0" y="0" width="220" height="48" fill="rgba(0,255,143,0.03)" stroke="rgba(0,255,143,0.2)" stroke-width="0.75" rx="2" />
+      <text x="10" y="15" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5">Real XAI / Grad-CAM Engine</text>
+      <text x="10" y="28" font-family="monospace" font-size="7.5" fill="rgba(250,249,245,0.6)">Intercepts conv-layer: 'getitem_144'</text>
+      <text x="10" y="39" font-family="monospace" font-size="7.5" fill="#00ff8f">Generates 1280x7x7 Heatmap Overlay</text>
+    </g>
+  </g>
+
+  <!-- ==================== TẦNG 4: DATABASE — SUPABASE (RIGHT TOP) ==================== -->
+  <g transform="translate(720, 80)" filter="url(#shadow)">
+    <!-- Container Box -->
+    <rect x="0" y="0" width="240" height="190" fill="#0b130e" stroke="#059669" stroke-width="1.5" rx="6" />
+    <!-- DB Cylinder Icon -->
+    <path d="M 22,25 C 22,21 34,21 34,25 C 34,29 22,29 22,25 Z M 22,25 L 22,33 C 22,37 34,37 34,33 L 34,25" stroke="#FAF9F5" fill="none" stroke-width="1" />
+    <!-- Header -->
+    <text x="44" y="28" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FAF9F5">DATABASE (Supabase)</text>
+    <line x1="10" y1="42" x2="230" y2="42" stroke="rgba(5,150,105,0.15)" stroke-width="1" />
+
+    <!-- Supabase Storage -->
+    <g transform="translate(15, 55)">
+      <rect x="0" y="0" width="210" height="35" fill="rgba(5,150,105,0.03)" stroke="rgba(5,150,105,0.2)" stroke-width="0.75" rx="2" />
+      <text x="10" y="16" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5">Supabase S3 Storage</text>
+      <text x="10" y="27" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.5)">Stores captured raw .wav files</text>
+    </g>
+
+    <!-- PostgreSQL Database Tables -->
+    <g transform="translate(15, 105)">
+      <rect x="0" y="0" width="210" height="70" fill="rgba(5,150,105,0.03)" stroke="rgba(5,150,105,0.2)" stroke-width="0.75" rx="2" />
+      <text x="10" y="16" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5">PostgreSQL Database</text>
+      <text x="15" y="32" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.6)">• table: 'detections' (Logs &amp; Index)</text>
+      <text x="15" y="46" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.6)">• table: 'sensors' (Geospatial Metadata)</text>
+      <text x="15" y="60" font-family="monospace" font-size="7.5" fill="#00ff8f">Enables Realtime Data Subscriptions</text>
+    </g>
+  </g>
+
+  <!-- ==================== TẦNG 5: REPORT ENGINE — GROQ LLM (RIGHT BOTTOM) ==================== -->
+  <g transform="translate(720, 390)" filter="url(#shadow)">
+    <!-- Container Box -->
+    <rect x="0" y="0" width="240" height="110" fill="#0b130e" stroke="#059669" stroke-width="1.5" rx="6" />
+    <!-- AI icon -->
+    <circle cx="28" cy="28" r="8" stroke="#FAF9F5" fill="none" stroke-width="1" />
+    <!-- Header -->
+    <text x="44" y="31" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FAF9F5">REPORT ENGINE (Groq)</text>
+    <line x1="10" y1="46" x2="230" y2="46" stroke="rgba(5,150,105,0.15)" stroke-width="1" />
+
+    <!-- Groq LLaMA-3 -->
+    <g transform="translate(15, 56)">
+      <rect x="0" y="0" width="210" height="40" fill="rgba(5,150,105,0.03)" stroke="rgba(5,150,105,0.2)" stroke-width="0.75" rx="2" />
+      <text x="10" y="16" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FAF9F5">LLaMA-3-8B model</text>
+      <text x="10" y="30" font-family="monospace" font-size="8" fill="rgba(250,249,245,0.5)">Generates Natural Ranger Reports</text>
+    </g>
+  </g>
+
+</svg>
