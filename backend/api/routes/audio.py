@@ -56,7 +56,7 @@ try:
             intermediate_info = onnx.helper.make_tensor_value_info(
                 name="getitem_144",
                 elem_type=onnx.TensorProto.FLOAT,
-                shape=[1, 1280, 7, 7]
+                shape=[1, 160, 14, 14]
             )
             model.graph.output.append(intermediate_info)
             
@@ -87,16 +87,13 @@ THREAT_LABELS = {
     8: {"type": "background_normal", "name": "Bình thường", "is_alert": False},
 }
 
-# Species Classes (species_head): 24 classes (s0 to s23)
+# Species Classes (species_head): 3 classes (aligned with Việt's model output shape)
 SPECIES_LABELS = {
-    0: {"id": "pycnonotus_jocosus", "name": "Chào mào (Red-whiskered Bulbul)"},
-    1: {"id": "acridotheres_tristis", "name": "Sáo đá (Common Myna)"},
-    2: {"id": "copsychus_saularis", "name": "Chích chòe (Oriental Magpie-Robin)"},
-    3: {"id": "microhyla_fissipes", "name": "Ếch nhái Ornate (Narrow-mouthed Frog)"},
-    4: {"id": "macaca_leonina", "name": "Khỉ đuôi lợn (Northern Pig-tailed Macaque)"},
-    5: {"id": "cicadidae", "name": "Ve sầu (Cicada)"},
+    0: {"id": "copsychus_saularis", "name": "Chích chòe (Oriental Magpie-Robin)"},  # Bird (Chim)
+    1: {"id": "microhyla_fissipes", "name": "Ếch nhái Ornate (Narrow-mouthed Frog)"}, # Frog (Ếch)
+    2: {"id": "cicadidae", "name": "Ve sầu (Cicada)"},                              # Insect (Ve sầu)
 }
-for i in range(6, 24):
+for i in range(3, 24):
     SPECIES_LABELS[i] = {"id": f"species_s{i}", "name": f"Loài s{i}"}
 
 def preprocess_audio(file_path: str) -> np.ndarray:
@@ -189,6 +186,12 @@ def generate_audio_visualizations(file_path: str, features: Optional[np.ndarray]
             else:
                 act_norm = np.zeros_like(act_map)
                 
+            # Focus thresholding: keep only activations above 0.35 to remove low-intensity background noise
+            act_norm = np.where(act_norm > 0.35, act_norm, 0.0)
+            act_min, act_max = act_norm.min(), act_norm.max()
+            if act_max - act_min > 1e-9:
+                act_norm = (act_norm - act_min) / (act_max - act_min)
+            
             # Flip vertically to match flipped spectrogram
             act_norm = np.flipud(act_norm)
             
@@ -198,8 +201,8 @@ def generate_audio_visualizations(file_path: str, features: Optional[np.ndarray]
             # Resize from (7, 7) to (450, 176) using bilinear interpolation
             act_resized = cv2.resize(act_uint8, (450, 176), interpolation=cv2.INTER_LINEAR)
             
-            # Apply a large Gaussian blur to mimic the low resolution of CNN feature maps
-            blurred_act = cv2.GaussianBlur(act_resized, (35, 35), 0)
+            # Apply a large Gaussian blur for smooth heatmap boundaries
+            blurred_act = cv2.GaussianBlur(act_resized, (45, 45), 0)
         else:
             # Apply thresholding to isolate loudest events (bird calls, chainsaw, storm)
             threshold = 0.55
@@ -209,17 +212,18 @@ def generate_audio_visualizations(file_path: str, features: Optional[np.ndarray]
             act_uint8 = (activation * 255).astype(np.uint8)
             act_resized = cv2.resize(act_uint8, (450, 176), interpolation=cv2.INTER_LINEAR)
             
-            # Apply a large Gaussian blur to mimic the low resolution of CNN feature maps
-            blurred_act = cv2.GaussianBlur(act_resized, (35, 35), 0)
+            # Apply a large Gaussian blur for smooth heatmap boundaries
+            blurred_act = cv2.GaussianBlur(act_resized, (45, 45), 0)
         
         # Apply Jet colormap for classical red-to-blue Grad-CAM style
         cam_colored = cv2.applyColorMap(blurred_act, cv2.COLORMAP_JET)
 
-        # Create transparency mask: Alpha is proportional to blurred activation intensity
+        # Create transparency mask: Alpha is proportional to blurred activation intensity,
+        # but thresholded below 50 to ensure clean transparency overlay on Mel Spectrogram.
         h, w = blurred_act.shape
         rgba = np.zeros((h, w, 4), dtype=np.uint8)
         rgba[:, :, :3] = cam_colored
-        rgba[:, :, 3] = (blurred_act * 0.70).astype(np.uint8)
+        rgba[:, :, 3] = np.where(blurred_act > 50, (blurred_act * 0.80).astype(np.uint8), 0)
 
         # Encode Grad-CAM to PNG
         _, cam_buf = cv2.imencode('.png', rgba)
