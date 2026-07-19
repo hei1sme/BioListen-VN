@@ -232,8 +232,7 @@ export function useDashboardState(initialHistory: HistoricalRecord[]) {
             duration_sec: 5.0,
             processing_time_ms: 142,
             species_detections: [
-              { species_id: "pycnonotus_jocosus", common_name: "Chào mào (Red-whiskered Bulbul)", confidence: 0.94, uncertainty: 0.02, time_window: { start_sec: 1.0, end_sec: 3.5 }, is_confident: true },
-              { species_id: "copsychus_saularis", common_name: "Chích chòe (Oriental Magpie-Robin)", confidence: 0.88, uncertainty: 0.04, time_window: { start_sec: 2.2, end_sec: 4.8 }, is_confident: true }
+              { species_id: "birds", common_name: "Nhóm Chim (Birds)", confidence: 0.94, uncertainty: 0.02, time_window: { start_sec: 1.0, end_sec: 4.5 }, is_confident: true }
             ],
             threat_detections: [],
             ecosystem_health: {
@@ -244,7 +243,7 @@ export function useDashboardState(initialHistory: HistoricalRecord[]) {
             },
             spectrogram_base64: "procedural_birds",
             gradcam_base64: "procedural_birds_cam",
-            llm_report: "Hệ sinh thái hoạt động bình thường và phong phú. Phát hiện tiếng kêu của Chào mào và Chích chòe lửa tại phân khu Suối Lớn. Không ghi nhận bất cứ mối đe dọa hoặc tiếng ồn lạ xâm hại."
+            llm_report: "Hệ sinh thái hoạt động bình thường và phong phú. Ghi nhận tiếng hót hoạt động mạnh mẽ của nhóm Chim tại phân khu Suối Lớn. Không phát hiện mối đe dọa xâm hại."
           };
           targetSensor = "demo-sensor-1";
           break;
@@ -256,7 +255,7 @@ export function useDashboardState(initialHistory: HistoricalRecord[]) {
             duration_sec: 5.0,
             processing_time_ms: 156,
             species_detections: [
-              { species_id: "acridotheres_tristis", common_name: "Sáo đá (Common Myna)", confidence: 0.65, uncertainty: 0.09, time_window: { start_sec: 0.5, end_sec: 1.8 }, is_confident: true }
+              { species_id: "birds", common_name: "Nhóm Chim (Birds)", confidence: 0.65, uncertainty: 0.09, time_window: { start_sec: 0.5, end_sec: 1.8 }, is_confident: true }
             ],
             threat_detections: [
               { threat_type: "chainsaw", confidence: 0.91, uncertainty: 0.03, is_alert: true }
@@ -304,7 +303,7 @@ export function useDashboardState(initialHistory: HistoricalRecord[]) {
             duration_sec: 5.0,
             processing_time_ms: 172,
             species_detections: [
-              { species_id: "microhyla_fissipes", common_name: "Ếch nhái Ornate (Narrow-mouthed Frog)", confidence: 0.48, uncertainty: 0.17, time_window: { start_sec: 3.0, end_sec: 4.8 }, is_confident: false }
+              { species_id: "frogs", common_name: "Nhóm Ếch nhái (Frogs)", confidence: 0.48, uncertainty: 0.17, time_window: { start_sec: 3.0, end_sec: 4.8 }, is_confident: false }
             ],
             threat_detections: [],
             ecosystem_health: {
