@@ -48,5 +48,7 @@ data/
 
 # Models & Checkpoints (too large for git)
 models/
+BioListen_AI_Collaboration_Log.zip
+Nhat_ky_cong_tac_AI.md
 *.onnx
 
